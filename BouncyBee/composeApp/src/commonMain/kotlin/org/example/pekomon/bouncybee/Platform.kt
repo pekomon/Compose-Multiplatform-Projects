@@ -1,7 +1,10 @@
 package org.example.pekomon.bouncybee
 
-interface Platform {
-    val name: String
+enum class Platform {
+    Android,
+    iOS,
+    Desktop,
+    Web
 }
 
 expect fun getPlatform(): Platform
