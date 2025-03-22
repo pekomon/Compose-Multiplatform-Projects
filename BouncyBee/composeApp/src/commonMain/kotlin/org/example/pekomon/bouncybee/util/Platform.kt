@@ -1,4 +1,4 @@
-package org.example.pekomon.bouncybee
+package org.example.pekomon.bouncybee.util
 
 enum class Platform {
     Android,
