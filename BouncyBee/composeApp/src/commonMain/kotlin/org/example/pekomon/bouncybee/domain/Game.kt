@@ -19,11 +19,11 @@ class Game(
 
     var bee by mutableStateOf(
         Bee(
-            x = screenWidth / 2f,
+            x = screenWidth / 4f,
             y = screenHeight / 2f
         )
-
     )
+        private set
 
     fun start() {
         status = GameStatus.Started
