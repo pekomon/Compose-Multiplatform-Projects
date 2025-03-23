@@ -42,21 +42,12 @@ fun App() {
         var screenWidth by remember { mutableStateOf(0) }
         var screenHeight by remember { mutableStateOf(0) }
         var game by remember { mutableStateOf<Game?>(null)}
-
-        /*var game = remember(screenWidth, screenHeight) {
-            Game(
-                screenWidth = screenWidth,
-                screenHeight = screenHeight
-            )
-        }
-        */
-        val bee: Bee? = remember { null }
-
+        
         LaunchedEffect(Unit) {
             game?.start()
         }
 
-        LaunchedEffect(Unit) {
+        LaunchedEffect(game?.status) {
             while (game?.status == GameStatus.Started) {
                 withFrameMillis {
                     game?.updateGameProgress()
