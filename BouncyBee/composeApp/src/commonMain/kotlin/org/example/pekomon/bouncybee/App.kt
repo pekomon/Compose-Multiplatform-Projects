@@ -14,7 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import bouncybee.composeapp.generated.resources.Res
 import bouncybee.composeapp.generated.resources.background
+import org.example.pekomon.bouncybee.domain.Bee
 import org.example.pekomon.bouncybee.domain.Game
 import org.example.pekomon.bouncybee.domain.GameStatus
 import org.example.pekomon.bouncybee.util.ChewyFontFamily
@@ -38,23 +39,27 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun App() {
     MaterialTheme {
 
-        var screenWidth by remember { mutableIntStateOf(0) }
-        var screenHeight by remember { mutableIntStateOf(0) }
-        val game = remember(screenWidth, screenHeight) {
+        var screenWidth by remember { mutableStateOf(0) }
+        var screenHeight by remember { mutableStateOf(0) }
+        var game by remember { mutableStateOf<Game?>(null)}
+
+        /*var game = remember(screenWidth, screenHeight) {
             Game(
                 screenWidth = screenWidth,
                 screenHeight = screenHeight
             )
         }
+        */
+        val bee: Bee? = remember { null }
 
         LaunchedEffect(Unit) {
-            game.start()
+            game?.start()
         }
 
-        LaunchedEffect(game.status) {
-            if (game.status == GameStatus.Started) {
+        LaunchedEffect(Unit) {
+            while (game?.status == GameStatus.Started) {
                 withFrameMillis {
-                    game.updateGameProgress()
+                    game?.updateGameProgress()
                 }
             }
         }
@@ -74,25 +79,35 @@ fun App() {
             modifier = Modifier
                 .fillMaxSize()
                 .onGloballyPositioned {
+                    val newSize = it.size
+                    if (newSize.width <= 0f || newSize.height <= 0) {
+                        return@onGloballyPositioned
+                    }
                     if (it.size.width != screenWidth || it.size.height != screenHeight) {
                         screenWidth = it.size.width
                         screenHeight = it.size.height
+                        game = Game(
+                            screenWidth = screenWidth,
+                            screenHeight = screenHeight
+                        )
                     }
                 }
                 .clickable {
-                    if (game.status == GameStatus.Started) {
-                        game.jump()
+                    if (game?.status == GameStatus.Started) {
+                        game?.jump()
                     }
                 }
         ) {
+            game?.let {
             drawCircle(
                 color = Color.Red,
-                radius = game.bee.radius,
+                radius = it.bee.radius,
                 center = Offset(
-                    x = game.bee.x,
-                    y = game.bee.y
+                    x = it.bee.x,
+                    y = it.bee.y
                 )
             )
+            }
         }
 
         Row(

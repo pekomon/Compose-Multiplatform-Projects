@@ -17,13 +17,17 @@ class Game(
     var beeVelocity by mutableStateOf(0f)
         private set
 
-    var bee by mutableStateOf(
+    var _bee by mutableStateOf(
         Bee(
             x = screenWidth / 4f,
             y = screenHeight / 2f
         )
     )
-        private set
+    var bee: Bee
+        get() = _bee
+    private set(value) {
+        _bee = value
+    }
 
     fun start() {
         status = GameStatus.Started
@@ -40,8 +44,9 @@ class Game(
     fun updateGameProgress() {
         beeVelocity = (beeVelocity + gravity)
             .coerceIn(-beeMaxVelocity, beeMaxVelocity)
-        bee = bee.copy(
+        val newBee = bee.copy(
             y = bee.y + beeVelocity
         )
+        bee = newBee
     }
 }
