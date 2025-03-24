@@ -42,11 +42,24 @@ class Game(
     }
 
     fun updateGameProgress() {
+        if (bee.y < 0) {
+            stopBee()
+            return
+        } else if (bee.y > screenHeight) {
+            gameOver()
+            return
+        }
+
         beeVelocity = (beeVelocity + gravity)
             .coerceIn(-beeMaxVelocity, beeMaxVelocity)
         val newBee = bee.copy(
             y = bee.y + beeVelocity
         )
         bee = newBee
+    }
+
+    fun stopBee() {
+        beeVelocity = 0f
+        bee = bee.copy(y = 0f)
     }
 }
