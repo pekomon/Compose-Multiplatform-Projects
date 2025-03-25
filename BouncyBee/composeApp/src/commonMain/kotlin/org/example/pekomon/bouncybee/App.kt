@@ -20,21 +20,31 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bouncybee.composeapp.generated.resources.Res
 import bouncybee.composeapp.generated.resources.background
+import bouncybee.composeapp.generated.resources.bee_sprite
+import com.stevdza_san.sprite.component.drawSpriteView
+import com.stevdza_san.sprite.domain.SpriteSheet
+import com.stevdza_san.sprite.domain.SpriteSpec
+import com.stevdza_san.sprite.domain.rememberSpriteState
 import org.example.pekomon.bouncybee.domain.Bee
 import org.example.pekomon.bouncybee.domain.Game
 import org.example.pekomon.bouncybee.domain.GameStatus
 import org.example.pekomon.bouncybee.util.ChewyFontFamily
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+
+private const val BEE_FRAME_SIZE = 80
 
 @Composable
 @Preview
@@ -44,9 +54,30 @@ fun App() {
         var screenWidth by remember { mutableStateOf(0) }
         var screenHeight by remember { mutableStateOf(0) }
         var game by remember { mutableStateOf<Game?>(null)}
-        
+
+        val spriteState = rememberSpriteState(
+            // Specs bee_sprite.png
+            totalFrames = 9,
+            framesPerRow = 3
+        )
+
+        val spriteSpec = remember {
+            SpriteSpec(
+                screenWidth = screenWidth.toFloat(),
+                default = SpriteSheet(
+                    frameWidth = BEE_FRAME_SIZE,
+                    frameHeight = BEE_FRAME_SIZE,
+                    image = Res.drawable.bee_sprite,
+                )
+            )
+        }
+
+        val currentFrame by spriteState.currentFrame.collectAsStateWithLifecycle()
+        val sheetImage = spriteSpec.imageBitmap
+
         LaunchedEffect(Unit) {
             game?.start()
+            spriteState.start()
         }
 
         LaunchedEffect(game?.status) {
@@ -92,14 +123,17 @@ fun App() {
                 }
         ) {
             game?.let {
-            drawCircle(
-                color = Color.Red,
-                radius = it.bee.radius,
-                center = Offset(
-                    x = it.bee.x,
-                    y = it.bee.y
+                drawSpriteView(
+                    spriteState = spriteState,
+                    spriteSpec = spriteSpec,
+                    currentFrame = currentFrame,
+                    image = sheetImage,
+                    offset = IntOffset(
+                        x = it.bee.x.toInt(),
+                        y = it.bee.y.toInt()
+                    ),
+                    spriteFlip = null
                 )
-            )
             }
         }
 
@@ -129,7 +163,7 @@ fun App() {
                     .fillMaxSize()
                     .background(color = Color.Black.copy(alpha = 0.5f)),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = "Game Over",
