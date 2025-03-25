@@ -139,8 +139,8 @@ fun App() {
                 rotate(
                     degrees = animatedBeeAngle,
                     pivot = Offset(
-                        x = it.bee.x,
-                        y = it.bee.y
+                        x = it.bee.x - it.beeRadius,
+                        y = it.bee.y - it.beeRadius
                     )
                 ) {
                     drawSpriteView(
@@ -149,8 +149,8 @@ fun App() {
                         currentFrame = currentFrame,
                         image = sheetImage,
                         offset = IntOffset(
-                            x = it.bee.x.toInt(),
-                            y = it.bee.y.toInt()
+                            x = it.bee.x.toInt() - it.beeRadius.toInt(),
+                            y = it.bee.y.toInt() - it.beeRadius.toInt()
                         ),
                         spriteFlip = null
                     )
