@@ -86,6 +86,9 @@ fun App() {
                     game?.updateGameProgress()
                 }
             }
+            if (game?.status == GameStatus.Over) {
+                spriteState.stop()
+            }
         }
 
         Box(
