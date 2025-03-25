@@ -1,5 +1,6 @@
 package org.example.pekomon.bouncybee
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
@@ -74,6 +76,14 @@ fun App() {
 
         val currentFrame by spriteState.currentFrame.collectAsStateWithLifecycle()
         val sheetImage = spriteSpec.imageBitmap
+        val animatedBeeAngle by animateFloatAsState(
+            targetValue = game?.let {
+                 when {
+                    it.beeVelocity > it.beeVelocity / 1.1 -> 30f
+                    else -> 0f
+                }
+            } ?: 0f
+        )
 
         LaunchedEffect(Unit) {
             game?.start()
@@ -126,17 +136,25 @@ fun App() {
                 }
         ) {
             game?.let {
-                drawSpriteView(
-                    spriteState = spriteState,
-                    spriteSpec = spriteSpec,
-                    currentFrame = currentFrame,
-                    image = sheetImage,
-                    offset = IntOffset(
-                        x = it.bee.x.toInt(),
-                        y = it.bee.y.toInt()
-                    ),
-                    spriteFlip = null
-                )
+                rotate(
+                    degrees = animatedBeeAngle,
+                    pivot = Offset(
+                        x = it.bee.x,
+                        y = it.bee.y
+                    )
+                ) {
+                    drawSpriteView(
+                        spriteState = spriteState,
+                        spriteSpec = spriteSpec,
+                        currentFrame = currentFrame,
+                        image = sheetImage,
+                        offset = IntOffset(
+                            x = it.bee.x.toInt(),
+                            y = it.bee.y.toInt()
+                        ),
+                        spriteFlip = null
+                    )
+                }
             }
         }
 
