@@ -18,7 +18,7 @@ class Game(
     var beeVelocity by mutableStateOf(0f)
         private set
 
-    var _bee by mutableStateOf(
+    private var _bee by mutableStateOf(
         Bee(
             x = screenWidth / 4f,
             y = screenHeight / 2f,
@@ -41,6 +41,18 @@ class Game(
 
     fun jump() {
         beeVelocity = beeJumpImpulse
+    }
+
+    fun restart() {
+        resetBeePosition()
+        start()
+    }
+
+    private fun resetBeePosition() {
+        bee = bee.copy(
+            y = (screenHeight / 2f)
+        )
+        beeVelocity = 0f
     }
 
     fun updateGameProgress() {
