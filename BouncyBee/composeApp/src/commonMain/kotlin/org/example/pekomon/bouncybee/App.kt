@@ -1,6 +1,11 @@
 package org.example.pekomon.bouncybee
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -46,6 +53,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bouncybee.composeapp.generated.resources.Res
 import bouncybee.composeapp.generated.resources.background
 import bouncybee.composeapp.generated.resources.bee_sprite
+import bouncybee.composeapp.generated.resources.moving_background
 import com.stevdza_san.sprite.component.drawSpriteView
 import com.stevdza_san.sprite.domain.SpriteSheet
 import com.stevdza_san.sprite.domain.SpriteSpec
@@ -104,13 +112,6 @@ fun App() {
             }
         }
 
-        /*
-        LaunchedEffect(Unit) {
-            game?.start()
-            spriteState.start()
-        }
-        */
-
         LaunchedEffect(game?.status) {
             while (game?.status == GameStatus.Started) {
                 withFrameMillis {
@@ -122,14 +123,62 @@ fun App() {
             }
         }
 
+        val backGroundOffsetX = remember { Animatable(0f) }
+        var imageWidth by remember { mutableStateOf(0) }
+
+        LaunchedEffect(game?.status) {
+            while (game?.status == GameStatus.Started) {
+                backGroundOffsetX.animateTo(
+                    targetValue = -imageWidth.toFloat(),
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(
+                            durationMillis = 4000,
+                            easing = LinearEasing
+                        ),
+                        repeatMode = RepeatMode.Restart
+                    )
+                )
+            }
+        }
+
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
         ) {
             Image(
                 painter = painterResource(Res.drawable.background),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
+            )
+            Image(
+                painter = painterResource(Res.drawable.moving_background),
+                contentDescription = null,
+                contentScale = ContentScale.FillHeight,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onSizeChanged {
+                        imageWidth = it.width
+                    }
+                    .offset {
+                        IntOffset(
+                            x = backGroundOffsetX.value.toInt(),
+                            y = 0
+                        )
+                    }
+            )
+            Image(
+                painter = painterResource(Res.drawable.moving_background),
+                contentDescription = null,
+                contentScale = ContentScale.FillHeight,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset {
+                        IntOffset(
+                            x = backGroundOffsetX.value.toInt() + imageWidth,
+                            y = 0
+                        )
+                    }
             )
         }
 
@@ -245,6 +294,12 @@ fun App() {
                     color = Color.Gray,
                     fontSize = MaterialTheme.typography.displayMedium.fontSize,
                     fontWeight = FontWeight.Bold,
+                    fontFamily = ChewyFontFamily()
+                )
+                Text(
+                    text = "Score: 0",
+                    color = Color.White,
+                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
                     fontFamily = ChewyFontFamily()
                 )
                 Spacer(modifier = Modifier.height(24.dp))
