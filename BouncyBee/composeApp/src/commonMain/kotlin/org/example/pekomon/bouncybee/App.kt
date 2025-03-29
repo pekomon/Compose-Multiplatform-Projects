@@ -41,6 +41,7 @@ import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.layout.ContentScale
@@ -205,12 +206,12 @@ fun App() {
                     }
                 }
         ) {
-            game?.let {
+            game?.let { g->
                 rotate(
                     degrees = animatedBeeAngle,
                     pivot = Offset(
-                        x = it.bee.x - it.beeRadius,
-                        y = it.bee.y - it.beeRadius
+                        x = g.bee.x - g.beeRadius,
+                        y = g.bee.y - g.beeRadius
                     )
                 ) {
                     drawSpriteView(
@@ -219,10 +220,28 @@ fun App() {
                         currentFrame = currentFrame,
                         image = sheetImage,
                         offset = IntOffset(
-                            x = it.bee.x.toInt() - it.beeRadius.toInt(),
-                            y = it.bee.y.toInt() - it.beeRadius.toInt()
+                            x = g.bee.x.toInt() - g.beeRadius.toInt(),
+                            y = g.bee.y.toInt() - g.beeRadius.toInt()
                         ),
                         spriteFlip = null
+                    )
+                }
+                g.pipePairs.forEach { pipePair ->
+                    drawRect(
+                        color = Color.Blue,
+                        topLeft = Offset(
+                            x = pipePair.x - g.pipeWidth / 2,
+                            y = 0f
+                        ),
+                        size = Size(g.pipeWidth, pipePair.topHeight)
+                    )
+                    drawRect(
+                        color = Color.Red,
+                        topLeft = Offset(
+                            x = pipePair.x - g.pipeWidth / 2,
+                            y = pipePair.y + g.pipeGapSize / 2
+                        ),
+                        size = Size(g.pipeWidth, pipePair.bottomHeight)
                     )
                 }
             }
