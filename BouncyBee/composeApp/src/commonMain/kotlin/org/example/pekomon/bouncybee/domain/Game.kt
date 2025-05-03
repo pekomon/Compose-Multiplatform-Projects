@@ -88,6 +88,7 @@ class Game(
     fun restart() {
         resetBeePosition()
         removePipes()
+        resetScore()
         start()
     }
 
@@ -100,6 +101,10 @@ class Game(
 
     private fun removePipes() {
         pipePairs.clear()
+    }
+
+    private fun resetScore() {
+        currentScore = 0
     }
 
     fun updateGameProgress() {
