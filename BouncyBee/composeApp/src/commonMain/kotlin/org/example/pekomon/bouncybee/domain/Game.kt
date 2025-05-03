@@ -4,7 +4,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.russhwolf.settings.ObservableSettings
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.random.Random
+
+private const val SETTINGS_KEY_HIGH_SCORE = "high_score"
 
 class Game(
     val screenWidth: Int,
@@ -16,7 +21,9 @@ class Game(
     val pipeWidth: Float = 120f,
     val pipeVelocity: Float = 5f,
     val pipeGapSize: Float = 260f,
-) {
+) : KoinComponent {
+    private val settings: ObservableSettings by inject()
+
     var status by mutableStateOf(GameStatus.Idle)
         private set
 
@@ -38,12 +45,40 @@ class Game(
 
     var pipePairs = mutableStateListOf<PipePair>()
 
+    var currentScore by mutableStateOf(0)
+        private set
+
+    var highScore by mutableStateOf(0)
+        private set
+
+    init {
+        highScore = settings.getInt(
+            key = SETTINGS_KEY_HIGH_SCORE,
+            defaultValue = 0
+        )
+        settings.addIntListener(
+            key = SETTINGS_KEY_HIGH_SCORE,
+            defaultValue = 0,
+            callback = {
+                highScore = it
+            }
+        )
+    }
+
     fun start() {
         status = GameStatus.Started
     }
 
     fun gameOver() {
         status = GameStatus.Over
+        saveScore()
+    }
+
+    private fun saveScore() {
+        if (currentScore > highScore) {
+            settings.putInt(SETTINGS_KEY_HIGH_SCORE, currentScore)
+            //highScore = currentScore
+        }
     }
 
     fun jump() {
@@ -73,6 +108,11 @@ class Game(
             if (isCollision(pipePair = pipePair)) {
                 gameOver()
                 return
+            }
+
+            if (!pipePair.scored && bee.x > pipePair.x + pipeWidth / 2) {
+                pipePair.scored = true
+                currentScore++
             }
         }
 
