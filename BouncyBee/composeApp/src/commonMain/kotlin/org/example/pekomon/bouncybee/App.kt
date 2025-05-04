@@ -117,6 +117,7 @@ fun App() {
             onDispose {
                 spriteState.stop()
                 spriteState.cleanup()
+                game?.cleanUp()
             }
         }
 

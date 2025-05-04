@@ -68,10 +68,12 @@ class Game(
 
     fun start() {
         status = GameStatus.Started
+        audioPlayer.playBackgroundMusic()
     }
 
     fun gameOver() {
         status = GameStatus.Over
+        audioPlayer.stopBackgroundMusic()
         saveScore()
     }
 
@@ -84,6 +86,7 @@ class Game(
 
     fun jump() {
         beeVelocity = beeJumpImpulse
+        audioPlayer.playJumpSound()
     }
 
     fun restart() {
@@ -180,5 +183,9 @@ class Game(
     fun stopBee() {
         beeVelocity = 0f
         bee = bee.copy(y = 0f)
+    }
+
+    fun cleanUp() {
+        audioPlayer.release()
     }
 }
