@@ -22,6 +22,7 @@ class Game(
     val pipeVelocity: Float = 5f,
     val pipeGapSize: Float = 260f,
 ) : KoinComponent {
+    private val audioPlayer: AudioPlayer by inject()
     private val settings: ObservableSettings by inject()
 
     var status by mutableStateOf(GameStatus.Idle)
