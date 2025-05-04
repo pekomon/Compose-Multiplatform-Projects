@@ -36,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
@@ -62,6 +63,7 @@ import com.stevdza_san.sprite.component.drawSpriteView
 import com.stevdza_san.sprite.domain.SpriteSheet
 import com.stevdza_san.sprite.domain.SpriteSpec
 import com.stevdza_san.sprite.domain.rememberSpriteState
+import kotlinx.coroutines.launch
 import org.example.pekomon.bouncybee.domain.Bee
 import org.example.pekomon.bouncybee.domain.Game
 import org.example.pekomon.bouncybee.domain.GameStatus
@@ -128,6 +130,8 @@ fun App() {
                 spriteState.stop()
             }
         }
+
+        val scope = rememberCoroutineScope()
 
         val backGroundOffsetX = remember { Animatable(0f) }
         var imageWidth by remember { mutableStateOf(0) }
@@ -382,6 +386,9 @@ fun App() {
                     onClick = {
                         game?.restart()
                         spriteState.start()
+                        scope.launch {
+                            backGroundOffsetX.snapTo(0f)
+                        }
                     }
                 ) {
                     Icon(
