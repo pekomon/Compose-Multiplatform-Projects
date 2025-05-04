@@ -48,9 +48,10 @@ class Game(
 
     var currentScore by mutableStateOf(0)
         private set
-
     var highScore by mutableStateOf(0)
         private set
+
+    private var isFallingSoundPlayed = false
 
     init {
         highScore = settings.getInt(
@@ -75,6 +76,7 @@ class Game(
         status = GameStatus.Over
         audioPlayer.stopBackgroundMusic()
         saveScore()
+        isFallingSoundPlayed = false
     }
 
     private fun saveScore() {
@@ -87,6 +89,7 @@ class Game(
     fun jump() {
         beeVelocity = beeJumpImpulse
         audioPlayer.playJumpSound()
+        isFallingSoundPlayed = false
     }
 
     fun restart() {
@@ -94,6 +97,7 @@ class Game(
         removePipes()
         resetScore()
         start()
+        isFallingSoundPlayed = false
     }
 
     private fun resetBeePosition() {
@@ -139,6 +143,14 @@ class Game(
             y = bee.y + beeVelocity
         )
         bee = newBee
+
+        // Should play falling sound
+        if (beeVelocity > (beeMaxVelocity / 1.1)) {
+            if (isFallingSoundPlayed.not()) {
+                audioPlayer.playFallingSound()
+                isFallingSoundPlayed = true
+            }
+        }
 
         spawnPipes()
     }
