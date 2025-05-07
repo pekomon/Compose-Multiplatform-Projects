@@ -70,6 +70,8 @@ import org.example.pekomon.bouncybee.domain.Game
 import org.example.pekomon.bouncybee.domain.GameStatus
 import org.example.pekomon.bouncybee.ui.orange
 import org.example.pekomon.bouncybee.util.ChewyFontFamily
+import org.example.pekomon.bouncybee.util.Platform
+import org.example.pekomon.bouncybee.util.getPlatform
 import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -81,7 +83,7 @@ private const val PIPE_CAP_HEIGHT = 50f
 @Preview
 fun App() {
     MaterialTheme {
-
+        val platform = remember { getPlatform() }
         var screenWidth by remember { mutableStateOf(0) }
         var screenHeight by remember { mutableStateOf(0) }
         var game by remember { mutableStateOf<Game?>(null)}
@@ -208,6 +210,7 @@ fun App() {
                         screenWidth = it.size.width
                         screenHeight = it.size.height
                         game = Game(
+                            platform = platform,
                             screenWidth = screenWidth,
                             screenHeight = screenHeight
                         )

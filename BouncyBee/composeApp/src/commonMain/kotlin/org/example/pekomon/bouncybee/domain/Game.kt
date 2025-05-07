@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.russhwolf.settings.ObservableSettings
+import org.example.pekomon.bouncybee.util.Platform
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.random.Random
@@ -12,15 +13,16 @@ import kotlin.random.Random
 private const val SETTINGS_KEY_HIGH_SCORE = "high_score"
 
 class Game(
+    val platform: Platform,
     val screenWidth: Int,
     val screenHeight: Int,
     val gravity: Float = 0.7f,
     val beeRadius: Float = 30f,
     val beeJumpImpulse: Float = -12f,
-    val beeMaxVelocity: Float = 25f,
+    val beeMaxVelocity: Float = if (platform == Platform.Android) 25f else 10f,
     val pipeWidth: Float = 120f,
-    val pipeVelocity: Float = 5f,
-    val pipeGapSize: Float = 260f,
+    val pipeVelocity: Float = if (platform == Platform.Android) 5f else 2.5f,
+    val pipeGapSize: Float = if (platform == Platform.Android) 250f else 300f,
 ) : KoinComponent {
     private val audioPlayer: AudioPlayer by inject()
     private val settings: ObservableSettings by inject()
