@@ -129,7 +129,7 @@ actual class AudioPlayer {
     }
 
     private fun loadAudioFile(fileName: String): ByteArray {
-        val resourcePath = Paths.get("src/common/composeResources/files/$fileName")
+        val resourcePath = Paths.get("src/commonMain/composeResources/files/$fileName")
         if (Files.exists(resourcePath).not()) {
             throw FileNotFoundException("Audio file not found: $fileName")
         }
