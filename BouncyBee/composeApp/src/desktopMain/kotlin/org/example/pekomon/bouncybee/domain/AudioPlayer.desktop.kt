@@ -16,24 +16,38 @@ actual class AudioPlayer {
     private val playingLines = mutableMapOf<String, SourceDataLine>()
 
     actual fun playGameOverSound() {
+        stopFallingSound()
+        playSound("game_over.wav")
     }
 
     actual fun playJumpSound() {
+        stopFallingSound()
+        playSound("jump.wav")
     }
 
     actual fun playFallingSound() {
+        playSound("falling.wav")
     }
 
     actual fun stopFallingSound() {
+        stopSound("falling.wav")
     }
 
     actual fun playBackgroundMusic() {
+        playSound(
+            fileName = "game_sound.wav",
+            playInLoop = true
+        )
     }
 
     actual fun stopBackgroundMusic() {
+        playGameOverSound()
+        stopSound("game_sound.wav")
     }
 
     actual fun release() {
+        audioCache.clear()
+        stopAllSounds()
     }
 
     private fun playSound(
