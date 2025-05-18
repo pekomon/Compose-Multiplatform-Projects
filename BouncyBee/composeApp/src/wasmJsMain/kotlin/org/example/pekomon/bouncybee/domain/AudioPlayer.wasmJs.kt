@@ -70,7 +70,11 @@ actual class AudioPlayer {
 
 
     private fun createAudioElement(filename: String): Audio {
-        val path = "src/commonMain/composeResources/files/$filename"
+        // Production path
+        val path = "composeResources/bouncybee.composeapp.generated.resources/files/$filename"
+
+        // debug path
+        //val path = "src/commonMain/composeResources/files/$filename"
         return Audio(path).apply {
             onerror = { _: JsAny?, _: String, _: Int, _: Int, _: JsAny? ->
                 println("Error loading audio file: $path")
