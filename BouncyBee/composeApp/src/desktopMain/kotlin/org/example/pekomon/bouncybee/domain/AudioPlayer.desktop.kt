@@ -129,10 +129,18 @@ actual class AudioPlayer {
     }
 
     private fun loadAudioFile(fileName: String): ByteArray {
+        // release path (packaged in to a jar file)
+        val resourceStream = this::class.java.classLoader.getResourceAsStream("composeResources/bouncybee.composeapp.generated.resources/files/$fileName")
+            ?: throw FileNotFoundException("Audio file not found: $fileName")
+        return resourceStream.use { it.readBytes() }
+
+        // debug path
+        /*
         val resourcePath = Paths.get("src/commonMain/composeResources/files/$fileName")
         if (Files.exists(resourcePath).not()) {
             throw FileNotFoundException("Audio file not found: $fileName")
         }
         return FileInputStream(resourcePath.toFile()).use { it.readBytes() }
+         */
     }
 }
