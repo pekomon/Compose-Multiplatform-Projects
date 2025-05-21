@@ -3,10 +3,11 @@ name: Bouncy Bee Android CI
 on:
   push:
     paths:
-      - 'composeApp/**'
+      - 'BouncyBee/composeApp/**'
   pull_request:
     paths:
-      - 'composeApp/**'
+      - 'BouncyBee/composeApp/**'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -28,4 +29,3 @@ jobs:
 
       - name: Build Debug APK
         run: ./gradlew :composeApp:assembleDebug
-
