@@ -4,12 +4,13 @@
 
 > A whimsical and challenging Flappy Bird-style game where you guide BouncyBee through a series of pipes. Built with Kotlin Multiplatform and Jetpack Compose for Multiplatform.
 
-<!-- Optional: Add a captivating GIF or screenshot of BouncyBee in action here -->
+<!-- TODO: Add a captivating GIF or screenshot of BouncyBee in action here -->
 <!-- ![BouncyBee Gameplay](./docs/bouncybee_gameplay.gif) -->
 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Technologies Used](#technologies-used)
 - [Features](#features)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -24,6 +25,14 @@
 BouncyBee is an engaging arcade-style game developed as a part of the "Compose Multiplatform Showcase Projects" collection. It demonstrates how Kotlin Multiplatform and Jetpack Compose for Multiplatform can be used to create interactive games that run on both Android and Desktop (JVM).
 
 The game challenges players to navigate a bee through an endless series of pipes by tapping to make the bee jump. The objective is to achieve the highest possible score.
+
+## Technologies Used
+
+- **Kotlin Multiplatform (KMP)** – Shared logic across Android and Desktop.
+- **Jetpack Compose for Multiplatform** – Declarative UI for both platforms.
+- **Gradle** – Build system and dependency management.
+- **Koin** – Dependency injection framework for KMP.
+- **Koin Annotations** – Annotation-based DI simplification.
 
 ## Features
 
@@ -102,4 +111,3 @@ Contributions to BouncyBee are welcome! If you have ideas for improvements, new 
 ---
 
 *(This README.md is for the BouncyBee sub-project. You can return to the [main project README](../README.md).)*
-
