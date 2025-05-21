@@ -1,6 +1,7 @@
 # BouncyBee: A Compose Multiplatform Game
 
-<!-- Build Status Badge will be added here later -->
+![Android Build](https://github.com/pekomon/Compose-Multiplatform-Projects/actions/workflows/android.yml/badge.svg)
+
 
 > A whimsical and challenging Flappy Bird-style game where you guide BouncyBee through a series of pipes. Built with Kotlin Multiplatform and Jetpack Compose for Multiplatform.
 
