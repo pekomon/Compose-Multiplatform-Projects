@@ -13,11 +13,11 @@ This repository serves as a showcase and experimental ground for various small a
 
 Here is a list of the sub-projects contained within this collection:
 
+- [BouncyBee](./BouncyBee) – A fun and engaging multiplatform game.
+
+
 ---
 
-*(This section will be populated with links and descriptions of the sub-projects as they are developed. For example, BouncyBee will be added here later.)*
-
----
 
 ## Technologies
 
@@ -39,4 +39,3 @@ Contributions are welcome! If you want to propose a new sub-project, improve an 
 5.  Open a Pull Request.
 
 For more specific contribution guidelines, please refer to the README files within individual sub-projects if available.
-
