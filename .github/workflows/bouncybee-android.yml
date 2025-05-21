@@ -13,6 +13,9 @@ jobs:
   build:
     name: Build Android
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./BouncyBee
 
     steps:
       - name: Checkout source code
