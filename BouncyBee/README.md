@@ -1,7 +1,10 @@
 # BouncyBee: A Compose Multiplatform Game
 
 ![Android Build](https://github.com/pekomon/Compose-Multiplatform-Projects/actions/workflows/bouncybee-android.yml/badge.svg)
+
 ![iOS Build](https://github.com/pekomon/Compose-Multiplatform-Projects/actions/workflows/bouncybee-ios.yml/badge.svg)
+
+![Desktop Build](https://github.com/pekomon/Compose-Multiplatform-Projects/actions/workflows/bouncybee-desktop.yml/badge.svg)
 
 
 
