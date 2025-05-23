@@ -6,6 +6,9 @@
 
 ![Desktop Build](https://github.com/pekomon/Compose-Multiplatform-Projects/actions/workflows/bouncybee-desktop.yml/badge.svg)
 
+![Web Build](https://github.com/pekomon/Compose-Multiplatform-Projects/actions/workflows/bouncybee-wasm.yml/badge.svg)
+
+
 
 
 > A whimsical and challenging Flappy Bird-style game where you guide BouncyBee through a series of pipes. Built with Kotlin Multiplatform and Jetpack Compose for Multiplatform.
