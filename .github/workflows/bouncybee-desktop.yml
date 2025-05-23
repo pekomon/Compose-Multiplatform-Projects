@@ -33,8 +33,12 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x ./gradlew
 
+      - name: List files (Windows)
+        run: dir
+        if: runner.os == 'Windows'
+
       - name: Build Desktop App (Windows)
-        run: gradlew.bat :composeApp:packageDistributionForCurrentOS
+        run: .\gradlew.bat :composeApp:packageDistributionForCurrentOS
         if: runner.os == 'Windows'
 
       - name: Build Desktop App (Unix)
