@@ -13,6 +13,9 @@ jobs:
   build:
     name: Build and Deploy Web (Wasm)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./BouncyBee
 
     steps:
       - name: Checkout source code
@@ -28,15 +31,15 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build Web App (Wasm)
-        run: ./gradlew :BouncyBee:composeApp:wasmJsBrowserDistribution
+        run: ./gradlew :composeApp:wasmJsBrowserDistribution
 
       - name: Show Wasm build output
-        run: ls -la ./BouncyBee/composeApp/build/dist/wasmJs/productionExecutable
+        run: ls -la ./composeApp/build/dist/wasmJs/productionExecutable
 
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./BouncyBee/composeApp/build/dist/wasmJs/productionExecutable
+          publish_dir: ./composeApp/build/dist/wasmJs/productionExecutable
           destination_dir: BouncyBee/web
