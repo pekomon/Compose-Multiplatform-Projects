@@ -1,0 +1,11 @@
+abi_version=1.201.0
+builtins_platform=WASM
+compiler_version=2.1.0
+depends=components.resources\:library components.ui-tooling-preview\:library org.jetbrains.androidx.lifecycle\:lifecycle-viewmodel io.insert-koin\:koin-compose io.insert-koin\:koin-core com.russhwolf\:multiplatform-settings-no-arg com.russhwolf\:multiplatform-settings com.russhwolf\:multiplatform-settings-make-observable com.stevdza_san\:sprite org.jetbrains.compose.material3\:material3 org.jetbrains.compose.material\:material-ripple org.jetbrains.compose.foundation\:foundation org.jetbrains.compose.animation\:animation org.jetbrains.compose.material\:material-icons-core org.jetbrains.compose.foundation\:foundation-layout org.jetbrains.compose.ui\:ui org.jetbrains.kotlinx\:kotlinx-browser org.jetbrains.androidx.lifecycle\:lifecycle-runtime-compose org.jetbrains.androidx.lifecycle\:lifecycle-runtime org.jetbrains.androidx.lifecycle\:lifecycle-common org.jetbrains.compose.annotation-internal\:annotation org.jetbrains.compose.animation\:animation-core org.jetbrains.kotlinx\:kotlinx-coroutines-core org.jetbrains.kotlinx\:atomicfu org.jetbrains.compose.runtime\:runtime-saveable kotlin org.jetbrains.compose.runtime\:runtime org.jetbrains.compose.ui\:ui-text org.jetbrains.compose.ui\:ui-graphics org.jetbrains.compose.ui\:ui-unit org.jetbrains.skiko\:skiko org.jetbrains.compose.ui\:ui-geometry org.jetbrains.compose.ui\:ui-util
+ir_signature_versions=1,2
+jsOutputName=composeApp
+metadata_version=1.4.1
+serializedIrFileFingerprints=1vlqlrajj812v.d8vy30ys5q5g 1pa1gy91aqqss.1uca79tjrv9es 2s908hzpekihd.9lgi1golgumy pg6g5bpclaer.17zyvd271gjfs 32n4t2s3s5ub3.fjnxvwut3h5e 3ofv5a1xqus09.wc2hg2o8nd5g 2d01g4132c5c8.4lo8aaair6iq 1dr36gws32t09.11k75b7gxdzxh 15auu0kupn74m.3kksgv5uwdtp5 8hl38yubbel7.3rj6ef4fltq1l 145plyidt559d.sb62asqqik5r 2uolsidfjvqff.2x3yqsfhq5cw2 1b4vlzmzjxu02.zbbcjb1t6qj 1gig9ohhrccvk.1gyn4j249pcv9 9mi8za8igkqa.3nqxyh93ps3sj 2kth1vchmpagf.11ybngrp42qzg 3935medr4zgsk.2u34q673gqv5k 8ltikm8j4mrz.3bnzud1osxicj hjltt0huwc58.2ipxgrts1e0ql
+serializedKlibFingerprint=1ogtzdu3a4t0m.2i2fxbwk1v7cd
+unique_name=BouncyBee\:composeApp
+wasm_targets=wasm-js

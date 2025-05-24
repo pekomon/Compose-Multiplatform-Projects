@@ -1,0 +1,14 @@
+--app-image
+"/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/build/compose/binaries/main/app"
+--resource-dir
+"/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/build/compose/tmp/resources"
+--type
+"dmg"
+--dest
+"/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/build/compose/binaries/main/dmg"
+--name
+"org.example.pekomon.bouncybee"
+--app-version
+"1.0.0"
+--mac-entitlements
+"/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/build/compose/default-resources/1.7.0/default-entitlements.plist"

@@ -1,0 +1,158 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="org.example.pekomon.bouncybee"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="24"
+9        android:targetSdkVersion="35" />
+10
+11    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+11-->[androidx.media3:media3-common:1.5.0] /Users/pekka/.gradle/caches/8.9/transforms/77e89f299574f9f5d4010a07aa087f5a/transformed/media3-common-1.5.0/AndroidManifest.xml:22:5-79
+11-->[androidx.media3:media3-common:1.5.0] /Users/pekka/.gradle/caches/8.9/transforms/77e89f299574f9f5d4010a07aa087f5a/transformed/media3-common-1.5.0/AndroidManifest.xml:22:22-76
+12
+13    <permission
+13-->[androidx.core:core:1.13.1] /Users/pekka/.gradle/caches/8.9/transforms/bd09aa526a69c8b4ff301865620c8e71/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+14        android:name="org.example.pekomon.bouncybee.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+14-->[androidx.core:core:1.13.1] /Users/pekka/.gradle/caches/8.9/transforms/bd09aa526a69c8b4ff301865620c8e71/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+15        android:protectionLevel="signature" />
+15-->[androidx.core:core:1.13.1] /Users/pekka/.gradle/caches/8.9/transforms/bd09aa526a69c8b4ff301865620c8e71/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+16
+17    <uses-permission android:name="org.example.pekomon.bouncybee.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+17-->[androidx.core:core:1.13.1] /Users/pekka/.gradle/caches/8.9/transforms/bd09aa526a69c8b4ff301865620c8e71/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+17-->[androidx.core:core:1.13.1] /Users/pekka/.gradle/caches/8.9/transforms/bd09aa526a69c8b4ff301865620c8e71/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+18
+19    <application
+19-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:4:5-22:19
+20        android:name="org.example.pekomon.bouncybee.BouncyBeeApp"
+20-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:5:9-37
+21        android:allowBackup="true"
+21-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:6:9-35
+22        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+22-->[androidx.core:core:1.13.1] /Users/pekka/.gradle/caches/8.9/transforms/bd09aa526a69c8b4ff301865620c8e71/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
+23        android:debuggable="true"
+24        android:extractNativeLibs="false"
+25        android:icon="@mipmap/ic_launcher"
+25-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:7:9-43
+26        android:label="@string/app_name"
+26-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:8:9-41
+27        android:roundIcon="@mipmap/ic_launcher_round"
+27-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:9:9-54
+28        android:supportsRtl="true"
+28-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:10:9-35
+29        android:theme="@android:style/Theme.Material.Light.NoActionBar" >
+29-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:11:9-72
+30        <activity
+30-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:12:9-21:20
+31            android:name="org.example.pekomon.bouncybee.MainActivity"
+31-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:15:13-41
+32            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen|uiMode"
+32-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:14:13-225
+33            android:exported="true" >
+33-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:13:13-36
+34            <intent-filter>
+34-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:16:13-20:29
+35                <action android:name="android.intent.action.MAIN" />
+35-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:17:17-69
+35-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:17:25-66
+36
+37                <category android:name="android.intent.category.LAUNCHER" />
+37-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:19:17-77
+37-->/Users/pekka/work/github/Compose-Multiplatform-Projects/BouncyBee/composeApp/src/androidMain/AndroidManifest.xml:19:27-74
+38            </intent-filter>
+39        </activity>
+40
+41        <provider
+41-->[org.jetbrains.compose.components:components-resources-android:1.7.0] /Users/pekka/.gradle/caches/8.9/transforms/b26b4746bf3f6fa584f7c614956268e2/transformed/library-release/AndroidManifest.xml:8:9-13:20
+42            android:name="org.jetbrains.compose.resources.AndroidContextProvider"
+42-->[org.jetbrains.compose.components:components-resources-android:1.7.0] /Users/pekka/.gradle/caches/8.9/transforms/b26b4746bf3f6fa584f7c614956268e2/transformed/library-release/AndroidManifest.xml:9:13-82
+43            android:authorities="org.example.pekomon.bouncybee.resources.AndroidContextProvider"
+43-->[org.jetbrains.compose.components:components-resources-android:1.7.0] /Users/pekka/.gradle/caches/8.9/transforms/b26b4746bf3f6fa584f7c614956268e2/transformed/library-release/AndroidManifest.xml:10:13-84
+44            android:enabled="true"
+44-->[org.jetbrains.compose.components:components-resources-android:1.7.0] /Users/pekka/.gradle/caches/8.9/transforms/b26b4746bf3f6fa584f7c614956268e2/transformed/library-release/AndroidManifest.xml:11:13-35
+45            android:exported="false" >
+45-->[org.jetbrains.compose.components:components-resources-android:1.7.0] /Users/pekka/.gradle/caches/8.9/transforms/b26b4746bf3f6fa584f7c614956268e2/transformed/library-release/AndroidManifest.xml:12:13-37
+46        </provider>
+47
+48        <activity
+48-->[androidx.compose.ui:ui-tooling-android:1.7.1] /Users/pekka/.gradle/caches/8.9/transforms/32a3700385bccbdaa6061660de5fbfc7/transformed/ui-tooling-release/AndroidManifest.xml:23:9-25:39
+49            android:name="androidx.compose.ui.tooling.PreviewActivity"
+49-->[androidx.compose.ui:ui-tooling-android:1.7.1] /Users/pekka/.gradle/caches/8.9/transforms/32a3700385bccbdaa6061660de5fbfc7/transformed/ui-tooling-release/AndroidManifest.xml:24:13-71
+50            android:exported="true" />
+50-->[androidx.compose.ui:ui-tooling-android:1.7.1] /Users/pekka/.gradle/caches/8.9/transforms/32a3700385bccbdaa6061660de5fbfc7/transformed/ui-tooling-release/AndroidManifest.xml:25:13-36
+51
+52        <provider
+52-->[androidx.emoji2:emoji2:1.3.0] /Users/pekka/.gradle/caches/8.9/transforms/a6dd53e325932ee29119882c52a472cb/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+53            android:name="androidx.startup.InitializationProvider"
+53-->[androidx.emoji2:emoji2:1.3.0] /Users/pekka/.gradle/caches/8.9/transforms/a6dd53e325932ee29119882c52a472cb/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+54            android:authorities="org.example.pekomon.bouncybee.androidx-startup"
+54-->[androidx.emoji2:emoji2:1.3.0] /Users/pekka/.gradle/caches/8.9/transforms/a6dd53e325932ee29119882c52a472cb/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+55            android:exported="false" >
+55-->[androidx.emoji2:emoji2:1.3.0] /Users/pekka/.gradle/caches/8.9/transforms/a6dd53e325932ee29119882c52a472cb/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+56            <meta-data
+56-->[androidx.emoji2:emoji2:1.3.0] /Users/pekka/.gradle/caches/8.9/transforms/a6dd53e325932ee29119882c52a472cb/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+57                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+57-->[androidx.emoji2:emoji2:1.3.0] /Users/pekka/.gradle/caches/8.9/transforms/a6dd53e325932ee29119882c52a472cb/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+58                android:value="androidx.startup" />
+58-->[androidx.emoji2:emoji2:1.3.0] /Users/pekka/.gradle/caches/8.9/transforms/a6dd53e325932ee29119882c52a472cb/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+59            <meta-data
+59-->[androidx.lifecycle:lifecycle-process:2.8.5] /Users/pekka/.gradle/caches/8.9/transforms/7582a2d139fd35f6452c9577298a77bc/transformed/lifecycle-process-2.8.5/AndroidManifest.xml:29:13-31:52
+60                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+60-->[androidx.lifecycle:lifecycle-process:2.8.5] /Users/pekka/.gradle/caches/8.9/transforms/7582a2d139fd35f6452c9577298a77bc/transformed/lifecycle-process-2.8.5/AndroidManifest.xml:30:17-78
+61                android:value="androidx.startup" />
+61-->[androidx.lifecycle:lifecycle-process:2.8.5] /Users/pekka/.gradle/caches/8.9/transforms/7582a2d139fd35f6452c9577298a77bc/transformed/lifecycle-process-2.8.5/AndroidManifest.xml:31:17-49
+62            <meta-data
+62-->[com.russhwolf:multiplatform-settings-no-arg-android-debug:1.2.0] /Users/pekka/.gradle/caches/8.9/transforms/c3948d64943c689d4fb6c9f6d794ff3e/transformed/multiplatform-settings-no-arg-debug/AndroidManifest.xml:29:13-31:52
+63                android:name="com.russhwolf.settings.SettingsInitializer"
+63-->[com.russhwolf:multiplatform-settings-no-arg-android-debug:1.2.0] /Users/pekka/.gradle/caches/8.9/transforms/c3948d64943c689d4fb6c9f6d794ff3e/transformed/multiplatform-settings-no-arg-debug/AndroidManifest.xml:30:17-74
+64                android:value="androidx.startup" />
+64-->[com.russhwolf:multiplatform-settings-no-arg-android-debug:1.2.0] /Users/pekka/.gradle/caches/8.9/transforms/c3948d64943c689d4fb6c9f6d794ff3e/transformed/multiplatform-settings-no-arg-debug/AndroidManifest.xml:31:17-49
+65            <meta-data
+65-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+66                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+66-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+67                android:value="androidx.startup" />
+67-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+68        </provider>
+69
+70        <receiver
+70-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+71            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+71-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+72            android:directBootAware="false"
+72-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+73            android:enabled="true"
+73-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+74            android:exported="true"
+74-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+75            android:permission="android.permission.DUMP" >
+75-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+76            <intent-filter>
+76-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+77                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+77-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+77-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+78            </intent-filter>
+79            <intent-filter>
+79-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+80                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+80-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+80-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+81            </intent-filter>
+82            <intent-filter>
+82-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+83                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+83-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+83-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+84            </intent-filter>
+85            <intent-filter>
+85-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+86                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+86-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+86-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/pekka/.gradle/caches/8.9/transforms/7a721636c93d07f5c5d35fdc8c108ff8/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+87            </intent-filter>
+88        </receiver>
+89    </application>
+90
+91</manifest>
