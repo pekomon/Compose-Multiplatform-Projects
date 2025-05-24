@@ -9,8 +9,6 @@
 ![Web Build](https://github.com/pekomon/Compose-Multiplatform-Projects/actions/workflows/bouncybee-wasm.yml/badge.svg)
 
 
-
-
 > A whimsical and challenging Flappy Bird-style game where you guide BouncyBee through a series of pipes. Built with Kotlin Multiplatform and Jetpack Compose for Multiplatform.
 
 <!-- TODO: Add a captivating GIF or screenshot of BouncyBee in action here -->
@@ -34,6 +32,15 @@
 BouncyBee is an engaging arcade-style game developed as a part of the "Compose Multiplatform Showcase Projects" collection. It demonstrates how Kotlin Multiplatform and Jetpack Compose for Multiplatform can be used to create interactive games that run on both Android and Desktop (JVM).
 
 The game challenges players to navigate a bee through an endless series of pipes by tapping to make the bee jump. The objective is to achieve the highest possible score.
+
+## Play Online
+
+You can try BouncyBee directly in your browser via GitHub Pages:
+
+👉 [Play BouncyBee in your browser](https://pekomon.github.io/Compose-Multiplatform-Projects/BouncyBee/web/)
+
+No installation needed – just click and play!
+
 
 ## Technologies Used
 
