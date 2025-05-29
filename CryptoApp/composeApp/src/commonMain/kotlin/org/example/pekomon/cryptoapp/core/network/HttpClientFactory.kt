@@ -11,6 +11,7 @@ import io.ktor.http.contentType
 import io.ktor.http.headers
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import org.example.pekomon.cryptoapp.core.network.platform.ApiKeyProvider
 
 object HttpClientFactory {
     fun create(engine: HttpClientEngine): HttpClient {
@@ -28,7 +29,7 @@ object HttpClientFactory {
             }
             install(HttpCache)
             defaultRequest {
-                headers { append("x-access-token", "XXX") }
+                headers { append("x-access-token", ApiKeyProvider.getApiKey()) }
                 contentType(ContentType.Application.Json)
             }
         }

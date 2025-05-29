@@ -26,6 +26,7 @@ koin = "4.0.0"
 biometry = "1.1.0"
 assertK = "0.25"
 turbine = "0.7.0"
+roomCompiler = "2.7.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -82,6 +83,7 @@ coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil-compose" 
 
 # Biometry Libraries
 biometric = { module = "androidx.biometric:biometric", version.ref = "biometry" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -1,6 +1,7 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -91,7 +92,27 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+
+        // Read the API key from local.properties in the root project
+        val localProperties = Properties()
+        // Access local.properties from the root project directory
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            FileInputStream(localPropertiesFile).use { fis -> // Use 'use' for safe closing
+                localProperties.load(fis)
+            }
+        }
+
+        // Make the API key available in BuildConfig for the Android target
+        // It's good practice to provide a default empty string
+
+        buildConfigField(
+            "String",
+            "COINRANKING_API_KEY",
+            "\"${localProperties.getProperty("COINRANKING_API_KEY", "")}\""
+        )
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -114,6 +135,7 @@ room {
 }
 
 dependencies {
+    implementation(libs.androidx.room.compiler)
     ksp(libs.room.compiler)
     debugImplementation(compose.uiTooling)
 }
