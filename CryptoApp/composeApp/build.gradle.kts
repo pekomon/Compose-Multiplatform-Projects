@@ -86,6 +86,10 @@ android {
     namespace = "org.example.pekomon.cryptoapp"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "org.example.pekomon.cryptoapp"
         minSdk = libs.versions.android.minSdk.get().toInt()
