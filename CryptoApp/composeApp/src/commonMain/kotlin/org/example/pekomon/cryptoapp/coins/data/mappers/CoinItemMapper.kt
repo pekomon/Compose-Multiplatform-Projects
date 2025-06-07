@@ -2,8 +2,8 @@ package org.example.pekomon.cryptoapp.coins.data.mappers
 
 import org.example.pekomon.cryptoapp.coins.data.remote.dto.CoinItemDto
 import org.example.pekomon.cryptoapp.coins.data.remote.dto.CoinPriceDto
-import org.example.pekomon.cryptoapp.coins.model.CoinModel
-import org.example.pekomon.cryptoapp.coins.model.PriceModel
+import org.example.pekomon.cryptoapp.coins.domain.model.CoinModel
+import org.example.pekomon.cryptoapp.coins.domain.model.PriceModel
 import org.example.pekomon.cryptoapp.core.domain.Coin.Coin
 
 fun CoinItemDto.toCoinModel() = CoinModel(

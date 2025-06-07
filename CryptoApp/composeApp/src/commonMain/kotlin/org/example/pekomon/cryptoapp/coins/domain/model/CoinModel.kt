@@ -1,4 +1,4 @@
-package org.example.pekomon.cryptoapp.coins.model
+package org.example.pekomon.cryptoapp.coins.domain.model
 
 import org.example.pekomon.cryptoapp.core.domain.Coin.Coin
 
