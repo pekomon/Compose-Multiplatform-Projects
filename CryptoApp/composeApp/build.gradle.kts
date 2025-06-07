@@ -144,3 +144,12 @@ dependencies {
     debugImplementation(compose.uiTooling)
 }
 
+configurations.all {
+    resolutionStrategy {
+        dependencySubstitution {
+            substitute(module("com.intellij:annotations")).using(module("org.jetbrains:annotations:23.0.0"))
+        }
+        // 12.0 and 23.0 clashing... force newer one
+        force("org.jetbrains:annotations:23.0.0")
+    }
+}
