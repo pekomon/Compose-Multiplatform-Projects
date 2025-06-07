@@ -4,11 +4,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CoinPriceHistoryResponseDto(
-    val data: CoinsPriceHistoryDto
+    val data: CoinPriceHistoryDto
 )
 
 @Serializable
-data class CoinsPriceHistoryDto(
+data class CoinPriceHistoryDto(
     val history: List<CoinPriceDto>
 )
 
