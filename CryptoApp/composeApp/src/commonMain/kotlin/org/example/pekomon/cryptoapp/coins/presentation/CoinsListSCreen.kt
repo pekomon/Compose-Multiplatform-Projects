@@ -26,9 +26,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import org.example.pekomon.cryptoapp.core.logger.Logger
 import org.example.pekomon.cryptoapp.theme.LocalCryptoAppColorsPalette
+import org.koin.compose.viewmodel.koinViewModel
 
 // TODO: Separate in separate files
 // TODO: Add Previews
@@ -37,7 +38,7 @@ import org.example.pekomon.cryptoapp.theme.LocalCryptoAppColorsPalette
 fun CoinsListScreen(
     onCoinClicked: (String) -> Unit
 ) {
-    val viewModel = viewModel(CoinsListViewModel::class) // TODO: Inject
+    val viewModel = koinViewModel<CoinsListViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     CoinsListContent(
@@ -57,10 +58,12 @@ private fun CoinsListContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        CoinsList(
-            coins = state.coins,
-            onCoinClicked = onCoinClicked
-        )
+        Column {
+            CoinsList(
+                coins = state.coins,
+                onCoinClicked = onCoinClicked
+            )
+        }
     }
 }
 
@@ -90,7 +93,6 @@ private fun CoinsList(
                     coin = coin,
                     onCoinClicked = onCoinClicked
                 )
-
             }
         }
     }

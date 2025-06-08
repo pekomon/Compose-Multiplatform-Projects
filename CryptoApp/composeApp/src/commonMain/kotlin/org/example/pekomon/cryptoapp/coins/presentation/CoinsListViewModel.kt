@@ -17,7 +17,7 @@ class CoinsListViewModel(
     private val _state = MutableStateFlow(CoinsState())
     val state = _state
         .onStart {
-            //getAllCoins()
+            getAllCoins()
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -48,7 +48,18 @@ class CoinsListViewModel(
                 _state.update {
                     CoinsState(
                         error = null, // TODO: Update when having resources
-                        coins = emptyList()
+                        //coins = emptyList()
+                        coins = listOf(
+                            UiCoinListItem(
+                                id = "1",
+                                name = "${coinsResponse.error}",
+                                symbol = "BTC",
+                                iconUrl = "https://cryptologos.cc/logos/bitcoin-btc-logo",
+                                formattedPrice = "10000",
+                                formattedChange = "100",
+                                isPositive = true
+                            )
+                        )
                     )
                 }
             }

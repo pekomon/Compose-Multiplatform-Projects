@@ -8,6 +8,7 @@ import org.example.pekomon.cryptoapp.coins.data.remote.dto.CoinsResponseDto
 import org.example.pekomon.cryptoapp.coins.domain.api.CoinsRemoteDataSource
 import org.example.pekomon.cryptoapp.core.domain.DataError
 import org.example.pekomon.cryptoapp.core.domain.Result
+import org.example.pekomon.cryptoapp.core.logger.Logger
 import org.example.pekomon.cryptoapp.core.network.safeCall
 
 // TODO: put this to configuration or consts file
@@ -17,9 +18,10 @@ class KtorCoinsRemoteDataSource(
     private val httpClient: HttpClient
 ): CoinsRemoteDataSource {
     override suspend fun getListOfCoins(): Result<CoinsResponseDto, DataError.Remote> {
-        val gg: HttpClient = HttpClient()
         return safeCall {
-            httpClient.get("$BASE_URL/coins")
+            val response = httpClient.get("$BASE_URL/coins")
+            Logger.d("CoinsRemoteDataSource", "getListOfCoins status: ${response.status.value}")
+            response
         }
     }
 
