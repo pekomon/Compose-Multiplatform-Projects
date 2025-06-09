@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import org.example.pekomon.cryptoapp.coins.domain.GetCoinsListUseCase
 import org.example.pekomon.cryptoapp.core.domain.Result
+import org.example.pekomon.cryptoapp.core.util.formatFiat
+import org.example.pekomon.cryptoapp.core.util.formatPercentage
 
 class CoinsListViewModel(
     private val getCoinsUseCase: GetCoinsListUseCase
@@ -35,8 +37,8 @@ class CoinsListViewModel(
                                 name = item.coin.name,
                                 iconUrl = item.coin.iconUrl,
                                 symbol = item.coin.symbol,
-                                formattedPrice = item.price.toString(), // TODO: Needs some formatting in future
-                                formattedChange = item.price.toString(), // TODO: Needs some formatting in future
+                                formattedPrice = formatFiat(item.price),
+                                formattedChange = formatPercentage(item.change),
                                 isPositive = item.change >= 0
                             )
                         }
