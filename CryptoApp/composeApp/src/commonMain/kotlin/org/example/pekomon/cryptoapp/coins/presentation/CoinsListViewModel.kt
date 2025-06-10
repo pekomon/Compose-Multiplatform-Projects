@@ -2,6 +2,8 @@ package org.example.pekomon.cryptoapp.coins.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cryptoapp.composeapp.generated.resources.Res
+import cryptoapp.composeapp.generated.resources.error_serialization
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
@@ -11,6 +13,7 @@ import org.example.pekomon.cryptoapp.coins.domain.GetCoinsListUseCase
 import org.example.pekomon.cryptoapp.core.domain.Result
 import org.example.pekomon.cryptoapp.core.util.formatFiat
 import org.example.pekomon.cryptoapp.core.util.formatPercentage
+import org.example.pekomon.cryptoapp.core.util.toUiText
 
 class CoinsListViewModel(
     private val getCoinsUseCase: GetCoinsListUseCase
@@ -49,19 +52,8 @@ class CoinsListViewModel(
             is Result.Error-> {
                 _state.update {
                     CoinsState(
-                        error = null, // TODO: Update when having resources
-                        //coins = emptyList()
-                        coins = listOf(
-                            UiCoinListItem(
-                                id = "1",
-                                name = "${coinsResponse.error}",
-                                symbol = "BTC",
-                                iconUrl = "https://cryptologos.cc/logos/bitcoin-btc-logo",
-                                formattedPrice = "10000",
-                                formattedChange = "100",
-                                isPositive = true
-                            )
-                        )
+                        error = coinsResponse.error.toUiText(),
+                        coins = emptyList()
                     )
                 }
             }
