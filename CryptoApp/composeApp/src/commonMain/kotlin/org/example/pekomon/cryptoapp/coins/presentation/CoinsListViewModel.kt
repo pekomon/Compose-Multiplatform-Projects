@@ -2,13 +2,13 @@ package org.example.pekomon.cryptoapp.coins.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cryptoapp.composeapp.generated.resources.Res
-import cryptoapp.composeapp.generated.resources.error_serialization
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.example.pekomon.cryptoapp.coins.domain.GetCoinPriceHistoryUseCase
 import org.example.pekomon.cryptoapp.coins.domain.GetCoinsListUseCase
 import org.example.pekomon.cryptoapp.core.domain.Result
 import org.example.pekomon.cryptoapp.core.util.formatFiat
@@ -16,7 +16,8 @@ import org.example.pekomon.cryptoapp.core.util.formatPercentage
 import org.example.pekomon.cryptoapp.core.util.toUiText
 
 class CoinsListViewModel(
-    private val getCoinsUseCase: GetCoinsListUseCase
+    private val getCoinsUseCase: GetCoinsListUseCase,
+    private val getCoinPriceHistoryUseCase: GetCoinPriceHistoryUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CoinsState())
@@ -59,4 +60,44 @@ class CoinsListViewModel(
             }
         }
     }
+
+    private fun onCoinLongPressed(coinId: String) {
+        _state.update {
+            it.copy(
+                chartState = UiChartState(
+                    sparkLine = emptyList(),
+                    isLoading = true,
+                    coinName = ""
+                )
+            )
+        }
+
+        viewModelScope.launch {
+            when (val priceHistory = getCoinPriceHistoryUseCase(coinId)) {
+                is Result.Success -> {
+                    _state.update { currentState ->
+                        currentState.copy(
+                            chartState = UiChartState(
+                                sparkLine = priceHistory.data.sortedBy { it.timestamp }.map { it.price },
+                                isLoading = false,
+                                coinName = currentState.coins.firstOrNull { it.id == coinId }?.name ?: ""
+                            )
+                        )
+                    }
+                }
+                is Result.Error -> {
+                    _state.update {
+                        it.copy(
+                            chartState = UiChartState(
+                                sparkLine = emptyList(),
+                                isLoading = false,
+                                coinName = ""
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
+
