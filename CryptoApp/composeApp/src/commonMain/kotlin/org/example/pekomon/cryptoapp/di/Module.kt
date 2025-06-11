@@ -3,6 +3,7 @@ package org.example.pekomon.cryptoapp.di
 import io.ktor.client.HttpClient
 import org.example.pekomon.cryptoapp.coins.data.remote.impl.KtorCoinsRemoteDataSource
 import org.example.pekomon.cryptoapp.coins.domain.GetCoinDetailsUseCase
+import org.example.pekomon.cryptoapp.coins.domain.GetCoinPriceHistoryUseCase
 import org.example.pekomon.cryptoapp.coins.domain.GetCoinsListUseCase
 import org.example.pekomon.cryptoapp.coins.domain.api.CoinsRemoteDataSource
 import org.example.pekomon.cryptoapp.coins.presentation.CoinsListViewModel
@@ -30,8 +31,9 @@ val sharedModule = module {
     single<HttpClient> { HttpClientFactory.create(get()) }
 
     // coins list
-    viewModel { CoinsListViewModel(get()) }
+    viewModel { CoinsListViewModel(get(), get()) }
     singleOf(::GetCoinsListUseCase)
     singleOf(::KtorCoinsRemoteDataSource).bind<CoinsRemoteDataSource>()
     singleOf(::GetCoinDetailsUseCase)
+    singleOf(::GetCoinPriceHistoryUseCase)
 }
