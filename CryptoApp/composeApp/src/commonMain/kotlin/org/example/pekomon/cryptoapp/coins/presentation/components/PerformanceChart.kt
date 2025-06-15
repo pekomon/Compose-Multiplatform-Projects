@@ -1,14 +1,25 @@
 package org.example.pekomon.cryptoapp.coins.presentation.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
-import org.example.pekomon.cryptoapp.theme.CryptoAppTheme
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import org.example.pekomon.cryptoapp.coins.presentation.UiChartState
+import org.example.pekomon.cryptoapp.theme.LocalCryptoAppColorsPalette
 
 @Composable
 fun PerformanceChart(
@@ -25,7 +36,7 @@ fun PerformanceChart(
     val lineColor = if (nodes.last() > nodes.first()) profitColor else lossColor
 
     Canvas(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
     ) {
         val path = Path()
         nodes.forEachIndexed { index, node ->
@@ -42,7 +53,50 @@ fun PerformanceChart(
         drawPath(
             path = path,
             color = lineColor,
-            style = Stroke(width = 2.0f)
+            style = Stroke(width = 5.0f)
         )
     }
+}
+
+
+@Composable
+fun CoinChartDialog(
+    uiChartState: UiChartState,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        modifier = Modifier.fillMaxWidth(),
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = "24h Price chart for ${uiChartState.coinName}")
+        },
+        text = {
+            if (uiChartState.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                }
+            } else {
+                PerformanceChart(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(16.dp),
+                    nodes = uiChartState.sparkLine,
+                    profitColor = LocalCryptoAppColorsPalette.current.profitGreen,
+                    lossColor = LocalCryptoAppColorsPalette.current.lossRed
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            Button(
+                onClick = onDismiss
+            ) {
+                Text(text = "Close")
+            }
+        }
+    )
 }

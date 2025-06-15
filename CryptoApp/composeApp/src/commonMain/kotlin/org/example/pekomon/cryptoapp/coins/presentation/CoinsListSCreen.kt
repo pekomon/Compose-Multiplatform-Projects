@@ -2,6 +2,7 @@ package org.example.pekomon.cryptoapp.coins.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,12 +28,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import org.example.pekomon.cryptoapp.core.logger.Logger
+import org.example.pekomon.cryptoapp.coins.presentation.components.CoinChartDialog
 import org.example.pekomon.cryptoapp.theme.LocalCryptoAppColorsPalette
 import org.koin.compose.viewmodel.koinViewModel
 
 // TODO: Separate in separate files
-// TODO: Add Previews
 
 @Composable
 fun CoinsListScreen(
@@ -43,14 +43,17 @@ fun CoinsListScreen(
 
     CoinsListContent(
         state = state,
-        onCoinClicked = onCoinClicked
+        onCoinLongPressed = { coinId -> viewModel.onCoinLongPressed(coinId) },
+        onCoinClicked = onCoinClicked,
+        onDismissChart = { viewModel.dismissChart()},
     )
-
 }
 
 @Composable
 private fun CoinsListContent(
     state: CoinsState,
+    onDismissChart: () -> Unit,
+    onCoinLongPressed: (String) -> Unit,
     onCoinClicked: (String) -> Unit
 ) {
     Box(
@@ -58,18 +61,25 @@ private fun CoinsListContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Column {
-            CoinsList(
-                coins = state.coins,
-                onCoinClicked = onCoinClicked
+        if (state.chartState != null) {
+            CoinChartDialog(
+                uiChartState = state.chartState,
+                onDismiss = onDismissChart
             )
         }
+
+        CoinsList(
+            coins = state.coins,
+            onCoinLongPressed = onCoinLongPressed,
+            onCoinClicked = onCoinClicked
+        )
     }
 }
 
 @Composable
 private fun CoinsList(
     coins: List<UiCoinListItem>,
+    onCoinLongPressed: (String) -> Unit,
     onCoinClicked: (String) -> Unit
 ) {
     Box(
@@ -91,6 +101,7 @@ private fun CoinsList(
             items(coins) { coin ->
                 CoinListItem(
                     coin = coin,
+                    onCoinLongPressed = onCoinLongPressed,
                     onCoinClicked = onCoinClicked
                 )
             }
@@ -101,13 +112,17 @@ private fun CoinsList(
 @Composable
 private fun CoinListItem(
     coin: UiCoinListItem,
+    onCoinLongPressed: (String) -> Unit,
     onCoinClicked: (String) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onCoinClicked(coin.id) }
+            .combinedClickable(
+                onLongClick = { onCoinLongPressed(coin.id) },
+                onClick = { onCoinClicked(coin.id) }
+            )
             .padding(16.dp)
     ) {
         AsyncImage(

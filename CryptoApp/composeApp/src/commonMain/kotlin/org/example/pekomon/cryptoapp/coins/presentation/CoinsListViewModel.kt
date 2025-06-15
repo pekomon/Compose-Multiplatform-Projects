@@ -61,7 +61,7 @@ class CoinsListViewModel(
         }
     }
 
-    private fun onCoinLongPressed(coinId: String) {
+    fun onCoinLongPressed(coinId: String) {
         _state.update {
             it.copy(
                 chartState = UiChartState(
@@ -97,6 +97,14 @@ class CoinsListViewModel(
                     }
                 }
             }
+        }
+    }
+
+    fun dismissChart() {
+        _state.update {
+            it.copy(
+                chartState = null
+            )
         }
     }
 }
