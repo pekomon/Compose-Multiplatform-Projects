@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class PortFolioCoinEntity(
+data class PortfolioCoinEntity(
     @PrimaryKey
     val coinId: String,
     val name: String,
