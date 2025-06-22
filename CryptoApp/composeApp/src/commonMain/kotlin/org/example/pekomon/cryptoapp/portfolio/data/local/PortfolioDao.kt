@@ -1,9 +1,11 @@
 package org.example.pekomon.cryptoapp.portfolio.data.local
 
+import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
+@Dao
 interface PortfolioDao {
 
     @Upsert
