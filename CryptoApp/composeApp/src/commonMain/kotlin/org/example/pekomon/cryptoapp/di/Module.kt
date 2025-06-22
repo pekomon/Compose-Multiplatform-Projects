@@ -1,5 +1,6 @@
 package org.example.pekomon.cryptoapp.di
 
+import androidx.room.RoomDatabase
 import io.ktor.client.HttpClient
 import org.example.pekomon.cryptoapp.coins.data.remote.impl.KtorCoinsRemoteDataSource
 import org.example.pekomon.cryptoapp.coins.domain.GetCoinDetailsUseCase
@@ -7,6 +8,8 @@ import org.example.pekomon.cryptoapp.coins.domain.GetCoinPriceHistoryUseCase
 import org.example.pekomon.cryptoapp.coins.domain.GetCoinsListUseCase
 import org.example.pekomon.cryptoapp.coins.domain.api.CoinsRemoteDataSource
 import org.example.pekomon.cryptoapp.coins.presentation.CoinsListViewModel
+import org.example.pekomon.cryptoapp.core.database.portfolio.PortfolioDatabase
+import org.example.pekomon.cryptoapp.core.database.portfolio.getPortfolioDatabase
 import org.example.pekomon.cryptoapp.core.network.HttpClientFactory
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -29,6 +32,9 @@ expect val platformModule: Module
 
 val sharedModule = module {
     single<HttpClient> { HttpClientFactory.create(get()) }
+
+    // db
+    single { getPortfolioDatabase(get<RoomDatabase.Builder<PortfolioDatabase>>()) }
 
     // coins list
     viewModel { CoinsListViewModel(get(), get()) }
