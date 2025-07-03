@@ -1,8 +1,10 @@
 package org.example.pekomon.cryptoapp.portfolio.data.local
 
+import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 
+@Dao
 interface UserBalanceDao {
 
     @Query("SELECT cashBalance FROM UserBalanceEntity WHERE id = 1")
