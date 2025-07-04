@@ -11,6 +11,8 @@ import org.example.pekomon.cryptoapp.coins.presentation.CoinsListViewModel
 import org.example.pekomon.cryptoapp.core.database.portfolio.PortfolioDatabase
 import org.example.pekomon.cryptoapp.core.database.portfolio.getPortfolioDatabase
 import org.example.pekomon.cryptoapp.core.network.HttpClientFactory
+import org.example.pekomon.cryptoapp.portfolio.data.PortfolioRepositoryImpl
+import org.example.pekomon.cryptoapp.portfolio.domain.PortfolioRepository
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
@@ -33,8 +35,9 @@ expect val platformModule: Module
 val sharedModule = module {
     single<HttpClient> { HttpClientFactory.create(get()) }
 
-    // db
+    // portfolio
     single { getPortfolioDatabase(get<RoomDatabase.Builder<PortfolioDatabase>>()) }
+    singleOf(::PortfolioRepositoryImpl).bind<PortfolioRepository>()
 
     // coins list
     viewModel { CoinsListViewModel(get(), get()) }
