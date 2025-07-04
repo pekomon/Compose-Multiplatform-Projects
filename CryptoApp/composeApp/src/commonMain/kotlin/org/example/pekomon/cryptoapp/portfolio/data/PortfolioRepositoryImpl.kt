@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.internal.NopCollector.emit
 import org.example.pekomon.cryptoapp.coins.domain.api.CoinsRemoteDataSource
 import org.example.pekomon.cryptoapp.core.domain.DataError
 import org.example.pekomon.cryptoapp.core.domain.EmptyResult
