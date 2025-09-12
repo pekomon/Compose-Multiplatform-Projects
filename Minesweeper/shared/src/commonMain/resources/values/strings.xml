@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_title">Minesweeper</string>
+    <string name="hello_minesweeper">Hello, Minesweeper!</string>
+</resources>

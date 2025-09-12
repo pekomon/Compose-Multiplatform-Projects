@@ -1,0 +1,13 @@
+# Gradle
+.gradle/
+build/
+local.properties
+
+# iOS
+iosApp/build/
+iosApp/DerivedData/
+iosApp/Pods/
+iosApp/xcuserdata/
+
+# Desktop
+desktopApp/build/

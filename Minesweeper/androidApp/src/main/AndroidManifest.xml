@@ -1,0 +1,15 @@
+<manifest package="com.pekomon.minesweeper" xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:label="Minesweeper"
+        android:theme="@style/Theme.Minesweeper">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Minesweeper">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
