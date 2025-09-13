@@ -312,3 +312,9 @@ obj/
 
 # End of https://www.toptal.com/developers/gitignore/api/kotlin,macos,intellij,androidstudio,xcode
 
+
+# Allow Gradle wrapper in all modules (subprojects)
+!**/gradle/wrapper/gradle-wrapper.jar
+!**/gradle/wrapper/gradle-wrapper.properties
+!**/gradlew
+!**/gradlew.bat
