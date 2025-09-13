@@ -79,8 +79,8 @@ jobs:
       - name: Gradle cache
         uses: gradle/actions/setup-gradle@v4
       - name: Assemble iOS simulator framework
-      run: ./gradlew :composeApp:compileKotlinIosSimulatorArm64
-      #run: ./gradlew :composeApp:assembleIosSimulatorArm64
+	run: ./gradlew :composeApp:compileKotlinIosSimulatorArm64
+        #run: ./gradlew :composeApp:assembleIosSimulatorArm64
       - name: Upload iOS framework
         uses: actions/upload-artifact@v4
         with:
