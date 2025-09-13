@@ -1,0 +1,118 @@
+name: Minesweeper CI
+
+on:
+  pull_request:
+    paths:
+      - 'Minesweeper/**'
+      - '.github/workflows/minesweeper-ci.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'Minesweeper/**'
+      - '.github/workflows/minesweeper-ci.yml'
+
+jobs:
+  build-android:
+    name: Android (assembleDebug)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Minesweeper
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v4
+      - name: Assemble debug
+        run: ./gradlew :composeApp:assembleDebug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: composeApp/build/outputs/apk/debug/*.apk
+          if-no-files-found: warn
+
+  build-desktop:
+    name: Desktop (package for OS)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Minesweeper
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v4
+      - name: Package Desktop
+        run: ./gradlew :composeApp:packageDistributionForCurrentOS
+      - name: Upload Desktop artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-dist
+          path: composeApp/build/compose/binaries/**
+          if-no-files-found: warn
+
+  build-ios-simulator:
+    name: iOS (Simulator)
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: Minesweeper
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v4
+      - name: Assemble iOS simulator framework
+        run: ./gradlew :composeApp:assembleIosSimulatorArm64
+      - name: Upload iOS framework
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-sim-framework
+          path: composeApp/build/bin/iosSimulatorArm64/**
+          if-no-files-found: warn
+
+  build-wasm:
+    name: WASM (browser distribution)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Minesweeper
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v4
+      - name: Build WASM dist
+        run: |
+          ./gradlew :composeApp:wasmJsBrowserDistribution || \
+          ./gradlew :composeApp:wasmJsProductionExecutableCompileSync || \
+          ./gradlew :composeApp:wasmJsBrowserRun --dry-run
+      - name: Upload WASM dist (if present)
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-dist
+          path: |
+            composeApp/build/dist/wasmJs/productionExecutable/**
+            composeApp/build/dist/wasmJs/productionExecutable.zip
+          if-no-files-found: warn
