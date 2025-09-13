@@ -1,0 +1,19 @@
+# Minimal Detekt config – extend later
+build:
+  maxIssues: 0
+config:
+  validation: true
+processors:
+  active: true
+
+# Salli Compose-tyyliset lyhyet funktiot jne. – säädä myöhemmin
+style:
+  MagicNumber:
+    active: false
+  LongMethod:
+    active: false
+  LongParameterList:
+    active: false
+  TooManyFunctions:
+    active: false
+
