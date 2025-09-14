@@ -45,10 +45,22 @@ subprojects {
     configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension> {
         buildUponDefaultConfig = true
         allRules = false
-        config = files("$rootDir/config/detekt/detekt.yml") // use this kind if having own config
+        config.setFrom(files("$rootDir/config/detekt/detekt.yml")) // use this kind if having own config
         baseline = file("$projectDir/detekt-baseline.xml")     // own baseline for project
         autoCorrect = false
         parallel = true
+    }
+    // Ensure Detekt runs on Kotlin sources (skip generated/build)
+    tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+        setSource(files("src"))
+        include("**/*.kt")
+        exclude("**/build/**")
+        reports {
+            xml.required.set(true)
+            html.required.set(true)
+            txt.required.set(false)
+            sarif.required.set(false)
+        }
     }
 
     // 3) Android Lint is run only in  Android-moduule

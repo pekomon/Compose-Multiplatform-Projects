@@ -6,14 +6,30 @@ config:
 processors:
   active: true
 
-# Salli Compose-tyyliset lyhyet funktiot jne. – säädä myöhemmin
+# Common Compose/KMP relaxations; tighten later when code stabilizes
 style:
   MagicNumber:
     active: false
+
+complexity:
   LongMethod:
     active: false
   LongParameterList:
     active: false
   TooManyFunctions:
     active: false
+
+naming:
+  # Package and class rules stay enabled; adjust as needed
+  FunctionNaming:
+    active: true
+    # Keep PascalCase allowance for @Composable handled by ktlint; detekt focuses on other funcs
+    ignoreAnnotated:
+      - Composable
+
+  MatchingDeclarationName:
+    active: true
+    excludes:
+      - '**/Platform.*.kt'
+
 
