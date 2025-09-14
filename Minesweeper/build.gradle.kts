@@ -25,6 +25,7 @@ subprojects {
             targetExclude("**/build/**", "**/main.kt")
 
             ktlint(libs.versions.ktlint.get())
+                .setEditorConfigPath(rootProject.file("composeApp/.editorconfig"))
                 .editorConfigOverride(
                     mapOf(
                         // Allow PascalCase for @Composable functions
