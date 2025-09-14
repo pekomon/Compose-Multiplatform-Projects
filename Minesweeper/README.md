@@ -19,10 +19,18 @@ A tiny Minesweeper built with Kotlin Multiplatform + Compose Multiplatform.
 
 # Tests & coverage (HTML report at: build/reports/kover/html/index.html)
 ./gradlew test koverHtmlReport
+```
 
-#How to run
-Android: ./gradlew :composeApp:assembleDebug
-Desktop: ./gradlew :composeApp:packageReleaseUberJarForCurrentOS → run the JAR in composeApp/build/compose/jars/
-Wasm: ./gradlew :composeApp:wasmJsBrowserDevelopmentRun
-iOS (sim compile): ./gradlew :composeApp:compileKotlinIosSimulatorArm64
+
+## How to run
+
+Android: `./gradlew :composeApp:assembleDebug`
+
+Desktop: `./gradlew :composeApp:packageReleaseUberJarForCurrentOS → run the JAR in composeApp/build/compose/jars/`
+
+Wasm: `./gradlew :composeApp:wasmJsBrowserDevelopmentRun`
+
+iOS (sim compile): `./gradlew :composeApp:compileKotlinIosSimulatorArm64`
+
+
 
