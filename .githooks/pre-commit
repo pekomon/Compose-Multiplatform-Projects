@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Format Kotlin sources before each commit for consistent style
+(
+  cd Minesweeper
+  ./gradlew -q spotlessApply
+)
+# Re-stage any formatted files
+git add -A
