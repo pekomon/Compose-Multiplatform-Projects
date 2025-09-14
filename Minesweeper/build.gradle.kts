@@ -21,16 +21,22 @@ subprojects {
     apply(plugin = "com.diffplug.spotless")
     configure<com.diffplug.gradle.spotless.SpotlessExtension> {
         kotlin {
-            // use ktlint-version from lib catalog
-            ktlint(libs.versions.ktlint.get())
             target("**/*.kt")
-            targetExclude("**/build/**")
-            // additionally this also... ???
-            // editorConfigOverride(mapOf("max_line_length" to "120"))
-        }
-        kotlinGradle {
+            targetExclude("**/build/**", "**/main.kt")
+
             ktlint(libs.versions.ktlint.get())
+                .editorConfigOverride(
+                    mapOf(
+                        // Allow PascalCase for @Composable functions
+                        "ktlint_function_naming_ignore_when_annotated_with" to "Composable"
+                    )
+                )
+        }
+
+        kotlinGradle {
             target("**/*.kts")
+            // YKSI ainoa ktlint-step Gradle KTS -tiedostoille
+            ktlint(libs.versions.ktlint.get())
         }
     }
 
