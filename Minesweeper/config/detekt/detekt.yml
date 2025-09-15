@@ -18,6 +18,10 @@ complexity:
     active: false
   TooManyFunctions:
     active: false
+  CyclomaticComplexMethod:
+    threshold: 25
+  ReturnCount:
+    threshold: 5
 
 naming:
   # Package and class rules stay enabled; adjust as needed

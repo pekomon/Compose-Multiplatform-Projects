@@ -43,6 +43,7 @@ fun generateBoard(width: Int, height: Int, mineCount: Int, seed: Long? = null): 
 }
 
 /** Toggles a flag on the cell at [x], [y] if it is hidden or flagged. */
+@Suppress("ReturnCount")
 fun toggleFlag(board: Board, x: Int, y: Int): Board {
     if (!board.inBounds(x, y)) return board
     val index = board.indexOf(x, y)
@@ -57,6 +58,7 @@ fun toggleFlag(board: Board, x: Int, y: Int): Board {
 }
 
 /** Reveals the cell at [x], [y]. Handles flood fill for zero-value cells and win/lose states. */
+@Suppress("CyclomaticComplexMethod", "NestedBlockDepth", "ReturnCount")
 fun reveal(board: Board, x: Int, y: Int): Board {
     if (!board.inBounds(x, y)) return board
     if (board.status != GameStatus.IN_PROGRESS) return board
