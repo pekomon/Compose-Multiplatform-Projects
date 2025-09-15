@@ -3,6 +3,7 @@
 [![Minesweeper CI](https://github.com/pekomon/Compose-Multiplatform-Projects/actions/workflows/minesweeper-ci.yml/badge.svg)](https://github.com/pekomon/Compose-Multiplatform-Projects/actions/workflows/minesweeper-ci.yml)
 
 A tiny Minesweeper built with Kotlin Multiplatform + Compose Multiplatform.
+Core game logic is implemented as pure Kotlin shared across all targets.
 
 ## Quality
 - **Style:** Spotless (ktlint)
