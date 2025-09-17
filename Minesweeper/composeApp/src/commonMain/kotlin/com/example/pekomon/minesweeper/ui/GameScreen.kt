@@ -209,6 +209,7 @@ private fun BoardView(
     }
 }
 
+@Suppress("CyclomaticComplexMethod")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CellView(
@@ -276,7 +277,11 @@ private fun CellView(
             Text(
                 text = content,
                 color = textColor,
-                fontWeight = if (cell.state == CellState.REVEALED && cell.adjacentMines > 0) FontWeight.Bold else FontWeight.Normal,
+                fontWeight = if (cell.state == CellState.REVEALED && cell.adjacentMines > 0) {
+                    FontWeight.Bold
+                } else {
+                    FontWeight.Normal
+                },
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
