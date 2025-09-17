@@ -3,5 +3,6 @@
 package com.example.pekomon.minesweeper
 
 import androidx.compose.ui.window.ComposeUIViewController
+import com.example.pekomon.minesweeper.ui.GameScreen
 
-fun MainViewController() = ComposeUIViewController { App() }
+fun MainViewController() = ComposeUIViewController { GameScreen() }
