@@ -33,8 +33,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.awaitPointerEventScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -245,7 +243,7 @@ private fun CellView(
             .aspectRatio(1f)
             .background(backgroundColor, RoundedCornerShape(cornerRadius))
             .border(1.dp, CellBorderColor, RoundedCornerShape(cornerRadius))
-            .pointerInput(boardStatus, cell.state) {
+            .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
                         if (revealEnabled) {
@@ -258,18 +256,6 @@ private fun CellView(
                         }
                     },
                 )
-            }
-            .pointerInput(boardStatus, cell.state) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        if (event.type == PointerEventType.Press && event.buttons.isSecondaryPressed) {
-                            if (cell.state != CellState.REVEALED) {
-                                updatedToggle()
-                            }
-                        }
-                    }
-                }
             },
         contentAlignment = Alignment.Center,
     ) {
