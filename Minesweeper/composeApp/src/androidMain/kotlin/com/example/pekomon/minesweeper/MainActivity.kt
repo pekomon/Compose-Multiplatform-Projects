@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.pekomon.minesweeper.ui.GameScreen
+import com.example.pekomon.minesweeper.ui.theme.AndroidMinesweeperTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -14,7 +15,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            GameScreen()
+            AndroidMinesweeperTheme {
+                GameScreen()
+            }
         }
     }
 }
@@ -22,5 +25,7 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun GameScreenAndroidPreview() {
-    GameScreen()
+    AndroidMinesweeperTheme {
+        GameScreen()
+    }
 }
