@@ -43,6 +43,11 @@ import com.example.pekomon.minesweeper.game.CellState
 import com.example.pekomon.minesweeper.game.Difficulty
 import com.example.pekomon.minesweeper.game.GameApi
 import com.example.pekomon.minesweeper.game.GameStatus
+import com.example.pekomon.minesweeper.ui.theme.cellBorderColor
+import com.example.pekomon.minesweeper.ui.theme.flaggedCellColor
+import com.example.pekomon.minesweeper.ui.theme.hiddenCellColor
+import com.example.pekomon.minesweeper.ui.theme.numberColor
+import com.example.pekomon.minesweeper.ui.theme.revealedCellColor
 import kotlinx.coroutines.delay
 
 @Composable
@@ -90,50 +95,47 @@ fun GameScreen(modifier: Modifier = Modifier) {
         }
     }
 
-    MaterialTheme {
-        Surface(modifier = modifier.fillMaxSize()) {
-            Column(
+    Surface(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+        ) {
+            TopBar(
+                difficulty = difficulty,
+                onDifficultyClick = { difficultyMenuExpanded = true },
+                difficultyMenuExpanded = difficultyMenuExpanded,
+                onDifficultyDismiss = { difficultyMenuExpanded = false },
+                onDifficultySelected = {
+                    difficultyMenuExpanded = false
+                    resetGame(it)
+                },
+                onReset = { resetGame(difficulty) },
+                elapsedSeconds = elapsedSeconds,
+                statusEmoji = statusEmoji,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            BoardView(
+                board = board,
+                onReveal = { x, y ->
+                    if (board.status == GameStatus.IN_PROGRESS) {
+                        api.onReveal(x, y)
+                        refreshBoard()
+                    }
+                },
+                onToggleFlag = { x, y ->
+                    if (board.status == GameStatus.IN_PROGRESS) {
+                        api.onToggleFlag(x, y)
+                        refreshBoard()
+                    }
+                },
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp),
-            ) {
-                TopBar(
-                    difficulty = difficulty,
-                    onDifficultyClick = { difficultyMenuExpanded = true },
-                    difficultyMenuExpanded = difficultyMenuExpanded,
-                    onDifficultyDismiss = { difficultyMenuExpanded = false },
-                    onDifficultySelected = {
-                        difficultyMenuExpanded = false
-                        resetGame(it)
-                    },
-                    onReset = { resetGame(difficulty) },
-                    elapsedSeconds = elapsedSeconds,
-                    statusEmoji = statusEmoji,
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                BoardView(
-                    board = board,
-                    onReveal = { x, y ->
-                        if (board.status == GameStatus.IN_PROGRESS) {
-                            api.onReveal(x, y)
-                            refreshBoard()
-                        }
-                    },
-                    onToggleFlag = { x, y ->
-                        if (board.status == GameStatus.IN_PROGRESS) {
-                            api.onToggleFlag(x, y)
-                            refreshBoard()
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f, fill = true),
-                    cellSpacing = 4.dp,
-                )
-            }
+                    .fillMaxWidth()
+                    .weight(1f, fill = true),
+                cellSpacing = 4.dp,
+            )
         }
     }
 }
@@ -221,9 +223,9 @@ private fun CellView(
     val updatedReveal by rememberUpdatedState(onReveal)
     val updatedToggle by rememberUpdatedState(onToggleFlag)
     val backgroundColor = when (cell.state) {
-        CellState.HIDDEN -> HiddenCellColor
-        CellState.REVEALED -> RevealedCellColor
-        CellState.FLAGGED -> FlaggedCellColor
+        CellState.HIDDEN -> hiddenCellColor()
+        CellState.REVEALED -> revealedCellColor()
+        CellState.FLAGGED -> flaggedCellColor()
     }
     val textColor = when {
         cell.state == CellState.REVEALED && cell.isMine -> MaterialTheme.colorScheme.error
@@ -242,7 +244,7 @@ private fun CellView(
         modifier = modifier
             .aspectRatio(1f)
             .background(backgroundColor, RoundedCornerShape(cornerRadius))
-            .border(1.dp, CellBorderColor, RoundedCornerShape(cornerRadius))
+            .border(1.dp, cellBorderColor(), RoundedCornerShape(cornerRadius))
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
