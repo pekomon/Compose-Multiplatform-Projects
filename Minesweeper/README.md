@@ -5,6 +5,8 @@
 A tiny Minesweeper built with Kotlin Multiplatform + Compose Multiplatform.
 Core game logic is implemented as pure Kotlin shared across all targets.
 - Material 3 theming with coordinated light and dark palettes. Android 12+ devices automatically adopt dynamic color.
+- Custom splash screens and launcher icons across Android, iOS, Desktop and Web. Phase 1 ships text-only assets so the diff stays
+  binary-free; branded bitmaps land in Phase 2.
 
 ## Quality
 - **Style:** Spotless (ktlint)

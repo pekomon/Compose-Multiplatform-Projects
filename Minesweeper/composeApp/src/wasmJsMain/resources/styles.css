@@ -5,3 +5,35 @@ html, body {
     padding: 0;
     overflow: hidden;
 }
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #101827;
+    color: #f8f1e2;
+    font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.splash {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    padding: 24px 32px;
+    border-radius: 16px;
+    background: rgba(15, 23, 42, 0.55);
+    box-shadow: 0 24px 48px rgba(12, 18, 28, 0.35);
+}
+
+.splash__title {
+    margin: 0;
+    font-size: 1.35rem;
+    letter-spacing: 0.04em;
+}
+
+.splash__subtitle {
+    margin: 0;
+    font-size: 0.95rem;
+    color: rgba(248, 241, 226, 0.75);
+}
