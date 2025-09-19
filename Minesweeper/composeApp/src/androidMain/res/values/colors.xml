@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="splash_background">#101827</color>
+    <color name="icon_background">#0b1220</color>
+    <color name="icon_frame">#101827</color>
+    <color name="icon_board">#1f2937</color>
+    <color name="icon_grid">#f97316</color>
+    <color name="icon_mine">#ef4444</color>
+    <color name="icon_highlight">#fef3c7</color>
+</resources>
