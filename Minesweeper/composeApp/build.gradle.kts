@@ -41,6 +41,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.core.splashscreen)
             implementation(libs.androidx.lifecycle.runtimeKtx)
+            implementation(libs.material)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
