@@ -1,46 +1,61 @@
-# Minesweeper (Compose Multiplatform)
+# Minesweeper
 
 [![Minesweeper CI](https://github.com/pekomon/Compose-Multiplatform-Projects/actions/workflows/minesweeper-ci.yml/badge.svg)](https://github.com/pekomon/Compose-Multiplatform-Projects/actions/workflows/minesweeper-ci.yml)
 
-A tiny Minesweeper built with Kotlin Multiplatform + Compose Multiplatform.
-Core game logic is implemented as pure Kotlin shared across all targets.
-- Runtime-only history of top-10 completion times per difficulty (cleared on app restart). Persistence will land in Phase 2.
-- Unit tests and coverage via Kover (HTML report uploaded as CI artifact).
-- Material 3 theming with coordinated light and dark palettes. Android 12+ devices automatically adopt dynamic color.
-- Custom splash screens and launcher icons across Android, iOS, Desktop and Web. Phase 1 ships text-only assets so the diff stays
-  binary-free; branded bitmaps land in Phase 2.
+## Overview
+Minesweeper is built with Compose Multiplatform to target Android, iOS, Desktop, and Wasm from a single Kotlin codebase.
 
-## Quality
-- **Style:** Spotless (ktlint)
-- **Static analysis:** Detekt
-- **Coverage:** Kover (HTML & XML uploaded as workflow artifacts)
+## Features (Phase 1)
+- Difficulty selection: Easy, Medium, and Hard boards.
+- Runtime-only history of the top 10 completion times per difficulty.
+- Material 3 design system with coordinated light and dark themes.
+- Binary-free splash experience powered by vector and storyboard assets.
+- In-game timer that tracks the current session.
+- Core Minesweeper gameplay with responsive Compose UI.
 
-### Local commands
-```bash
-# Formatting & lint
-./gradlew spotlessApply spotlessCheck
+## Roadmap (Phase 2)
+- Orientation-responsive Hard grid improvements (#22).
+- Branded bitmap icons and launch assets (#24).
+- Persistence layer for settings and historical leaderboards.
+- Rich animations and sound design.
 
-# Static analysis
-./gradlew detekt
+## Getting started
+### Requirements
+- JDK 17
+- Android SDK
+- Xcode (for iOS development)
 
-# Tests & coverage (HTML report at: build/reports/kover/html/index.html)
-./gradlew test koverHtmlReport
-```
+### Commands
+- **Android:** `./gradlew :composeApp:assembleDebug`
+- **iOS (simulator compile):** `./gradlew :composeApp:compileKotlinIosSimulatorArm64` (open the generated iOS project in Xcode after the build if needed)
+- **Desktop:** `./gradlew :composeApp:run`
+- **Wasm:** `./gradlew :composeApp:wasmJsBrowserRun`
 
+## Development
+### Quality
+- Spotless for formatting (ktlint under the hood).
+- Detekt for static analysis.
+- Kover for coverage (HTML report uploaded as a CI artifact).
 
-## Continuous Integration
-- Minesweeper CI uses a paths-filter so jobs run only when Minesweeper or shared build tooling files change.
-- You can also trigger the workflow manually from GitHub Actions via the 'Run workflow' button.
+### Useful commands
+`./gradlew spotlessApply spotlessCheck detekt test koverHtmlReport`
 
-## How to run
+## Module structure
+- `composeApp/build.gradle.kts` – shared multiplatform configuration.
+- `composeApp/src/commonMain/kotlin` – shared UI, state, and game logic.
+- `composeApp/src/commonMain/composeResources` – shared Compose resources.
+- `composeApp/src/androidMain`, `iosMain`, `jvmMain`, `wasmJsMain` – platform-specific entry points and integrations.
 
-Android: `./gradlew :composeApp:assembleDebug`
+## i18n
+English and Finnish localizations are included in Phase 1.
 
-Desktop: `./gradlew :composeApp:packageReleaseUberJarForCurrentOS → run the JAR in composeApp/build/compose/jars/`
+## Contributing
+- Work on a dedicated branch per issue, rebase before pushing, and keep pull requests small and focused.
+- Maintain quality constraints: cyclomatic complexity < 25 (use local `@Suppress` annotations only when absolutely necessary), line length ≤ 120, and ReturnCount < 5 (prefer local suppressions if you must exceed it).
 
-Wasm: `./gradlew :composeApp:wasmJsBrowserDevelopmentRun`
+## Project & labels
+- Project board: https://github.com/users/pekomon/projects/2
+- Common labels: `project:minesweeper`, `phase:1`, `enhancement`, `ux`, and related tags.
 
-iOS (sim compile): `./gradlew :composeApp:compileKotlinIosSimulatorArm64`
-
-
-
+## Screenshots
+Screenshots will be added in Phase 2. (No binary assets are included in this PR.)
