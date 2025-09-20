@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -43,12 +44,15 @@ import com.example.pekomon.minesweeper.game.CellState
 import com.example.pekomon.minesweeper.game.Difficulty
 import com.example.pekomon.minesweeper.game.GameApi
 import com.example.pekomon.minesweeper.game.GameStatus
+import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
+import com.example.pekomon.minesweeper.history.RunRecord
 import com.example.pekomon.minesweeper.ui.theme.cellBorderColor
 import com.example.pekomon.minesweeper.ui.theme.flaggedCellColor
 import com.example.pekomon.minesweeper.ui.theme.hiddenCellColor
 import com.example.pekomon.minesweeper.ui.theme.numberColor
 import com.example.pekomon.minesweeper.ui.theme.revealedCellColor
 import kotlinx.coroutines.delay
+import kotlinx.datetime.Clock
 
 @Composable
 fun GameScreen(modifier: Modifier = Modifier) {
@@ -58,6 +62,9 @@ fun GameScreen(modifier: Modifier = Modifier) {
     var elapsedSeconds by remember { mutableStateOf(0) }
     var timerRunning by remember { mutableStateOf(false) }
     var difficultyMenuExpanded by remember { mutableStateOf(false) }
+    var showHistoryDialog by remember { mutableStateOf(false) }
+    var historyVersion by remember { mutableStateOf(0) }
+    var winRecorded by remember { mutableStateOf(false) }
 
     fun refreshBoard() {
         board = api.board
@@ -95,6 +102,24 @@ fun GameScreen(modifier: Modifier = Modifier) {
         }
     }
 
+    LaunchedEffect(board.status) {
+        if (board.status == GameStatus.WON && !winRecorded) {
+            val elapsedMillis = elapsedSeconds * 1000L
+            InMemoryHistoryStore.add(
+                RunRecord(
+                    difficulty = difficulty,
+                    elapsedMillis = elapsedMillis,
+                    epochMillis = Clock.System.now().toEpochMilliseconds(),
+                ),
+            )
+            historyVersion += 1
+            winRecorded = true
+        }
+        if (board.status == GameStatus.IN_PROGRESS) {
+            winRecorded = false
+        }
+    }
+
     Surface(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -113,6 +138,7 @@ fun GameScreen(modifier: Modifier = Modifier) {
                 onReset = { resetGame(difficulty) },
                 elapsedSeconds = elapsedSeconds,
                 statusEmoji = statusEmoji,
+                onHistoryClick = { showHistoryDialog = true },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -138,6 +164,15 @@ fun GameScreen(modifier: Modifier = Modifier) {
             )
         }
     }
+
+    if (showHistoryDialog) {
+        key(historyVersion) {
+            HistoryDialog(
+                currentDifficulty = difficulty,
+                onClose = { showHistoryDialog = false },
+            )
+        }
+    }
 }
 
 @Composable
@@ -150,6 +185,7 @@ private fun TopBar(
     onReset: () -> Unit,
     elapsedSeconds: Int,
     statusEmoji: String,
+    onHistoryClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val difficulties = remember { Difficulty.values().toList() }
@@ -177,8 +213,17 @@ private fun TopBar(
 
         Text(text = "$statusEmoji ${elapsedSeconds}s")
 
-        Button(onClick = onReset) {
-            Text(text = "Reset")
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Button(onClick = onHistoryClick) {
+                Text(text = "History")
+            }
+
+            Button(onClick = onReset) {
+                Text(text = "Reset")
+            }
         }
     }
 }
