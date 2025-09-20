@@ -14,6 +14,7 @@ This repository serves as a showcase and experimental ground for various small a
 Here is a list of the sub-projects contained within this collection:
 
 - [BouncyBee](./BouncyBee) – A fun and engaging multiplatform game.
+- [Minesweeper](./Minesweeper/README.md) – Classic puzzle built with Compose Multiplatform.
 
 
 ---
