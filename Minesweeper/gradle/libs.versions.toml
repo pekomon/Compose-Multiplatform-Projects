@@ -12,6 +12,7 @@ androidx-lifecycle = "2.9.3"
 androidx-testExt = "1.3.0"
 composeHotReload = "1.0.0-beta06"
 composeMultiplatform = "1.8.2"
+compose_resources = "1.8.2"
 detekt = "1.23.6"
 kover = "0.8.3"
 ktlint = "1.3.1"
@@ -39,6 +40,8 @@ androidx-lifecycle-runtimeKtx = { module = "androidx.lifecycle:lifecycle-runtime
 material = { module = "com.google.android.material:material", version.ref = "material" }
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+compose-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose_resources" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
