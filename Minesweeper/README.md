@@ -28,6 +28,10 @@ Core game logic is implemented as pure Kotlin shared across all targets.
 ```
 
 
+## Continuous Integration
+- Minesweeper CI uses a paths-filter so jobs run only when Minesweeper or shared build tooling files change.
+- You can also trigger the workflow manually from GitHub Actions via the 'Run workflow' button.
+
 ## How to run
 
 Android: `./gradlew :composeApp:assembleDebug`

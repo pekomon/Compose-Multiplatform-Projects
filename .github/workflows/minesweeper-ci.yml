@@ -3,26 +3,44 @@ name: Minesweeper CI
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'Minesweeper/**'
-      - '.github/workflows/minesweeper-ci.yml'
   pull_request:
     branches: [ main ]
-    paths:
-      - 'Minesweeper/**'
-      - '.github/workflows/minesweeper-ci.yml'
+  workflow_dispatch:
 
 concurrency:
-  group: minesweeper-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Detect Minesweeper changes
+    runs-on: ubuntu-latest
+    outputs:
+      minesweeper: ${{ steps.filter.outputs.minesweeper }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            minesweeper:
+              - 'Minesweeper/**'
+              - 'gradle/**'
+              - 'gradlew'
+              - 'gradlew.bat'
+              - 'gradle.properties'
+              - 'settings.gradle*'
+              - 'build.gradle*'
+              - 'gradle/libs.versions.toml'
+              - '.github/workflows/**'
+
   # 1) Quality-gate (Spotless + Detekt)
   quality:
     name: Quality (Spotless + Detekt)
+    needs: [changes]
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -58,7 +76,8 @@ jobs:
   # 2) Tests + Coverage (Kover)
   coverage:
     name: Tests + Coverage (Kover)
-    needs: [quality]
+    needs: [changes, quality]
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -92,7 +111,8 @@ jobs:
   # 3) Android build
   android:
     name: Android (assembleDebug)
-    needs: [quality]
+    needs: [changes, quality]
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -129,7 +149,8 @@ jobs:
   # 4) Desktop build
   desktop:
     name: Desktop (uber-jar)
-    needs: [quality]
+    needs: [changes, quality]
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -163,7 +184,8 @@ jobs:
   # 5) Wasm build (production dist)
   wasm:
     name: Wasm (production distribution)
-    needs: [quality]
+    needs: [changes, quality]
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -197,7 +219,8 @@ jobs:
   # 6) iOS compile (simulator ARM64) – compile-only smoke
   ios:
     name: iOS (compile Kotlin/Native for simulator)
-    needs: [quality]
+    needs: [changes, quality]
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: macos-15
     defaults:
       run:
