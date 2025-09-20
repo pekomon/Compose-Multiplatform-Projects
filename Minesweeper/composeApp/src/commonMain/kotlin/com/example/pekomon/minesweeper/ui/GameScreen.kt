@@ -44,12 +44,9 @@ import com.example.pekomon.minesweeper.game.CellState
 import com.example.pekomon.minesweeper.game.Difficulty
 import com.example.pekomon.minesweeper.game.GameApi
 import com.example.pekomon.minesweeper.game.GameStatus
+import com.example.pekomon.minesweeper.generated.resources.MR
 import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
 import com.example.pekomon.minesweeper.history.RunRecord
-import com.example.pekomon.minesweeper.i18n.AppLocale
-import com.example.pekomon.minesweeper.i18n.AppLocales
-import com.example.pekomon.minesweeper.i18n.LocalAppLocale
-import com.example.pekomon.minesweeper.i18n.displayName
 import com.example.pekomon.minesweeper.i18n.localizedName
 import com.example.pekomon.minesweeper.i18n.localizedString
 import com.example.pekomon.minesweeper.ui.theme.cellBorderColor
@@ -59,25 +56,18 @@ import com.example.pekomon.minesweeper.ui.theme.numberColor
 import com.example.pekomon.minesweeper.ui.theme.revealedCellColor
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
-import minesweeper.composeapp.generated.resources.MR
 
 @Composable
-fun GameScreen(
-    modifier: Modifier = Modifier,
-    availableLocales: List<AppLocale> = AppLocales.supported,
-    onLocaleChange: (AppLocale) -> Unit = {},
-) {
+fun GameScreen(modifier: Modifier = Modifier) {
     val api = remember { GameApi(Difficulty.EASY) }
     var difficulty by remember { mutableStateOf(Difficulty.EASY) }
     var board by remember { mutableStateOf(api.board) }
     var elapsedSeconds by remember { mutableStateOf(0) }
     var timerRunning by remember { mutableStateOf(false) }
     var difficultyMenuExpanded by remember { mutableStateOf(false) }
-    var languageMenuExpanded by remember { mutableStateOf(false) }
     var showHistoryDialog by remember { mutableStateOf(false) }
     var historyVersion by remember { mutableStateOf(0) }
     var winRecorded by remember { mutableStateOf(false) }
-    val currentLocale = LocalAppLocale.current
 
     fun refreshBoard() {
         board = api.board
@@ -146,15 +136,6 @@ fun GameScreen(
                 elapsedSeconds = elapsedSeconds,
                 gameStatus = board.status,
                 onHistoryClick = { showHistoryDialog = true },
-                currentLocale = currentLocale,
-                supportedLocales = availableLocales,
-                onLanguageClick = { languageMenuExpanded = true },
-                languageMenuExpanded = languageMenuExpanded,
-                onLanguageDismiss = { languageMenuExpanded = false },
-                onLanguageSelected = {
-                    languageMenuExpanded = false
-                    onLocaleChange(it)
-                },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -202,12 +183,6 @@ private fun TopBar(
     elapsedSeconds: Int,
     gameStatus: GameStatus,
     onHistoryClick: () -> Unit,
-    currentLocale: AppLocale,
-    supportedLocales: List<AppLocale>,
-    onLanguageClick: () -> Unit,
-    languageMenuExpanded: Boolean,
-    onLanguageDismiss: () -> Unit,
-    onLanguageSelected: (AppLocale) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val difficulties = remember { Difficulty.values().toList() }
@@ -252,24 +227,6 @@ private fun TopBar(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box {
-                Button(onClick = onLanguageClick) {
-                    val label = localizedString(MR.strings.language)
-                    Text(text = "$label: ${currentLocale.displayName()}")
-                }
-                DropdownMenu(
-                    expanded = languageMenuExpanded,
-                    onDismissRequest = onLanguageDismiss,
-                ) {
-                    supportedLocales.forEach { locale ->
-                        DropdownMenuItem(
-                            text = { Text(locale.displayName()) },
-                            onClick = { onLanguageSelected(locale) },
-                        )
-                    }
-                }
-            }
-
             Button(onClick = onHistoryClick) {
                 Text(text = localizedString(MR.strings.action_history))
             }

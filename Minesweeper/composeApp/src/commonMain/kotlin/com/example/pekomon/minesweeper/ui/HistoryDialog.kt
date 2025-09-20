@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.pekomon.minesweeper.game.Difficulty
+import com.example.pekomon.minesweeper.generated.resources.MR
 import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
 import com.example.pekomon.minesweeper.history.RunRecord
 import com.example.pekomon.minesweeper.i18n.localizedName
@@ -35,7 +36,6 @@ import com.example.pekomon.minesweeper.util.formatMillisToMmSs
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import minesweeper.composeapp.generated.resources.MR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
