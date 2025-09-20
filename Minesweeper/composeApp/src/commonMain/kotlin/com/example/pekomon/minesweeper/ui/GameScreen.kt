@@ -52,7 +52,7 @@ import com.example.pekomon.minesweeper.ui.theme.hiddenCellColor
 import com.example.pekomon.minesweeper.ui.theme.numberColor
 import com.example.pekomon.minesweeper.ui.theme.revealedCellColor
 import kotlinx.coroutines.delay
-import kotlin.system.getTimeMillis
+import kotlinx.datetime.Clock
 
 @Composable
 fun GameScreen(modifier: Modifier = Modifier) {
@@ -64,6 +64,7 @@ fun GameScreen(modifier: Modifier = Modifier) {
     var difficultyMenuExpanded by remember { mutableStateOf(false) }
     var showHistoryDialog by remember { mutableStateOf(false) }
     var historyVersion by remember { mutableStateOf(0) }
+    var winRecorded by remember { mutableStateOf(false) }
 
     fun refreshBoard() {
         board = api.board
@@ -102,16 +103,20 @@ fun GameScreen(modifier: Modifier = Modifier) {
     }
 
     LaunchedEffect(board.status) {
-        if (board.status == GameStatus.WON) {
+        if (board.status == GameStatus.WON && !winRecorded) {
             val elapsedMillis = elapsedSeconds * 1000L
             InMemoryHistoryStore.add(
                 RunRecord(
                     difficulty = difficulty,
                     elapsedMillis = elapsedMillis,
-                    epochMillis = getTimeMillis(),
+                    epochMillis = Clock.System.now().toEpochMilliseconds(),
                 ),
             )
             historyVersion += 1
+            winRecorded = true
+        }
+        if (board.status == GameStatus.IN_PROGRESS) {
+            winRecorded = false
         }
     }
 
