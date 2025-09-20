@@ -38,6 +38,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.pekomon.minesweeper.composeapp.generated.resources.Res
 import com.example.pekomon.minesweeper.game.Board
 import com.example.pekomon.minesweeper.game.Cell
 import com.example.pekomon.minesweeper.game.CellState
@@ -46,6 +47,7 @@ import com.example.pekomon.minesweeper.game.GameApi
 import com.example.pekomon.minesweeper.game.GameStatus
 import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
 import com.example.pekomon.minesweeper.history.RunRecord
+import com.example.pekomon.minesweeper.i18n.t
 import com.example.pekomon.minesweeper.ui.theme.cellBorderColor
 import com.example.pekomon.minesweeper.ui.theme.flaggedCellColor
 import com.example.pekomon.minesweeper.ui.theme.hiddenCellColor
@@ -53,6 +55,8 @@ import com.example.pekomon.minesweeper.ui.theme.numberColor
 import com.example.pekomon.minesweeper.ui.theme.revealedCellColor
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun GameScreen(modifier: Modifier = Modifier) {
@@ -196,7 +200,7 @@ private fun TopBar(
     ) {
         Box {
             Button(onClick = onDifficultyClick) {
-                Text(text = difficulty.toDisplayName())
+                Text(text = t(Res.string.difficulty, difficulty.localizedLabel()))
             }
             DropdownMenu(
                 expanded = difficultyMenuExpanded,
@@ -204,25 +208,25 @@ private fun TopBar(
             ) {
                 difficulties.forEach { option ->
                     DropdownMenuItem(
-                        text = { Text(option.toDisplayName()) },
+                        text = { Text(option.localizedLabel()) },
                         onClick = { onDifficultySelected(option) },
                     )
                 }
             }
         }
 
-        Text(text = "$statusEmoji ${elapsedSeconds}s")
+        Text(text = t(Res.string.timer_label, statusEmoji, elapsedSeconds))
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Button(onClick = onHistoryClick) {
-                Text(text = "History")
+                Text(text = t(Res.string.history_button))
             }
 
             Button(onClick = onReset) {
-                Text(text = "Reset")
+                Text(text = t(Res.string.reset_button))
             }
         }
     }
@@ -321,7 +325,11 @@ private fun CellView(
     }
 }
 
-private fun Difficulty.toDisplayName(): String {
-    val name = name.lowercase()
-    return name.replaceFirstChar { it.titlecase() }
+private fun Difficulty.toStringResource(): StringResource = when (this) {
+    Difficulty.EASY -> Res.string.difficulty_easy
+    Difficulty.MEDIUM -> Res.string.difficulty_medium
+    Difficulty.HARD -> Res.string.difficulty_hard
 }
+
+@Composable
+private fun Difficulty.localizedLabel(): String = stringResource(toStringResource())

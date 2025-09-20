@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Miinaharava</string>
+    <string name="difficulty">Vaikeustaso: %1$s</string>
+    <string name="difficulty_easy">Helppo</string>
+    <string name="difficulty_medium">Keskitaso</string>
+    <string name="difficulty_hard">Vaikea</string>
+    <string name="history_title">Historia</string>
+    <string name="settings_title">Asetukset</string>
+    <string name="timer_label">%1$s %2$ds</string>
+    <string name="history_close">Sulje</string>
+    <string name="history_no_wins">Ei voittoja tasolla %1$s vielä.</string>
+    <string name="history_button">Historia</string>
+    <string name="reset_button">Aloita alusta</string>
+</resources>
