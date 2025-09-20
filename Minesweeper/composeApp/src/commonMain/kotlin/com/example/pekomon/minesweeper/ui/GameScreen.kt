@@ -46,6 +46,12 @@ import com.example.pekomon.minesweeper.game.GameApi
 import com.example.pekomon.minesweeper.game.GameStatus
 import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
 import com.example.pekomon.minesweeper.history.RunRecord
+import com.example.pekomon.minesweeper.i18n.AppLocale
+import com.example.pekomon.minesweeper.i18n.AppLocales
+import com.example.pekomon.minesweeper.i18n.LocalAppLocale
+import com.example.pekomon.minesweeper.i18n.displayName
+import com.example.pekomon.minesweeper.i18n.localizedName
+import com.example.pekomon.minesweeper.i18n.localizedString
 import com.example.pekomon.minesweeper.ui.theme.cellBorderColor
 import com.example.pekomon.minesweeper.ui.theme.flaggedCellColor
 import com.example.pekomon.minesweeper.ui.theme.hiddenCellColor
@@ -53,18 +59,25 @@ import com.example.pekomon.minesweeper.ui.theme.numberColor
 import com.example.pekomon.minesweeper.ui.theme.revealedCellColor
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
+import minesweeper.composeapp.generated.resources.MR
 
 @Composable
-fun GameScreen(modifier: Modifier = Modifier) {
+fun GameScreen(
+    modifier: Modifier = Modifier,
+    availableLocales: List<AppLocale> = AppLocales.supported,
+    onLocaleChange: (AppLocale) -> Unit = {},
+) {
     val api = remember { GameApi(Difficulty.EASY) }
     var difficulty by remember { mutableStateOf(Difficulty.EASY) }
     var board by remember { mutableStateOf(api.board) }
     var elapsedSeconds by remember { mutableStateOf(0) }
     var timerRunning by remember { mutableStateOf(false) }
     var difficultyMenuExpanded by remember { mutableStateOf(false) }
+    var languageMenuExpanded by remember { mutableStateOf(false) }
     var showHistoryDialog by remember { mutableStateOf(false) }
     var historyVersion by remember { mutableStateOf(0) }
     var winRecorded by remember { mutableStateOf(false) }
+    val currentLocale = LocalAppLocale.current
 
     fun refreshBoard() {
         board = api.board
@@ -76,12 +89,6 @@ fun GameScreen(modifier: Modifier = Modifier) {
         difficulty = newDifficulty
         elapsedSeconds = 0
         timerRunning = false
-    }
-
-    val statusEmoji = when (board.status) {
-        GameStatus.IN_PROGRESS -> "⏳"
-        GameStatus.WON -> "🏆"
-        GameStatus.LOST -> "💥"
     }
 
     LaunchedEffect(board.status, board.revealedCount) {
@@ -137,8 +144,17 @@ fun GameScreen(modifier: Modifier = Modifier) {
                 },
                 onReset = { resetGame(difficulty) },
                 elapsedSeconds = elapsedSeconds,
-                statusEmoji = statusEmoji,
+                gameStatus = board.status,
                 onHistoryClick = { showHistoryDialog = true },
+                currentLocale = currentLocale,
+                supportedLocales = availableLocales,
+                onLanguageClick = { languageMenuExpanded = true },
+                languageMenuExpanded = languageMenuExpanded,
+                onLanguageDismiss = { languageMenuExpanded = false },
+                onLanguageSelected = {
+                    languageMenuExpanded = false
+                    onLocaleChange(it)
+                },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -184,11 +200,30 @@ private fun TopBar(
     onDifficultySelected: (Difficulty) -> Unit,
     onReset: () -> Unit,
     elapsedSeconds: Int,
-    statusEmoji: String,
+    gameStatus: GameStatus,
     onHistoryClick: () -> Unit,
+    currentLocale: AppLocale,
+    supportedLocales: List<AppLocale>,
+    onLanguageClick: () -> Unit,
+    languageMenuExpanded: Boolean,
+    onLanguageDismiss: () -> Unit,
+    onLanguageSelected: (AppLocale) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val difficulties = remember { Difficulty.values().toList() }
+    val secondsText = localizedString(MR.strings.seconds_abbr, elapsedSeconds.toString())
+    val statusEmoji =
+        when (gameStatus) {
+            GameStatus.IN_PROGRESS -> "⏳"
+            GameStatus.WON -> "🏆"
+            GameStatus.LOST -> "💥"
+        }
+    val statusText =
+        when (gameStatus) {
+            GameStatus.IN_PROGRESS -> localizedString(MR.strings.status_in_progress)
+            GameStatus.WON -> localizedString(MR.strings.status_won)
+            GameStatus.LOST -> localizedString(MR.strings.status_lost)
+        }
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -196,7 +231,7 @@ private fun TopBar(
     ) {
         Box {
             Button(onClick = onDifficultyClick) {
-                Text(text = difficulty.toDisplayName())
+                Text(text = difficulty.localizedName())
             }
             DropdownMenu(
                 expanded = difficultyMenuExpanded,
@@ -204,25 +239,43 @@ private fun TopBar(
             ) {
                 difficulties.forEach { option ->
                     DropdownMenuItem(
-                        text = { Text(option.toDisplayName()) },
+                        text = { Text(option.localizedName()) },
                         onClick = { onDifficultySelected(option) },
                     )
                 }
             }
         }
 
-        Text(text = "$statusEmoji ${elapsedSeconds}s")
+        Text(text = "$statusEmoji $statusText · $secondsText")
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            Box {
+                Button(onClick = onLanguageClick) {
+                    val label = localizedString(MR.strings.language)
+                    Text(text = "$label: ${currentLocale.displayName()}")
+                }
+                DropdownMenu(
+                    expanded = languageMenuExpanded,
+                    onDismissRequest = onLanguageDismiss,
+                ) {
+                    supportedLocales.forEach { locale ->
+                        DropdownMenuItem(
+                            text = { Text(locale.displayName()) },
+                            onClick = { onLanguageSelected(locale) },
+                        )
+                    }
+                }
+            }
+
             Button(onClick = onHistoryClick) {
-                Text(text = "History")
+                Text(text = localizedString(MR.strings.action_history))
             }
 
             Button(onClick = onReset) {
-                Text(text = "Reset")
+                Text(text = localizedString(MR.strings.reset))
             }
         }
     }
@@ -310,18 +363,14 @@ private fun CellView(
             Text(
                 text = content,
                 color = textColor,
-                fontWeight = if (cell.state == CellState.REVEALED && cell.adjacentMines > 0) {
-                    FontWeight.Bold
-                } else {
-                    FontWeight.Normal
-                },
+                fontWeight =
+                    if (cell.state == CellState.REVEALED && cell.adjacentMines > 0) {
+                        FontWeight.Bold
+                    } else {
+                        FontWeight.Normal
+                    },
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
     }
-}
-
-private fun Difficulty.toDisplayName(): String {
-    val name = name.lowercase()
-    return name.replaceFirstChar { it.titlecase() }
 }

@@ -29,10 +29,13 @@ import androidx.compose.ui.unit.dp
 import com.example.pekomon.minesweeper.game.Difficulty
 import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
 import com.example.pekomon.minesweeper.history.RunRecord
+import com.example.pekomon.minesweeper.i18n.localizedName
+import com.example.pekomon.minesweeper.i18n.localizedString
 import com.example.pekomon.minesweeper.util.formatMillisToMmSs
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import minesweeper.composeapp.generated.resources.MR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,10 +51,10 @@ fun HistoryDialog(
         onDismissRequest = onClose,
         confirmButton = {
             TextButton(onClick = onClose) {
-                Text(text = "Close")
+                Text(text = localizedString(MR.strings.close))
             }
         },
-        title = { Text(text = "History") },
+        title = { Text(text = localizedString(MR.strings.history_title)) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
@@ -62,7 +65,7 @@ fun HistoryDialog(
                         FilterChip(
                             selected = selectedDifficulty == difficulty,
                             onClick = { selectedDifficulty = difficulty },
-                            label = { Text(text = difficulty.toDisplayName()) },
+                            label = { Text(text = difficulty.localizedName()) },
                             colors = FilterChipDefaults.filterChipColors(),
                         )
                     }
@@ -72,7 +75,10 @@ fun HistoryDialog(
 
                 if (records.isEmpty()) {
                     Text(
-                        text = "No wins recorded for ${selectedDifficulty.toDisplayName()} yet.",
+                        text = localizedString(
+                            MR.strings.history_empty_difficulty,
+                            selectedDifficulty.localizedName(),
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 } else {
@@ -136,8 +142,3 @@ private fun formatTimestamp(epochMillis: Long): String {
 
 private val ROW_HEIGHT = 32.dp
 private const val MAX_VISIBLE_ROWS = 10
-
-private fun Difficulty.toDisplayName(): String {
-    val name = name.lowercase()
-    return name.replaceFirstChar { it.titlecase() }
-}

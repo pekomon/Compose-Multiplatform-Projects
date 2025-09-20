@@ -47,7 +47,7 @@ Minesweeper is built with Compose Multiplatform to target Android, iOS, Desktop,
 - `composeApp/src/androidMain`, `iosMain`, `jvmMain`, `wasmJsMain` – platform-specific entry points and integrations.
 
 ## i18n
-English and Finnish localizations are included in Phase 1.
+English and Finnish localizations are included in Phase 1, with a runtime language switch available from the in-game toolbar. The selection is currently session-scoped (Phase 2 will add persistence).
 
 ## Contributing
 - Work on a dedicated branch per issue, rebase before pushing, and keep pull requests small and focused.
