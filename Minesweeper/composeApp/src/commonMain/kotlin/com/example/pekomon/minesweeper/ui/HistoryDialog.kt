@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.example.pekomon.minesweeper.game.Difficulty
 import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
 import com.example.pekomon.minesweeper.history.RunRecord
+import com.example.pekomon.minesweeper.util.formatMillisToMmSs
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -115,20 +116,6 @@ private fun HistoryList(records: List<RunRecord>) {
                 )
             }
         }
-    }
-}
-
-private fun formatMillisToMmSs(ms: Long): String {
-    val totalSeconds = (ms / 1000).coerceAtLeast(0L)
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return buildString {
-        append(minutes)
-        append(':')
-        if (seconds < 10) {
-            append('0')
-        }
-        append(seconds)
     }
 }
 

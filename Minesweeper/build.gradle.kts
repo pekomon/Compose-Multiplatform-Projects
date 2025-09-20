@@ -69,7 +69,12 @@ subprojects {
 
 // 4) Kover-coverage: create repots on top level
 kover {
-    // default settings are good for now
+    reports {
+        total {
+            html { onCheck.set(true) }
+            xml { onCheck.set(true) }
+        }
+    }
 }
 
 // Convenience-aggregates for CI:lle (can be called from root)
