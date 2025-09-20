@@ -21,6 +21,11 @@ jobs:
     outputs:
       minesweeper: ${{ steps.filter.outputs.minesweeper }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # tärkeää, paths-filter tarvitsee historian
+
       - uses: dorny/paths-filter@v3
         id: filter
         with:
