@@ -3,7 +3,13 @@ package com.example.pekomon.minesweeper.game
 import kotlin.random.Random
 
 /** Creates a new [Board] for the given [difficulty]. */
-fun newGame(difficulty: Difficulty, seed: Long? = null): Board = generateBoard(difficulty.width, difficulty.height, difficulty.mines, seed)
+fun newGame(difficulty: Difficulty, seed: Long? = null): Board =
+    generateBoard(
+        width = difficulty.width,
+        height = difficulty.height,
+        mineCount = difficulty.mines,
+        seed = seed,
+    )
 
 /**
  * Generates a new [Board] with [width] x [height] and [mineCount] mines.
