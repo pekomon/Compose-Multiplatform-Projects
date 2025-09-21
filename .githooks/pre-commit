@@ -6,4 +6,3 @@ set -euo pipefail
   ./gradlew -q spotlessApply
 )
 # Re-stage any formatted files
-git add -A
