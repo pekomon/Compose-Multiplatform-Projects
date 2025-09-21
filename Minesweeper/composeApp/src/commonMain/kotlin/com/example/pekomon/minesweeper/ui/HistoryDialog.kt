@@ -26,13 +26,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.pekomon.minesweeper.composeapp.generated.resources.Res
+import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_easy
+import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_hard
+import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_medium
+import com.example.pekomon.minesweeper.composeapp.generated.resources.history_close
+import com.example.pekomon.minesweeper.composeapp.generated.resources.history_no_wins
+import com.example.pekomon.minesweeper.composeapp.generated.resources.history_title
 import com.example.pekomon.minesweeper.game.Difficulty
 import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
 import com.example.pekomon.minesweeper.history.RunRecord
+import com.example.pekomon.minesweeper.i18n.t
 import com.example.pekomon.minesweeper.util.formatMillisToMmSs
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,10 +58,10 @@ fun HistoryDialog(
         onDismissRequest = onClose,
         confirmButton = {
             TextButton(onClick = onClose) {
-                Text(text = "Close")
+                Text(text = t(Res.string.history_close))
             }
         },
-        title = { Text(text = "History") },
+        title = { Text(text = t(Res.string.history_title)) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
@@ -62,7 +72,7 @@ fun HistoryDialog(
                         FilterChip(
                             selected = selectedDifficulty == difficulty,
                             onClick = { selectedDifficulty = difficulty },
-                            label = { Text(text = difficulty.toDisplayName()) },
+                            label = { Text(text = difficulty.localizedLabel()) },
                             colors = FilterChipDefaults.filterChipColors(),
                         )
                     }
@@ -72,7 +82,7 @@ fun HistoryDialog(
 
                 if (records.isEmpty()) {
                     Text(
-                        text = "No wins recorded for ${selectedDifficulty.toDisplayName()} yet.",
+                        text = t(Res.string.history_no_wins, selectedDifficulty.localizedLabel()),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 } else {
@@ -137,7 +147,11 @@ private fun formatTimestamp(epochMillis: Long): String {
 private val ROW_HEIGHT = 32.dp
 private const val MAX_VISIBLE_ROWS = 10
 
-private fun Difficulty.toDisplayName(): String {
-    val name = name.lowercase()
-    return name.replaceFirstChar { it.titlecase() }
+private fun Difficulty.toStringResource(): StringResource = when (this) {
+    Difficulty.EASY -> Res.string.difficulty_easy
+    Difficulty.MEDIUM -> Res.string.difficulty_medium
+    Difficulty.HARD -> Res.string.difficulty_hard
 }
+
+@Composable
+private fun Difficulty.localizedLabel(): String = stringResource(toStringResource())

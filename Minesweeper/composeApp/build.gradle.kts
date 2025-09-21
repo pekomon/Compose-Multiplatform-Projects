@@ -37,32 +37,44 @@ kotlin {
     }
 
     sourceSets {
-        androidMain.dependencies {
-            implementation(compose.preview)
-            implementation(libs.androidx.activity.compose)
-            implementation(libs.androidx.core.splashscreen)
-            implementation(libs.androidx.lifecycle.runtimeKtx)
-            implementation(libs.material)
+        val commonMain by getting {
+            dependencies {
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material3)
+                implementation(compose.ui)
+                implementation(compose.components.uiToolingPreview)
+                implementation(libs.androidx.lifecycle.viewmodelCompose)
+                implementation(libs.androidx.lifecycle.runtimeCompose)
+                implementation(libs.compose.resources)
+                implementation(libs.kotlinx.datetime)
+            }
         }
-        commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(libs.kotlinx.datetime)
+        val androidMain by getting {
+            dependencies {
+                implementation(compose.preview)
+                implementation(libs.androidx.activity.compose)
+                implementation(libs.androidx.core.splashscreen)
+                implementation(libs.androidx.lifecycle.runtimeKtx)
+                implementation(libs.material)
+            }
         }
-        commonTest.dependencies {
-            implementation(libs.kotlin.test)
+        val commonTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
         }
-        jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutinesSwing)
+        val jvmMain by getting {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation(libs.kotlinx.coroutinesSwing)
+            }
         }
     }
+}
+
+compose.resources {
+    packageOfResClass = "com.example.pekomon.minesweeper.composeapp.generated.resources"
 }
 
 android {
