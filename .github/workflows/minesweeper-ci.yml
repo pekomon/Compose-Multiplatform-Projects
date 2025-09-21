@@ -110,7 +110,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kover-html
-          path: composeApp/build/reports/kover/html
+          path: Minesweeper/composeApp/build/reports/kover/html
           if-no-files-found: warn
 
   # 3) Android build
@@ -144,11 +144,16 @@ jobs:
       - name: Build debug APK
         run: ./gradlew :composeApp:assembleDebug
 
+        - name: Debug: list outputs
+          run: |
+            ls -la Minesweeper/composeApp/build/outputs/apk/debug || true
+            find Minesweeper/composeApp/build -name "*.apk" -maxdepth 5 -print || true
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: android-apk-debug
-          path: composeApp/build/outputs/apk/debug/*.apk
+          path: Minesweeper/composeApp/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
 
   # 4) Desktop build
@@ -183,7 +188,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: desktop-uber-jar
-          path: composeApp/build/compose/jars/*.jar
+          path: Minesweeper/composeApp/build/compose/jars/*.jar
           if-no-files-found: warn
 
   # 5) Wasm build (production dist)
@@ -218,7 +223,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wasm-dist
-          path: composeApp/build/dist/wasmJs/productionExecutable/**
+          path: Minesweeper/composeApp/build/dist/wasmJs/productionExecutable/**
           if-no-files-found: warn
 
   # 6) iOS compile (simulator ARM64) – compile-only smoke
@@ -249,7 +254,7 @@ jobs:
       - name: Compile for iOS simulator (Kotlin/Native)
         run: ./gradlew :composeApp:compileKotlinIosSimulatorArm64
 
-      # Jos haluat tallettaa frameworkin, vaihda link-taskiin ja kopioi:
+      # If you wanna store framework, change to link-task and copy:
       # - name: Build iOS framework (optional)
       #   run: ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
       # - name: Upload iOS framework
