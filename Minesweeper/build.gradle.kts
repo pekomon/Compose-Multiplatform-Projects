@@ -17,7 +17,7 @@ allprojects {
 }
 
 subprojects {
-    // 1) Spotless (Ktlint-formatting)
+    // 1) Spotless (KtLint formatting)
     apply(plugin = "com.diffplug.spotless")
     configure<com.diffplug.gradle.spotless.SpotlessExtension> {
         kotlin {
@@ -26,17 +26,10 @@ subprojects {
 
             ktlint(libs.versions.ktlint.get())
                 .setEditorConfigPath(rootProject.file("composeApp/.editorconfig"))
-                .editorConfigOverride(
-                    mapOf(
-                        // Allow PascalCase for @Composable functions
-                        "ktlint_function_naming_ignore_when_annotated_with" to "Composable"
-                    )
-                )
         }
 
         kotlinGradle {
             target("**/*.kts")
-            // YKSI ainoa ktlint-step Gradle KTS -tiedostoille
             ktlint(libs.versions.ktlint.get())
         }
     }
@@ -55,7 +48,10 @@ subprojects {
     tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
         setSource(files("src"))
         include("**/*.kt")
+        exclude("build")
+        exclude(".gradle")
         exclude("**/build/**")
+        exclude("**/generated/**")
         reports {
             xml.required.set(true)
             html.required.set(true)

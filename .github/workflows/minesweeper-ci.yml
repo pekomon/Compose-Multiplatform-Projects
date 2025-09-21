@@ -43,7 +43,7 @@ jobs:
 
   # 1) Quality-gate (Spotless + Detekt)
   quality:
-    name: Quality (Spotless + Detekt)
+    name: Quality (Spotless + Detekt + Tests)
     needs: [changes]
     if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
@@ -66,48 +66,22 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Spotless + Detekt
-        run: ./gradlew qualityCheck
+      - name: Spotless + Detekt + Tests + Kover
+        run: ./gradlew :composeApp:spotlessCheck :composeApp:detekt :composeApp:test :composeApp:koverXmlReport :composeApp:koverHtmlReport
 
       - name: Upload Detekt reports
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: detekt-reports
           path: |
-            **/build/reports/detekt/*.html
-            **/build/reports/detekt/*.xml
+            Minesweeper/composeApp/build/reports/detekt/*.html
+            Minesweeper/composeApp/build/reports/detekt/*.xml
           if-no-files-found: warn
-
-  # 2) Tests + Coverage (Kover)
-  coverage:
-    name: Tests + Coverage (Kover)
-    needs: [changes, quality]
-    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: Minesweeper
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-          cache: gradle
-
-      - name: Gradle build cache
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
-      - name: Run tests + coverage
-        run: ./gradlew spotlessCheck detekt test koverXmlReport koverHtmlReport
 
       - name: Upload Kover coverage
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: kover-html
           path: Minesweeper/composeApp/build/reports/kover/html
