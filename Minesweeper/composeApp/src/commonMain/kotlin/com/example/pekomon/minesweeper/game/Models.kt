@@ -7,7 +7,11 @@ package com.example.pekomon.minesweeper.game
  * @property height board height in cells
  * @property mines number of mines on the board
  */
-enum class Difficulty(val width: Int, val height: Int, val mines: Int) {
+enum class Difficulty(
+    val width: Int,
+    val height: Int,
+    val mines: Int,
+) {
     /** 9x9 board with 10 mines. */
     EASY(9, 9, 10),
 
@@ -82,11 +86,20 @@ data class Board(
     val flaggedCount: Int = 0,
 ) {
     /** Returns the index within [cells] for coordinates [x], [y]. */
-    fun indexOf(x: Int, y: Int): Int = y * width + x
+    fun indexOf(
+        x: Int,
+        y: Int,
+    ): Int = y * width + x
 
     /** Returns the cell at coordinates [x], [y]. */
-    fun cellAt(x: Int, y: Int): Cell = cells[indexOf(x, y)]
+    fun cellAt(
+        x: Int,
+        y: Int,
+    ): Cell = cells[indexOf(x, y)]
 
     /** Returns true if [x], [y] are within board bounds. */
-    fun inBounds(x: Int, y: Int): Boolean = x in 0 until width && y in 0 until height
+    fun inBounds(
+        x: Int,
+        y: Int,
+    ): Boolean = x in 0 until width && y in 0 until height
 }

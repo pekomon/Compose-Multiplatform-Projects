@@ -3,7 +3,10 @@ package com.example.pekomon.minesweeper.game
 import kotlin.random.Random
 
 /** Creates a new [Board] for the given [difficulty]. */
-fun newGame(difficulty: Difficulty, seed: Long? = null): Board =
+fun newGame(
+    difficulty: Difficulty,
+    seed: Long? = null,
+): Board =
     generateBoard(
         width = difficulty.width,
         height = difficulty.height,
@@ -15,13 +18,21 @@ fun newGame(difficulty: Difficulty, seed: Long? = null): Board =
  * Generates a new [Board] with [width] x [height] and [mineCount] mines.
  * Mines are placed by shuffling indices using [seed] when provided.
  */
-fun generateBoard(width: Int, height: Int, mineCount: Int, seed: Long? = null): Board {
+fun generateBoard(
+    width: Int,
+    height: Int,
+    mineCount: Int,
+    seed: Long? = null,
+): Board {
     val total = width * height
     val random = seed?.let { Random(it) } ?: Random
     val indices = (0 until total).shuffled(random)
     val mines = indices.take(mineCount).toSet()
 
-    fun neighbors(x: Int, y: Int): List<Int> {
+    fun neighbors(
+        x: Int,
+        y: Int,
+    ): List<Int> {
         val list = mutableListOf<Int>()
         for (dy in -1..1) {
             for (dx in -1..1) {
@@ -36,20 +47,25 @@ fun generateBoard(width: Int, height: Int, mineCount: Int, seed: Long? = null): 
         return list
     }
 
-    val cells = List(total) { idx ->
-        val x = idx % width
-        val y = idx / width
-        val isMine = mines.contains(idx)
-        val adjacent = if (isMine) 0 else neighbors(x, y).count { mines.contains(it) }
-        Cell(x, y, isMine, adjacent, CellState.HIDDEN)
-    }
+    val cells =
+        List(total) { idx ->
+            val x = idx % width
+            val y = idx / width
+            val isMine = mines.contains(idx)
+            val adjacent = if (isMine) 0 else neighbors(x, y).count { mines.contains(it) }
+            Cell(x, y, isMine, adjacent, CellState.HIDDEN)
+        }
 
     return Board(width, height, cells)
 }
 
 /** Toggles a flag on the cell at [x], [y] if it is hidden or flagged. */
 @Suppress("ReturnCount")
-fun toggleFlag(board: Board, x: Int, y: Int): Board {
+fun toggleFlag(
+    board: Board,
+    x: Int,
+    y: Int,
+): Board {
     if (!board.inBounds(x, y)) return board
     val index = board.indexOf(x, y)
     val cell = board.cells[index]
@@ -64,7 +80,11 @@ fun toggleFlag(board: Board, x: Int, y: Int): Board {
 
 /** Reveals the cell at [x], [y]. Handles flood fill for zero-value cells and win/lose states. */
 @Suppress("CyclomaticComplexMethod", "NestedBlockDepth", "ReturnCount")
-fun reveal(board: Board, x: Int, y: Int): Board {
+fun reveal(
+    board: Board,
+    x: Int,
+    y: Int,
+): Board {
     if (!board.inBounds(x, y)) return board
     if (board.status != GameStatus.IN_PROGRESS) return board
     val index = board.indexOf(x, y)

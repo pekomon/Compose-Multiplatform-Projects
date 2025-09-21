@@ -5,4 +5,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun t(res: StringResource, vararg args: Any): String = stringResource(res, *args)
+fun t(
+    res: StringResource,
+    vararg args: Any,
+): String = stringResource(res, *args)

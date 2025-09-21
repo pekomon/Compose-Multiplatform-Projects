@@ -20,14 +20,18 @@ fun cellBorderColor(): Color = MaterialTheme.colorScheme.outline
 @Composable
 fun numberColor(count: Int): Color = numberColor(count, MaterialTheme.colorScheme)
 
-fun numberColor(count: Int, colorScheme: ColorScheme): Color = when (count) {
-    1 -> colorScheme.primary
-    2 -> colorScheme.secondary
-    3 -> colorScheme.tertiary
-    4 -> colorScheme.primaryContainer
-    5 -> colorScheme.secondaryContainer
-    6 -> colorScheme.tertiaryContainer
-    7 -> colorScheme.outline
-    8 -> colorScheme.onSurfaceVariant
-    else -> colorScheme.onSurface
-}
+fun numberColor(
+    count: Int,
+    colorScheme: ColorScheme,
+): Color =
+    when (count) {
+        1 -> colorScheme.primary
+        2 -> colorScheme.secondary
+        3 -> colorScheme.tertiary
+        4 -> colorScheme.primaryContainer
+        5 -> colorScheme.secondaryContainer
+        6 -> colorScheme.tertiaryContainer
+        7 -> colorScheme.outline
+        8 -> colorScheme.onSurfaceVariant
+        else -> colorScheme.onSurface
+    }

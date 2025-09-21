@@ -7,11 +7,12 @@ import kotlin.test.assertEquals
 class DifficultyConfigTest {
     @Test
     fun difficultyDimensionsAndMinesMatchRules() {
-        val expected = mapOf(
-            Difficulty.EASY to Triple(9, 9, 10),
-            Difficulty.MEDIUM to Triple(16, 16, 40),
-            Difficulty.HARD to Triple(30, 16, 99),
-        )
+        val expected =
+            mapOf(
+                Difficulty.EASY to Triple(9, 9, 10),
+                Difficulty.MEDIUM to Triple(16, 16, 40),
+                Difficulty.HARD to Triple(30, 16, 99),
+            )
 
         expected.forEach { (difficulty, spec) ->
             val (width, height, mines) = spec
@@ -23,11 +24,12 @@ class DifficultyConfigTest {
 
     @Test
     fun mineDensityStaysWithinClassicRatios() {
-        val classicDensity = mapOf(
-            Difficulty.EASY to 10.0 / 81.0,
-            Difficulty.MEDIUM to 40.0 / 256.0,
-            Difficulty.HARD to 99.0 / 480.0,
-        )
+        val classicDensity =
+            mapOf(
+                Difficulty.EASY to 10.0 / 81.0,
+                Difficulty.MEDIUM to 40.0 / 256.0,
+                Difficulty.HARD to 99.0 / 480.0,
+            )
 
         classicDensity.forEach { (difficulty, expectedDensity) ->
             val totalCells = difficulty.width * difficulty.height

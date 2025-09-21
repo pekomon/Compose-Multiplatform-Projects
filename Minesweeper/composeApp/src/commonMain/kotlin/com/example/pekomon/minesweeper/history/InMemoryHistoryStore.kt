@@ -17,7 +17,10 @@ object InMemoryHistoryStore {
         }
     }
 
-    fun top(difficulty: Difficulty, limit: Int = MAX_RECORDS): List<RunRecord> {
+    fun top(
+        difficulty: Difficulty,
+        limit: Int = MAX_RECORDS,
+    ): List<RunRecord> {
         if (limit <= 0) {
             return emptyList()
         }

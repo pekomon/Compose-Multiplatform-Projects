@@ -89,11 +89,12 @@ fun GameScreen(modifier: Modifier = Modifier) {
         timerRunning = false
     }
 
-    val statusEmoji = when (board.status) {
-        GameStatus.IN_PROGRESS -> "⏳"
-        GameStatus.WON -> "🏆"
-        GameStatus.LOST -> "💥"
-    }
+    val statusEmoji =
+        when (board.status) {
+            GameStatus.IN_PROGRESS -> "⏳"
+            GameStatus.WON -> "🏆"
+            GameStatus.LOST -> "💥"
+        }
 
     LaunchedEffect(board.status, board.revealedCount) {
         when {
@@ -133,9 +134,10 @@ fun GameScreen(modifier: Modifier = Modifier) {
 
     Surface(modifier = modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
         ) {
             TopBar(
                 difficulty = difficulty,
@@ -168,9 +170,10 @@ fun GameScreen(modifier: Modifier = Modifier) {
                         refreshBoard()
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f, fill = true),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f, fill = true),
                 cellSpacing = 4.dp,
             )
         }
@@ -278,65 +281,71 @@ private fun CellView(
     val cornerRadius = 6.dp
     val updatedReveal by rememberUpdatedState(onReveal)
     val updatedToggle by rememberUpdatedState(onToggleFlag)
-    val backgroundColor = when (cell.state) {
-        CellState.HIDDEN -> hiddenCellColor()
-        CellState.REVEALED -> revealedCellColor()
-        CellState.FLAGGED -> flaggedCellColor()
-    }
-    val textColor = when {
-        cell.state == CellState.REVEALED && cell.isMine -> MaterialTheme.colorScheme.error
-        cell.state == CellState.REVEALED && cell.adjacentMines > 0 -> numberColor(cell.adjacentMines)
-        else -> MaterialTheme.colorScheme.onSurface
-    }
-    val content = when {
-        cell.state == CellState.FLAGGED -> "🚩"
-        cell.state == CellState.REVEALED && cell.isMine -> "💣"
-        cell.state == CellState.REVEALED && cell.adjacentMines > 0 -> cell.adjacentMines.toString()
-        else -> ""
-    }
+    val backgroundColor =
+        when (cell.state) {
+            CellState.HIDDEN -> hiddenCellColor()
+            CellState.REVEALED -> revealedCellColor()
+            CellState.FLAGGED -> flaggedCellColor()
+        }
+    val textColor =
+        when {
+            cell.state == CellState.REVEALED && cell.isMine -> MaterialTheme.colorScheme.error
+            cell.state == CellState.REVEALED && cell.adjacentMines > 0 -> numberColor(cell.adjacentMines)
+            else -> MaterialTheme.colorScheme.onSurface
+        }
+    val content =
+        when {
+            cell.state == CellState.FLAGGED -> "🚩"
+            cell.state == CellState.REVEALED && cell.isMine -> "💣"
+            cell.state == CellState.REVEALED && cell.adjacentMines > 0 -> cell.adjacentMines.toString()
+            else -> ""
+        }
     val revealEnabled = boardStatus == GameStatus.IN_PROGRESS && cell.state == CellState.HIDDEN
 
     Box(
-        modifier = modifier
-            .aspectRatio(1f)
-            .background(backgroundColor, RoundedCornerShape(cornerRadius))
-            .border(1.dp, cellBorderColor(), RoundedCornerShape(cornerRadius))
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = {
-                        if (revealEnabled) {
-                            updatedReveal()
-                        }
-                    },
-                    onLongPress = {
-                        if (cell.state != CellState.REVEALED) {
-                            updatedToggle()
-                        }
-                    },
-                )
-            },
+        modifier =
+            modifier
+                .aspectRatio(1f)
+                .background(backgroundColor, RoundedCornerShape(cornerRadius))
+                .border(1.dp, cellBorderColor(), RoundedCornerShape(cornerRadius))
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            if (revealEnabled) {
+                                updatedReveal()
+                            }
+                        },
+                        onLongPress = {
+                            if (cell.state != CellState.REVEALED) {
+                                updatedToggle()
+                            }
+                        },
+                    )
+                },
         contentAlignment = Alignment.Center,
     ) {
         if (content.isNotEmpty()) {
             Text(
                 text = content,
                 color = textColor,
-                fontWeight = if (cell.state == CellState.REVEALED && cell.adjacentMines > 0) {
-                    FontWeight.Bold
-                } else {
-                    FontWeight.Normal
-                },
+                fontWeight =
+                    if (cell.state == CellState.REVEALED && cell.adjacentMines > 0) {
+                        FontWeight.Bold
+                    } else {
+                        FontWeight.Normal
+                    },
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
     }
 }
 
-private fun Difficulty.toStringResource(): StringResource = when (this) {
-    Difficulty.EASY -> Res.string.difficulty_easy
-    Difficulty.MEDIUM -> Res.string.difficulty_medium
-    Difficulty.HARD -> Res.string.difficulty_hard
-}
+private fun Difficulty.toStringResource(): StringResource =
+    when (this) {
+        Difficulty.EASY -> Res.string.difficulty_easy
+        Difficulty.MEDIUM -> Res.string.difficulty_medium
+        Difficulty.HARD -> Res.string.difficulty_hard
+    }
 
 @Composable
 private fun Difficulty.localizedLabel(): String = stringResource(toStringResource())
