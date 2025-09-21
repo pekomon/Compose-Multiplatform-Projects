@@ -1,7 +1,6 @@
-[*.kt]
+[*.{kt,kts}]
 # Allow PascalCase for @Composable functions
 ktlint_function_naming_ignore_when_annotated_with=Composable
 
 # Allow lowercase "main.kt" as an entry point filename
 ktlint_standard_filename_ignore_when_regex=^main\.kt$
-

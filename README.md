@@ -29,6 +29,11 @@ This project and its sub-projects primarily utilize the following technologies:
 *   **[Jetpack Compose for Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/):** A declarative UI toolkit for Android, Desktop, and Web (WASM), based on Google's Jetpack Compose.
 *   **[Gradle](https://gradle.org/):** A build automation tool used for building the project and managing dependencies.
 
+## Build & Quality
+
+* Quality checks (Spotless + Detekt + Android Lint baseline) run in CI for Minesweeper.
+* The Minesweeper CI workflow uploads Detekt reports (`detekt-reports` artifact) and the Kover HTML coverage report (`kover-html` artifact) for inspection in GitHub Actions.
+
 ## Contributing
 
 Contributions are welcome! If you want to propose a new sub-project, improve an existing one, or fix bugs, please follow these steps:

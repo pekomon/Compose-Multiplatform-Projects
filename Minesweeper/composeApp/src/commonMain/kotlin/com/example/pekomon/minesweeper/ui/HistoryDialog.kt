@@ -98,10 +98,11 @@ private fun HistoryList(records: List<RunRecord>) {
     val maxRows = records.size.coerceAtLeast(1).coerceAtMost(MAX_VISIBLE_ROWS)
     val maxHeight = ROW_HEIGHT * maxRows.toFloat()
     LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = maxHeight)
-            .padding(top = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .heightIn(max = maxHeight)
+                .padding(top = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         itemsIndexed(records) { index, record ->
@@ -147,11 +148,12 @@ private fun formatTimestamp(epochMillis: Long): String {
 private val ROW_HEIGHT = 32.dp
 private const val MAX_VISIBLE_ROWS = 10
 
-private fun Difficulty.toStringResource(): StringResource = when (this) {
-    Difficulty.EASY -> Res.string.difficulty_easy
-    Difficulty.MEDIUM -> Res.string.difficulty_medium
-    Difficulty.HARD -> Res.string.difficulty_hard
-}
+private fun Difficulty.toStringResource(): StringResource =
+    when (this) {
+        Difficulty.EASY -> Res.string.difficulty_easy
+        Difficulty.MEDIUM -> Res.string.difficulty_medium
+        Difficulty.HARD -> Res.string.difficulty_hard
+    }
 
 @Composable
 private fun Difficulty.localizedLabel(): String = stringResource(toStringResource())

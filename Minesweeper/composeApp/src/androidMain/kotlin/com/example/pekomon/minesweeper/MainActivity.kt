@@ -86,9 +86,10 @@ private fun LegacySplash() {
         color = MaterialTheme.colorScheme.surface,
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 32.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 32.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(

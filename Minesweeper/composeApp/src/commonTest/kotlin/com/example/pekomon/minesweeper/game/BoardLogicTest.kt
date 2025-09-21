@@ -8,12 +8,13 @@ import kotlin.test.assertTrue
 class BoardLogicTest {
     @Test
     fun toggleFlagOnlyAffectsCoveredCells() {
-        val board = createBoard(
-            width = 2,
-            height = 1,
-            mines = emptySet(),
-            stateOverrides = mapOf((1 to 0) to CellState.REVEALED),
-        )
+        val board =
+            createBoard(
+                width = 2,
+                height = 1,
+                mines = emptySet(),
+                stateOverrides = mapOf((1 to 0) to CellState.REVEALED),
+            )
 
         val flaggedBoard = toggleFlag(board, 0, 0)
         assertEquals(CellState.FLAGGED, flaggedBoard.cellAt(0, 0).state)
@@ -75,7 +76,10 @@ class BoardLogicTest {
         mines: Set<Pair<Int, Int>>,
         stateOverrides: Map<Pair<Int, Int>, CellState> = emptyMap(),
     ): Board {
-        fun adjacentCount(x: Int, y: Int): Int {
+        fun adjacentCount(
+            x: Int,
+            y: Int,
+        ): Int {
             if (mines.contains(x to y)) return 0
             var count = 0
             for (dy in -1..1) {
@@ -91,22 +95,23 @@ class BoardLogicTest {
             return count
         }
 
-        val cells = buildList(width * height) {
-            for (y in 0 until height) {
-                for (x in 0 until width) {
-                    val state = stateOverrides[x to y] ?: CellState.HIDDEN
-                    add(
-                        Cell(
-                            x = x,
-                            y = y,
-                            isMine = mines.contains(x to y),
-                            adjacentMines = adjacentCount(x, y),
-                            state = state,
-                        ),
-                    )
+        val cells =
+            buildList(width * height) {
+                for (y in 0 until height) {
+                    for (x in 0 until width) {
+                        val state = stateOverrides[x to y] ?: CellState.HIDDEN
+                        add(
+                            Cell(
+                                x = x,
+                                y = y,
+                                isMine = mines.contains(x to y),
+                                adjacentMines = adjacentCount(x, y),
+                                state = state,
+                            ),
+                        )
+                    }
                 }
             }
-        }
 
         val revealedCount = cells.count { it.state == CellState.REVEALED }
         val flaggedCount = cells.count { it.state == CellState.FLAGGED }
