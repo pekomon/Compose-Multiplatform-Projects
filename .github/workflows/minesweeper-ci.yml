@@ -144,10 +144,10 @@ jobs:
       - name: Build debug APK
         run: ./gradlew :composeApp:assembleDebug
 
-        - name: Debug: list outputs
-          run: |
-            ls -la Minesweeper/composeApp/build/outputs/apk/debug || true
-            find Minesweeper/composeApp/build -name "*.apk" -maxdepth 5 -print || true
+      - name: Debug: list outputs
+        run: |
+          ls -la Minesweeper/composeApp/build/outputs/apk/debug || true
+          find Minesweeper/composeApp/build -name "*.apk" -maxdepth 5 -print || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
