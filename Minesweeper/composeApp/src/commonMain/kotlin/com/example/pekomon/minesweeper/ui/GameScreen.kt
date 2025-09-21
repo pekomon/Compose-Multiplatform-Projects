@@ -39,6 +39,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.pekomon.minesweeper.composeapp.generated.resources.Res
+import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty
+import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_easy
+import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_hard
+import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_medium
+import com.example.pekomon.minesweeper.composeapp.generated.resources.history_button
+import com.example.pekomon.minesweeper.composeapp.generated.resources.reset_button
+import com.example.pekomon.minesweeper.composeapp.generated.resources.timer_label
 import com.example.pekomon.minesweeper.game.Board
 import com.example.pekomon.minesweeper.game.Cell
 import com.example.pekomon.minesweeper.game.CellState

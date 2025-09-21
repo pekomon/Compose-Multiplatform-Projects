@@ -27,6 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.pekomon.minesweeper.composeapp.generated.resources.Res
+import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_easy
+import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_hard
+import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_medium
+import com.example.pekomon.minesweeper.composeapp.generated.resources.history_close
+import com.example.pekomon.minesweeper.composeapp.generated.resources.history_no_wins
+import com.example.pekomon.minesweeper.composeapp.generated.resources.history_title
 import com.example.pekomon.minesweeper.game.Difficulty
 import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
 import com.example.pekomon.minesweeper.history.RunRecord
