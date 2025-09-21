@@ -144,7 +144,7 @@ jobs:
       - name: Build debug APK
         run: ./gradlew :composeApp:assembleDebug
 
-      - name: Debug: list outputs
+      - name: Debug list outputs
         run: |
           ls -la Minesweeper/composeApp/build/outputs/apk/debug || true
           find Minesweeper/composeApp/build -name "*.apk" -maxdepth 5 -print || true
