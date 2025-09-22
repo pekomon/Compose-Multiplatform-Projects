@@ -1,9 +1,6 @@
 package com.example.pekomon.minesweeper.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -30,12 +26,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.pekomon.minesweeper.composeapp.generated.resources.Res
@@ -55,10 +48,8 @@ import com.example.pekomon.minesweeper.game.GameStatus
 import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
 import com.example.pekomon.minesweeper.history.RunRecord
 import com.example.pekomon.minesweeper.i18n.t
-import com.example.pekomon.minesweeper.ui.theme.cellBorderColor
 import com.example.pekomon.minesweeper.ui.theme.flaggedCellColor
 import com.example.pekomon.minesweeper.ui.theme.hiddenCellColor
-import com.example.pekomon.minesweeper.ui.theme.numberColor
 import com.example.pekomon.minesweeper.ui.theme.revealedCellColor
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
@@ -268,7 +259,6 @@ private fun BoardView(
     }
 }
 
-@Suppress("CyclomaticComplexMethod")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CellView(
@@ -278,65 +268,31 @@ private fun CellView(
     boardStatus: GameStatus,
     modifier: Modifier = Modifier,
 ) {
-    val cornerRadius = 6.dp
-    val updatedReveal by rememberUpdatedState(onReveal)
-    val updatedToggle by rememberUpdatedState(onToggleFlag)
     val backgroundColor =
         when (cell.state) {
             CellState.HIDDEN -> hiddenCellColor()
             CellState.REVEALED -> revealedCellColor()
             CellState.FLAGGED -> flaggedCellColor()
         }
-    val textColor =
-        when {
-            cell.state == CellState.REVEALED && cell.isMine -> MaterialTheme.colorScheme.error
-            cell.state == CellState.REVEALED && cell.adjacentMines > 0 -> numberColor(cell.adjacentMines)
-            else -> MaterialTheme.colorScheme.onSurface
-        }
-    val content =
-        when {
-            cell.state == CellState.FLAGGED -> "🚩"
-            cell.state == CellState.REVEALED && cell.isMine -> "💣"
-            cell.state == CellState.REVEALED && cell.adjacentMines > 0 -> cell.adjacentMines.toString()
-            else -> ""
-        }
-    val revealEnabled = boardStatus == GameStatus.IN_PROGRESS && cell.state == CellState.HIDDEN
+    val interactionModifier =
+        Modifier.cellInteractions(
+            revealEnabled = boardStatus == GameStatus.IN_PROGRESS && cell.state == CellState.HIDDEN,
+            toggleEnabled = cell.state != CellState.REVEALED,
+            onReveal = onReveal,
+            onToggleFlag = onToggleFlag,
+        )
 
-    Box(
-        modifier =
-            modifier
-                .aspectRatio(1f)
-                .background(backgroundColor, RoundedCornerShape(cornerRadius))
-                .border(1.dp, cellBorderColor(), RoundedCornerShape(cornerRadius))
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = {
-                            if (revealEnabled) {
-                                updatedReveal()
-                            }
-                        },
-                        onLongPress = {
-                            if (cell.state != CellState.REVEALED) {
-                                updatedToggle()
-                            }
-                        },
-                    )
-                },
-        contentAlignment = Alignment.Center,
+    CellContainer(
+        backgroundColor = backgroundColor,
+        cornerRadius = 6.dp,
+        modifier = modifier.aspectRatio(1f),
+        interactionModifier = interactionModifier,
     ) {
-        if (content.isNotEmpty()) {
-            Text(
-                text = content,
-                color = textColor,
-                fontWeight =
-                    if (cell.state == CellState.REVEALED && cell.adjacentMines > 0) {
-                        FontWeight.Bold
-                    } else {
-                        FontWeight.Normal
-                    },
-                style = MaterialTheme.typography.bodyMedium,
-            )
-        }
+        CellContent(
+            state = cell.state,
+            isMine = cell.isMine,
+            adjacentMines = cell.adjacentMines,
+        )
     }
 }
 
