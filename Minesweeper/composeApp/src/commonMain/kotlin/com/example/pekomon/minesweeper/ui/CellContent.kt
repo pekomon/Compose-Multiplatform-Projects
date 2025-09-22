@@ -46,13 +46,13 @@ private fun cellContent(
         else -> ""
     }
 
+@Composable
 private fun cellContentColor(
     state: CellState,
     isMine: Boolean,
     adjacentMines: Int,
-) =
-    when {
-        state == CellState.REVEALED && isMine -> MaterialTheme.colorScheme.error
-        state == CellState.REVEALED && adjacentMines > 0 -> numberColor(adjacentMines)
-        else -> MaterialTheme.colorScheme.onSurface
-    }
+) = when {
+    state == CellState.REVEALED && isMine -> MaterialTheme.colorScheme.error
+    state == CellState.REVEALED && adjacentMines > 0 -> numberColor(adjacentMines)
+    else -> MaterialTheme.colorScheme.onSurface
+}
