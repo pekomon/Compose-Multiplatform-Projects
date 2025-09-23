@@ -14,22 +14,23 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallTopAppBar
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material.AppBarDefaults
+import androidx.compose.material.Button
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,7 +64,6 @@ import com.example.pekomon.minesweeper.i18n.t
 import com.example.pekomon.minesweeper.ui.theme.flaggedCellColor
 import com.example.pekomon.minesweeper.ui.theme.hiddenCellColor
 import com.example.pekomon.minesweeper.ui.theme.revealedCellColor
-import com.example.pekomon.minesweeper.ui.theme.space
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import org.jetbrains.compose.resources.StringResource
@@ -157,7 +157,6 @@ fun GameScreen(modifier: Modifier = Modifier) {
                     onHistoryClick = { showHistoryDialog = true },
                 )
             },
-            contentWindowInsets = WindowInsets(0, 0, 0, 0),
         ) { innerPadding ->
             Box(
                 modifier =
@@ -168,10 +167,9 @@ fun GameScreen(modifier: Modifier = Modifier) {
                 contentAlignment = Alignment.TopCenter,
             ) {
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                    val space = MaterialTheme.space
-                    val horizontalPadding = space.m
-                    val verticalPadding = space.l
-                    val cellSpacing = space.s
+                    val horizontalPadding = 16.dp
+                    val verticalPadding = 24.dp
+                    val cellSpacing = 8.dp
                     val columns = board.width.coerceAtLeast(1)
                     val rows = board.height.coerceAtLeast(1)
 
@@ -247,12 +245,17 @@ private fun GameTopBar(
     modifier: Modifier = Modifier,
 ) {
     val difficulties = remember { Difficulty.values().toList() }
-    val space = MaterialTheme.space
 
-    SmallTopAppBar(
+    val horizontalPadding = 16.dp
+    val actionSpacing = 8.dp
+    val topBarBackground = MaterialTheme.colors.surface
+    val contentColor = contentColorFor(topBarBackground)
+
+    TopAppBar(
         modifier =
             modifier
-                .padding(horizontal = space.m)
+                .statusBarsPadding()
+                .padding(horizontal = horizontalPadding)
                 .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()),
         title = { Text(text = t(Res.string.timer_label, statusEmoji, elapsedSeconds)) },
         navigationIcon = {
@@ -266,18 +269,19 @@ private fun GameTopBar(
             )
         },
         actions = {
-            Row(horizontalArrangement = Arrangement.spacedBy(space.s), verticalAlignment = Alignment.CenterVertically) {
-                FilledTonalButton(onClick = onHistoryClick) {
+            Row(horizontalArrangement = Arrangement.spacedBy(actionSpacing), verticalAlignment = Alignment.CenterVertically) {
+                Button(onClick = onHistoryClick) {
                     Text(text = t(Res.string.history_button))
                 }
 
-                FilledTonalButton(onClick = onReset) {
+                Button(onClick = onReset) {
                     Text(text = t(Res.string.reset_button))
                 }
             }
         },
-        colors = TopAppBarDefaults.smallTopAppBarColors(),
-        windowInsets = WindowInsets.statusBars,
+        backgroundColor = topBarBackground,
+        contentColor = contentColor,
+        elevation = AppBarDefaults.TopAppBarElevation,
     )
 }
 
@@ -292,7 +296,7 @@ private fun DifficultyButton(
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
-        FilledTonalButton(onClick = onClick) {
+        Button(onClick = onClick) {
             Text(text = t(Res.string.difficulty, difficulty.localizedLabel()))
         }
         DropdownMenu(
@@ -300,10 +304,9 @@ private fun DifficultyButton(
             onDismissRequest = onDismissRequest,
         ) {
             difficulties.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(option.localizedLabel()) },
-                    onClick = { onSelected(option) },
-                )
+                DropdownMenuItem(onClick = { onSelected(option) }) {
+                    Text(option.localizedLabel())
+                }
             }
         }
     }
