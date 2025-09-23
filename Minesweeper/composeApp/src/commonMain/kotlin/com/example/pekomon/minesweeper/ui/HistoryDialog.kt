@@ -11,13 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,7 +43,6 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryDialog(
     currentDifficulty: Difficulty,
@@ -69,12 +67,30 @@ fun HistoryDialog(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     difficulties.forEach { difficulty ->
-                        FilterChip(
-                            selected = selectedDifficulty == difficulty,
+                        val selected = selectedDifficulty == difficulty
+                        val backgroundColor =
+                            if (selected) {
+                                MaterialTheme.colors.primary.copy(alpha = 0.12f)
+                            } else {
+                                MaterialTheme.colors.surface
+                            }
+                        val contentColor =
+                            if (selected) {
+                                MaterialTheme.colors.primary
+                            } else {
+                                MaterialTheme.colors.onSurface
+                            }
+
+                        OutlinedButton(
                             onClick = { selectedDifficulty = difficulty },
-                            label = { Text(text = difficulty.localizedLabel()) },
-                            colors = FilterChipDefaults.filterChipColors(),
-                        )
+                            colors =
+                                ButtonDefaults.outlinedButtonColors(
+                                    backgroundColor = backgroundColor,
+                                    contentColor = contentColor,
+                                ),
+                        ) {
+                            Text(text = difficulty.localizedLabel())
+                        }
                     }
                 }
 
@@ -83,7 +99,7 @@ fun HistoryDialog(
                 if (records.isEmpty()) {
                     Text(
                         text = t(Res.string.history_no_wins, selectedDifficulty.localizedLabel()),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.body1,
                     )
                 } else {
                     HistoryList(records = records)
@@ -123,7 +139,7 @@ private fun HistoryList(records: List<RunRecord>) {
 
                 Text(
                     text = formatTimestamp(record.epochMillis),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.caption,
                 )
             }
         }
