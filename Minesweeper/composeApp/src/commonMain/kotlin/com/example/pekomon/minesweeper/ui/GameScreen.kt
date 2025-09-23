@@ -270,7 +270,10 @@ private fun GameTopBar(
             )
         },
         actions = {
-            Row(horizontalArrangement = Arrangement.spacedBy(actionSpacing), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(actionSpacing),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Button(onClick = onHistoryClick) {
                     Text(text = t(Res.string.history_button))
                 }

@@ -48,11 +48,12 @@ fun MinesweeperTheme(
     useDarkTheme: Boolean,
     content: @Composable () -> Unit,
 ) {
-    val colors = if (useDarkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
-    }
+    val colors =
+        if (useDarkTheme) {
+            DarkColorPalette
+        } else {
+            LightColorPalette
+        }
 
     MaterialTheme(
         colors = colors,
@@ -61,4 +62,3 @@ fun MinesweeperTheme(
         content = content,
     )
 }
-
