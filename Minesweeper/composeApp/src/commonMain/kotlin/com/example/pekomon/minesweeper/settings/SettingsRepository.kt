@@ -8,7 +8,7 @@ import com.russhwolf.settings.Settings
  * Keep keys stable for future migrations.
  */
 class SettingsRepository(
-    private val settings: Settings = Settings()
+    private val settings: Settings = Settings(),
 ) {
     private companion object {
         const val KEY_DIFFICULTY = "difficulty"

@@ -5,9 +5,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.example.pekomon.minesweeper.settings.SettingsRepository
 import com.example.pekomon.minesweeper.ui.GameScreen
 import com.example.pekomon.minesweeper.ui.theme.MinesweeperTheme
-import com.example.pekomon.minesweeper.settings.SettingsRepository
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
