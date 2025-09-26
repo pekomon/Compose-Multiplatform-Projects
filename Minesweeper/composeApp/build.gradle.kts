@@ -48,6 +48,7 @@ kotlin {
                 implementation(libs.androidx.lifecycle.runtimeCompose)
                 implementation(libs.compose.resources)
                 implementation(libs.kotlinx.datetime)
+                implementation(libs.multiplatform.settings.core)
             }
         }
         val androidMain by getting {

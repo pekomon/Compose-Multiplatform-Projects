@@ -24,7 +24,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import com.example.pekomon.minesweeper.ui.GameScreen
 import com.example.pekomon.minesweeper.ui.theme.AndroidMinesweeperTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -49,7 +48,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidMinesweeperTheme {
                 LegacySplashHost(showLegacySplash = !supportsSystemSplash) {
-                    GameScreen()
+                    App()
                 }
             }
         }
@@ -106,6 +105,6 @@ private fun LegacySplash() {
 @Composable
 fun GameScreenAndroidPreview() {
     AndroidMinesweeperTheme {
-        GameScreen()
+        App()
     }
 }

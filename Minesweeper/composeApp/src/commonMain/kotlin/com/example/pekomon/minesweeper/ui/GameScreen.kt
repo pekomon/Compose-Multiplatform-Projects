@@ -71,27 +71,35 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun GameScreen(modifier: Modifier = Modifier) {
-    val api = remember { GameApi(Difficulty.EASY) }
-    var difficulty by remember { mutableStateOf(Difficulty.EASY) }
-    var board by remember { mutableStateOf(api.board) }
-    var elapsedSeconds by remember { mutableStateOf(0) }
-    var timerRunning by remember { mutableStateOf(false) }
+fun GameScreen(
+    difficulty: Difficulty,
+    onDifficultyChange: (Difficulty) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val api = remember(difficulty) { GameApi(difficulty) }
+    var board by remember(difficulty) { mutableStateOf(api.board) }
+    var elapsedSeconds by remember(difficulty) { mutableStateOf(0) }
+    var timerRunning by remember(difficulty) { mutableStateOf(false) }
     var difficultyMenuExpanded by remember { mutableStateOf(false) }
     var showHistoryDialog by remember { mutableStateOf(false) }
     var historyVersion by remember { mutableStateOf(0) }
-    var winRecorded by remember { mutableStateOf(false) }
+    var winRecorded by remember(difficulty) { mutableStateOf(false) }
 
     fun refreshBoard() {
         board = api.board
     }
 
     fun resetGame(newDifficulty: Difficulty = difficulty) {
+        if (newDifficulty != difficulty) {
+            onDifficultyChange(newDifficulty)
+            return
+        }
+
         api.reset(newDifficulty)
         board = api.board
-        difficulty = newDifficulty
         elapsedSeconds = 0
         timerRunning = false
+        winRecorded = false
     }
 
     val statusEmoji =
