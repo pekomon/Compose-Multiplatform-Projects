@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.variant.AndroidComponentsExtension
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -11,74 +13,10 @@ plugins {
     alias(libs.plugins.kover)
 }
 
-kotlin {
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
-    }
+// Allow skipping Android target in environments without Android SDK (e.g., Codex container)
+val skipAndroid = providers.gradleProperty("skipAndroid").orNull == "true"
 
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64(),
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "ComposeApp"
-            isStatic = true
-        }
-    }
-
-    jvm()
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-        binaries.executable()
-    }
-
-    sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.material)
-                implementation(compose.ui)
-                implementation(compose.components.uiToolingPreview)
-                implementation(libs.androidx.lifecycle.viewmodelCompose)
-                implementation(libs.androidx.lifecycle.runtimeCompose)
-                implementation(libs.compose.resources)
-                implementation(libs.kotlinx.datetime)
-                implementation(libs.multiplatform.settings.core)
-            }
-        }
-        val androidMain by getting {
-            dependencies {
-                implementation(compose.preview)
-                implementation(libs.androidx.activity.compose)
-                implementation(libs.androidx.core.splashscreen)
-                implementation(libs.androidx.lifecycle.runtimeKtx)
-                implementation(libs.material)
-            }
-        }
-        val commonTest by getting {
-            dependencies {
-                implementation(libs.kotlin.test)
-            }
-        }
-        val jvmMain by getting {
-            dependencies {
-                implementation(compose.desktop.currentOs)
-                implementation(libs.kotlinx.coroutinesSwing)
-            }
-        }
-    }
-}
-
-compose.resources {
-    packageOfResClass = "com.example.pekomon.minesweeper.composeapp.generated.resources"
-}
-
-android {
+fun ApplicationExtension.configureAndroidDefaults() {
     namespace = "com.example.pekomon.minesweeper"
     compileSdk =
         libs.versions.android.compileSdk
@@ -115,6 +53,93 @@ android {
 
     lint {
         baseline = file("lint-baseline.xml")
+    }
+}
+
+kotlin {
+    if (!skipAndroid) {
+        @Suppress("UNUSED_VARIABLE")
+        androidTarget {
+            compilerOptions {
+                jvmTarget.set(JvmTarget.JVM_11)
+            }
+        }
+    }
+
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64(),
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "ComposeApp"
+            isStatic = true
+        }
+    }
+
+    jvm("desktop")
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
+        binaries.executable()
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material)
+                implementation(compose.ui)
+                implementation(compose.components.uiToolingPreview)
+                implementation(libs.androidx.lifecycle.viewmodelCompose)
+                implementation(libs.androidx.lifecycle.runtimeCompose)
+                implementation(libs.compose.resources)
+                implementation(libs.kotlinx.datetime)
+                implementation(libs.multiplatform.settings.core)
+            }
+        }
+        if (!skipAndroid) {
+            val androidMain by getting {
+                dependencies {
+                    implementation(compose.preview)
+                    implementation(libs.androidx.activity.compose)
+                    implementation(libs.androidx.core.splashscreen)
+                    implementation(libs.androidx.lifecycle.runtimeKtx)
+                    implementation(libs.material)
+                }
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
+        }
+        val desktopMain by getting {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation(libs.kotlinx.coroutinesSwing)
+            }
+        }
+    }
+}
+
+compose.resources {
+    packageOfResClass = "com.example.pekomon.minesweeper.composeapp.generated.resources"
+}
+
+if (skipAndroid) {
+    extensions.configure<ApplicationExtension>("android") {
+        configureAndroidDefaults()
+    }
+    extensions.configure<AndroidComponentsExtension<*, *, *>>("androidComponents") {
+        beforeVariants { variant ->
+            variant.enable = false
+        }
+    }
+} else {
+    android {
+        configureAndroidDefaults()
     }
 }
 
