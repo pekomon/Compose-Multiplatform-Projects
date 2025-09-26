@@ -1,4 +1,5 @@
 name: Auto-format (Spotless)
+
 on:
   pull_request:
     paths:
@@ -6,16 +7,21 @@ on:
       - '**/*.kt'
       - '**/*.kts'
 
+permissions:
+  contents: write         # tarvitaan commitointiin PR-haaraan
+  pull-requests: write
+
 jobs:
   auto-format:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # Checkouttaa suoraan PR:n lähdehaaran (ei detached HEAD -mergecommit)
+          ref: ${{ github.head_ref }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -30,14 +36,15 @@ jobs:
         working-directory: Minesweeper
         run: ./gradlew :composeApp:spotlessApply
 
-      - name: Commit changes (if any)
-        run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A
-            git commit -m "chore(spotless): auto-format on CI"
-            git push
-          else
-            echo "No formatting changes."
-          fi
+      # Hoitaa commitin & pushin automaattisesti PR-haaraan
+      - name: Auto-commit formatting changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(spotless): auto-format on CI"
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          file_pattern: |
+            **/*.kt
+            **/*.kts
+            Minesweeper/**
+
