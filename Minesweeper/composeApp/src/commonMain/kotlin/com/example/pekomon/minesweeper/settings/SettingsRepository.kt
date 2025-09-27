@@ -8,6 +8,7 @@ import com.example.pekomon.minesweeper.game.Difficulty
  */
 interface SettingsRepository {
     fun getSelectedDifficulty(): Difficulty? // null = not set
+
     fun setSelectedDifficulty(value: Difficulty)
 }
 
