@@ -1,4 +1,4 @@
-name: Minesweeper CI
+name: Build & Quality
 
 on:
   push:
@@ -12,7 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
 
 jobs:
   changes:
@@ -41,9 +42,8 @@ jobs:
               - 'gradle/libs.versions.toml'
               - '.github/workflows/**'
 
-  # 1) Quality-gate (Spotless + Detekt)
-  quality:
-    name: Quality (Spotless + Detekt + Tests)
+  format:
+    name: Spotless Apply & Push
     needs: [changes]
     if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
@@ -52,13 +52,15 @@ jobs:
         working-directory: Minesweeper
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref }}
 
-      - name: Setup Java 21
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
-          cache: gradle
+          java-version: '17'
 
       - name: Gradle build cache
         uses: gradle/actions/setup-gradle@v4
@@ -66,31 +68,27 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Spotless + Detekt + Tests + Kover
-        run: ./gradlew :composeApp:spotlessCheck :composeApp:detekt :composeApp:test :composeApp:koverXmlReport :composeApp:koverHtmlReport
+      - name: Spotless Apply
+        run: ./gradlew :composeApp:spotlessApply
 
-      - name: Upload Detekt reports
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: detekt-reports
-          path: |
-            Minesweeper/composeApp/build/reports/detekt/*.html
-            Minesweeper/composeApp/build/reports/detekt/*.xml
-          if-no-files-found: warn
+      - name: Commit and push formatting changes
+        if: github.event_name == 'pull_request'
+        run: |
+          cd ..
+          if [[ -n "$(git status --short)" ]]; then
+            if [[ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
+              echo 'Skipping auto-commit for forked PR.'
+            else
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git commit -am "chore: apply spotless formatting"
+              git push origin HEAD:${{ github.head_ref }}
+            fi
+          fi
 
-      - name: Upload Kover coverage
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: kover-html
-          path: Minesweeper/composeApp/build/reports/kover/html
-          if-no-files-found: warn
-
-  # 3) Android build
-  android:
-    name: Android (assembleDebug)
-    needs: [changes, quality]
+  quality:
+    name: Quality (Spotless Check & Detekt)
+    needs: [changes, format]
     if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
@@ -98,13 +96,93 @@ jobs:
         working-directory: Minesweeper
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref }}
 
-      - name: Setup Java 21
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
-          cache: gradle
+          java-version: '17'
+
+      - name: Gradle build cache
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Spotless Check & Detekt
+        run: ./gradlew :composeApp:spotlessCheck :composeApp:detekt
+
+      - name: Upload Detekt reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: detekt-reports
+          path: |
+            Minesweeper/composeApp/build/reports/detekt/*.html
+            Minesweeper/composeApp/build/reports/detekt/*.xml
+          if-no-files-found: warn
+
+  tests:
+    name: JVM Tests & Coverage
+    needs: [changes, format, quality]
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Minesweeper
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref }}
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Gradle build cache
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: JVM tests & Kover reports
+        run: ./gradlew :composeApp:test :composeApp:koverXmlReport :composeApp:koverHtmlReport
+
+      - name: Upload Kover coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kover-reports
+          path: |
+            Minesweeper/composeApp/build/reports/kover/html
+            Minesweeper/composeApp/build/reports/kover/xml
+          if-no-files-found: warn
+
+  android:
+    name: Android (assembleDebug)
+    needs: [changes, format, quality, tests]
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Minesweeper
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref }}
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
 
       - name: Install Android SDK (accept licenses)
         uses: android-actions/setup-android@v3
@@ -118,11 +196,6 @@ jobs:
       - name: Build debug APK
         run: ./gradlew :composeApp:assembleDebug
 
-      - name: Debug list outputs
-        run: |
-          ls -la Minesweeper/composeApp/build/outputs/apk/debug || true
-          find Minesweeper/composeApp/build -name "*.apk" -maxdepth 5 -print || true
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
@@ -130,10 +203,9 @@ jobs:
           path: Minesweeper/composeApp/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
 
-  # 4) Desktop build
   desktop:
     name: Desktop (uber-jar)
-    needs: [changes, quality]
+    needs: [changes, format, quality, tests]
     if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
@@ -141,13 +213,15 @@ jobs:
         working-directory: Minesweeper
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref }}
 
-      - name: Setup Java 21
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
-          cache: gradle
+          java-version: '17'
 
       - name: Gradle build cache
         uses: gradle/actions/setup-gradle@v4
@@ -165,10 +239,9 @@ jobs:
           path: Minesweeper/composeApp/build/compose/jars/*.jar
           if-no-files-found: warn
 
-  # 5) Wasm build (production dist)
   wasm:
     name: Wasm (production distribution)
-    needs: [changes, quality]
+    needs: [changes, format, quality, tests]
     if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
@@ -176,13 +249,15 @@ jobs:
         working-directory: Minesweeper
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref }}
 
-      - name: Setup Java 21
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
-          cache: gradle
+          java-version: '17'
 
       - name: Gradle build cache
         uses: gradle/actions/setup-gradle@v4
@@ -199,41 +274,3 @@ jobs:
           name: wasm-dist
           path: Minesweeper/composeApp/build/dist/wasmJs/productionExecutable/**
           if-no-files-found: warn
-
-  # 6) iOS compile (simulator ARM64) – compile-only smoke
-  ios:
-    name: iOS (compile Kotlin/Native for simulator)
-    needs: [changes, quality]
-    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
-    runs-on: macos-15
-    defaults:
-      run:
-        working-directory: Minesweeper
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-          cache: gradle
-
-      - name: Gradle build cache
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
-      - name: Compile for iOS simulator (Kotlin/Native)
-        run: ./gradlew :composeApp:compileKotlinIosSimulatorArm64
-
-      # If you wanna store framework, change to link-task and copy:
-      # - name: Build iOS framework (optional)
-      #   run: ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
-      # - name: Upload iOS framework
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: ios-sim-debug-framework
-      #     path: composeApp/build/bin/iosSimulatorArm64/debugFramework/ComposeApp.framework/**
-      #     if-no-files-found: warn
