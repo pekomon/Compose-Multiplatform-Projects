@@ -39,6 +39,9 @@ naming:
   MatchingDeclarationName:
     active: true
     excludes:
+      - '**/SettingsProvider.*.kt'
       - '**/Platform.*.kt'
+      - '**/*ViewController.*.kt'
+      - '**/*Activity.*.kt'
 
 
