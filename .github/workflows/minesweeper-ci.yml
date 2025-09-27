@@ -5,14 +5,15 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: minesweeper-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: write           # tarvitaan format-jobin auto-commit/push
   pull-requests: write
 
 jobs:
@@ -22,10 +23,10 @@ jobs:
     outputs:
       minesweeper: ${{ steps.filter.outputs.minesweeper }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # tärkeää, paths-filter tarvitsee historian
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref }}
 
       - uses: dorny/paths-filter@v3
         id: filter
@@ -45,7 +46,8 @@ jobs:
   format:
     name: Spotless Apply & Push
     needs: [changes]
-    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
+    # PR: aina; push: vain jos Minesweeper-osui
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -71,25 +73,28 @@ jobs:
       - name: Spotless Apply
         run: ./gradlew :composeApp:spotlessApply
 
-      - name: Commit and push formatting changes
+      - name: Commit and push formatting changes (PR only)
         if: github.event_name == 'pull_request'
         run: |
           cd ..
-          if [[ -n "$(git status --short)" ]]; then
+          if [[ -n "$(git status --porcelain)" ]]; then
             if [[ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
               echo 'Skipping auto-commit for forked PR.'
             else
               git config user.name "github-actions[bot]"
               git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-              git commit -am "chore: apply spotless formatting"
+              git add -A
+              git commit -m "chore: apply spotless formatting"
               git push origin HEAD:${{ github.head_ref }}
             fi
+          else
+            echo "No formatting changes."
           fi
 
   quality:
     name: Quality (Spotless Check & Detekt)
     needs: [changes, format]
-    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -128,7 +133,7 @@ jobs:
   tests:
     name: JVM Tests & Coverage
     needs: [changes, format, quality]
-    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -167,7 +172,7 @@ jobs:
   android:
     name: Android (assembleDebug)
     needs: [changes, format, quality, tests]
-    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -199,14 +204,14 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk-debug
+          name: composeApp-debug-apk
           path: Minesweeper/composeApp/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
 
   desktop:
     name: Desktop (uber-jar)
     needs: [changes, format, quality, tests]
-    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -230,9 +235,9 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build uber-jar
-        run: ./gradlew :composeApp:packageReleaseUberJarForCurrentOS
+        run: ./gradlew :composeApp:packageDistributionForCurrentOS
 
-      - name: Upload Desktop JAR
+      - name: Upload desktop jar
         uses: actions/upload-artifact@v4
         with:
           name: desktop-uber-jar
@@ -242,7 +247,7 @@ jobs:
   wasm:
     name: Wasm (production distribution)
     needs: [changes, format, quality, tests]
-    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -265,10 +270,10 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Build wasm distribution
+      - name: Build production distribution
         run: ./gradlew :composeApp:wasmJsBrowserDistribution
 
-      - name: Upload Wasm dist
+      - name: Upload wasm dist
         uses: actions/upload-artifact@v4
         with:
           name: wasm-dist
