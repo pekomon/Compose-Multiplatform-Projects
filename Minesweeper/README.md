@@ -7,6 +7,7 @@ Minesweeper is built with Compose Multiplatform to target Android, iOS, Desktop,
 
 ## Features (Phase 1)
 - Difficulty selection: Easy, Medium, and Hard boards.
+- Selected difficulty is remembered across launches on all platforms.
 - Runtime-only history of the top 10 completion times per difficulty.
 - Material 3 design system with coordinated light and dark themes.
 - Binary-free splash experience powered by vector and storyboard assets.

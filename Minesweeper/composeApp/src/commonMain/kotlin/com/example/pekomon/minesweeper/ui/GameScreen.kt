@@ -71,9 +71,13 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun GameScreen(modifier: Modifier = Modifier) {
-    val api = remember { GameApi(Difficulty.EASY) }
-    var difficulty by remember { mutableStateOf(Difficulty.EASY) }
+fun GameScreen(
+    modifier: Modifier = Modifier,
+    initialDifficulty: Difficulty = Difficulty.EASY,
+    onDifficultyChanged: (Difficulty) -> Unit = {},
+) {
+    val api = remember { GameApi(initialDifficulty) }
+    var difficulty by remember { mutableStateOf(initialDifficulty) }
     var board by remember { mutableStateOf(api.board) }
     var elapsedSeconds by remember { mutableStateOf(0) }
     var timerRunning by remember { mutableStateOf(false) }
@@ -151,6 +155,7 @@ fun GameScreen(modifier: Modifier = Modifier) {
                     onDifficultySelected = {
                         difficultyMenuExpanded = false
                         resetGame(it)
+                        onDifficultyChanged(it)
                     },
                     onReset = { resetGame(difficulty) },
                     elapsedSeconds = elapsedSeconds,
