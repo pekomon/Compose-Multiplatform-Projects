@@ -7,31 +7,31 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AppBarDefaults
-import androidx.compose.material.Button
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.contentColorFor
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -143,7 +143,10 @@ fun GameScreen(
 
     val scrollState = rememberScrollState()
 
-    Surface(modifier = modifier.fillMaxSize()) {
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+    ) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -163,13 +166,13 @@ fun GameScreen(
                     onHistoryClick = { showHistoryDialog = true },
                 )
             },
+            contentWindowInsets = WindowInsets.safeDrawing,
         ) { innerPadding ->
             Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(WindowInsets.safeDrawing.asPaddingValues()),
+                        .padding(innerPadding),
                 contentAlignment = Alignment.TopCenter,
             ) {
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -238,6 +241,7 @@ fun GameScreen(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun GameTopBar(
     difficulty: Difficulty,
     onDifficultyClick: () -> Unit,
@@ -254,16 +258,20 @@ private fun GameTopBar(
 
     val horizontalPadding = 16.dp
     val actionSpacing = 8.dp
-    val topBarBackground = MaterialTheme.colors.surface
-    val contentColor = contentColorFor(topBarBackground)
+    val colorScheme = MaterialTheme.colorScheme
 
-    TopAppBar(
+    CenterAlignedTopAppBar(
         modifier =
             modifier
                 .statusBarsPadding()
                 .padding(horizontal = horizontalPadding)
-                .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()),
-        title = { Text(text = t(Res.string.timer_label, statusEmoji, elapsedSeconds)) },
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)),
+        title = {
+            Text(
+                text = t(Res.string.timer_label, statusEmoji, elapsedSeconds),
+                style = MaterialTheme.typography.titleLarge,
+            )
+        },
         navigationIcon = {
             DifficultyButton(
                 onClick = onDifficultyClick,
@@ -279,18 +287,37 @@ private fun GameTopBar(
                 horizontalArrangement = Arrangement.spacedBy(actionSpacing),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Button(onClick = onHistoryClick) {
+                Button(
+                    onClick = onHistoryClick,
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = colorScheme.primary,
+                            contentColor = colorScheme.onPrimary,
+                        ),
+                ) {
                     Text(text = t(Res.string.history_button))
                 }
 
-                Button(onClick = onReset) {
+                Button(
+                    onClick = onReset,
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = colorScheme.secondary,
+                            contentColor = colorScheme.onSecondary,
+                        ),
+                ) {
                     Text(text = t(Res.string.reset_button))
                 }
             }
         },
-        backgroundColor = topBarBackground,
-        contentColor = contentColor,
-        elevation = AppBarDefaults.TopAppBarElevation,
+        colors =
+            TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = colorScheme.surface,
+                scrolledContainerColor = colorScheme.surface,
+                navigationIconContentColor = colorScheme.onSurface,
+                titleContentColor = colorScheme.onSurface,
+                actionIconContentColor = colorScheme.onSurface,
+            ),
     )
 }
 
@@ -304,8 +331,16 @@ private fun DifficultyButton(
     difficulty: Difficulty,
     modifier: Modifier = Modifier,
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Box(modifier = modifier) {
-        Button(onClick = onClick) {
+        Button(
+            onClick = onClick,
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = colorScheme.primaryContainer,
+                    contentColor = colorScheme.onPrimaryContainer,
+                ),
+        ) {
             Text(text = t(Res.string.difficulty, difficulty.localizedLabel()))
         }
         DropdownMenu(
@@ -313,9 +348,10 @@ private fun DifficultyButton(
             onDismissRequest = onDismissRequest,
         ) {
             difficulties.forEach { option ->
-                DropdownMenuItem(onClick = { onSelected(option) }) {
-                    Text(option.localizedLabel())
-                }
+                DropdownMenuItem(
+                    text = { Text(option.localizedLabel()) },
+                    onClick = { onSelected(option) },
+                )
             }
         }
     }

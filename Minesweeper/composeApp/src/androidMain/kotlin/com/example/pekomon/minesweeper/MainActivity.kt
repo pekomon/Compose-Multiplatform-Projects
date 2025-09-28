@@ -8,9 +8,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,7 +26,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.example.pekomon.minesweeper.settings.initializeSettingsRepository
 import com.example.pekomon.minesweeper.ui.GameScreen
-import com.example.pekomon.minesweeper.ui.theme.AndroidMinesweeperTheme
+import com.example.pekomon.minesweeper.ui.theme.MinesweeperThemeAndroid
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            AndroidMinesweeperTheme {
+            MinesweeperThemeAndroid {
                 LegacySplashHost(showLegacySplash = !supportsSystemSplash) {
                     MinesweeperContent()
                 }
@@ -86,7 +86,7 @@ private fun LegacySplashHost(
 private fun LegacySplash() {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colors.surface,
+        color = MaterialTheme.colorScheme.surface,
     ) {
         Box(
             modifier =
@@ -97,8 +97,8 @@ private fun LegacySplash() {
         ) {
             Text(
                 text = "Minesweeper",
-                style = MaterialTheme.typography.h4,
-                color = MaterialTheme.colors.onSurface,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
             )
         }
@@ -108,7 +108,7 @@ private fun LegacySplash() {
 @Preview
 @Composable
 fun GameScreenAndroidPreview() {
-    AndroidMinesweeperTheme {
+    MinesweeperThemeAndroid {
         GameScreen()
     }
 }

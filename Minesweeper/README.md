@@ -9,7 +9,9 @@ Minesweeper is built with Compose Multiplatform to target Android, iOS, Desktop,
 - Difficulty selection: Easy, Medium, and Hard boards.
 - Selected difficulty is remembered across launches on all platforms.
 - Runtime-only history of the top 10 completion times per difficulty.
-- Material 3 design system with coordinated light and dark themes.
+- UI migrated to Material 3 (Compose Multiplatform) with coordinated light and dark themes.
+- Safe-area aware layout powered by Material 3 Scaffold and `WindowInsets.safeDrawing`.
+- Android 12+ surfaces adopt dynamic color (Material You) with a fallback palette on earlier versions.
 - Binary-free splash experience powered by vector and storyboard assets.
 - In-game timer that tracks the current session.
 - Core Minesweeper gameplay with responsive Compose UI.
