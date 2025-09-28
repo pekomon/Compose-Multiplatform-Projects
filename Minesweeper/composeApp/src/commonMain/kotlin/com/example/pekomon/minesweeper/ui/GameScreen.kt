@@ -22,16 +22,16 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AppBarDefaults
-import androidx.compose.material.Button
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.contentColorFor
+import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -237,6 +237,7 @@ fun GameScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GameTopBar(
     difficulty: Difficulty,
@@ -254,9 +255,6 @@ private fun GameTopBar(
 
     val horizontalPadding = 16.dp
     val actionSpacing = 8.dp
-    val topBarBackground = MaterialTheme.colors.surface
-    val contentColor = contentColorFor(topBarBackground)
-
     TopAppBar(
         modifier =
             modifier
@@ -288,9 +286,13 @@ private fun GameTopBar(
                 }
             }
         },
-        backgroundColor = topBarBackground,
-        contentColor = contentColor,
-        elevation = AppBarDefaults.TopAppBarElevation,
+        colors =
+            TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                titleContentColor = MaterialTheme.colorScheme.onSurface,
+                navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                actionIconContentColor = MaterialTheme.colorScheme.onSurface,
+            ),
     )
 }
 
@@ -313,9 +315,10 @@ private fun DifficultyButton(
             onDismissRequest = onDismissRequest,
         ) {
             difficulties.forEach { option ->
-                DropdownMenuItem(onClick = { onSelected(option) }) {
-                    Text(option.localizedLabel())
-                }
+                DropdownMenuItem(
+                    text = { Text(option.localizedLabel()) },
+                    onClick = { onSelected(option) },
+                )
             }
         }
     }

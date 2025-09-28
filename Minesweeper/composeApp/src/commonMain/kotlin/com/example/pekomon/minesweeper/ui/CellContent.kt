@@ -1,7 +1,7 @@
 package com.example.pekomon.minesweeper.ui
 
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -29,7 +29,7 @@ internal fun CellContent(
             } else {
                 FontWeight.Normal
             },
-        style = MaterialTheme.typography.body1,
+        style = MaterialTheme.typography.bodyLarge,
         modifier = modifier,
     )
 }
@@ -52,7 +52,7 @@ private fun cellContentColor(
     isMine: Boolean,
     adjacentMines: Int,
 ) = when {
-    state == CellState.REVEALED && isMine -> MaterialTheme.colors.error
+    state == CellState.REVEALED && isMine -> MaterialTheme.colorScheme.error
     state == CellState.REVEALED && adjacentMines > 0 -> numberColor(adjacentMines)
-    else -> MaterialTheme.colors.onSurface
+    else -> MaterialTheme.colorScheme.onSurface
 }
