@@ -11,11 +11,11 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -26,7 +26,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -143,9 +145,13 @@ fun GameScreen(
 
     val scrollState = rememberScrollState()
 
-    Surface(modifier = modifier.fillMaxSize()) {
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.surface,
+    ) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
+            contentWindowInsets = WindowInsets.safeDrawing,
             topBar = {
                 GameTopBar(
                     difficulty = difficulty,
@@ -164,22 +170,21 @@ fun GameScreen(
                 )
             },
         ) { innerPadding ->
+            val outerPadding = 16.dp
             Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .padding(WindowInsets.safeDrawing.asPaddingValues()),
+                        .padding(horizontal = outerPadding, vertical = outerPadding),
                 contentAlignment = Alignment.TopCenter,
             ) {
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                    val horizontalPadding = 16.dp
-                    val verticalPadding = 24.dp
                     val cellSpacing = 8.dp
                     val columns = board.width.coerceAtLeast(1)
                     val rows = board.height.coerceAtLeast(1)
 
-                    val maxContentWidth = maxWidth - horizontalPadding * 2
+                    val maxContentWidth = maxWidth
                     val availableCellSpace = maxContentWidth - cellSpacing * (columns - 1)
                     val minCellSize = 28.dp
                     val maxCellSize = 48.dp
@@ -189,7 +194,7 @@ fun GameScreen(
                     val boardHeight = cellSize * rows + cellSpacing * (rows - 1)
 
                     val hasBoundedHeight = maxHeight != Infinity && maxHeight != Unspecified
-                    val availableHeight = if (hasBoundedHeight) maxHeight - verticalPadding * 2 else Infinity
+                    val availableHeight = if (hasBoundedHeight) maxHeight else Infinity
                     val needsScroll = hasBoundedHeight && boardHeight > availableHeight
 
                     val scrollModifier = if (needsScroll) Modifier.verticalScroll(scrollState) else Modifier
@@ -198,9 +203,7 @@ fun GameScreen(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = horizontalPadding)
-                                .then(scrollModifier)
-                                .padding(vertical = verticalPadding),
+                                .then(scrollModifier),
                         contentAlignment = Alignment.TopCenter,
                     ) {
                         BoardView(
@@ -253,15 +256,20 @@ private fun GameTopBar(
 ) {
     val difficulties = remember { Difficulty.values().toList() }
 
-    val horizontalPadding = 16.dp
     val actionSpacing = 8.dp
     TopAppBar(
         modifier =
             modifier
-                .statusBarsPadding()
-                .padding(horizontal = horizontalPadding)
-                .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()),
-        title = { Text(text = t(Res.string.timer_label, statusEmoji, elapsedSeconds)) },
+                .fillMaxWidth()
+                .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues())
+                .padding(horizontal = 16.dp),
+        windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top),
+        title = {
+            Text(
+                text = t(Res.string.timer_label, statusEmoji, elapsedSeconds),
+                style = MaterialTheme.typography.titleLarge,
+            )
+        },
         navigationIcon = {
             DifficultyButton(
                 onClick = onDifficultyClick,
@@ -277,12 +285,24 @@ private fun GameTopBar(
                 horizontalArrangement = Arrangement.spacedBy(actionSpacing),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Button(onClick = onHistoryClick) {
-                    Text(text = t(Res.string.history_button))
+                OutlinedButton(
+                    onClick = onHistoryClick,
+                    modifier = Modifier.heightIn(min = 48.dp),
+                ) {
+                    Text(
+                        text = t(Res.string.history_button),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
                 }
 
-                Button(onClick = onReset) {
-                    Text(text = t(Res.string.reset_button))
+                Button(
+                    onClick = onReset,
+                    modifier = Modifier.heightIn(min = 48.dp),
+                ) {
+                    Text(
+                        text = t(Res.string.reset_button),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
                 }
             }
         },
@@ -307,8 +327,14 @@ private fun DifficultyButton(
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
-        Button(onClick = onClick) {
-            Text(text = t(Res.string.difficulty, difficulty.localizedLabel()))
+        FilledTonalButton(
+            onClick = onClick,
+            modifier = Modifier.heightIn(min = 48.dp),
+        ) {
+            Text(
+                text = t(Res.string.difficulty, difficulty.localizedLabel()),
+                style = MaterialTheme.typography.labelLarge,
+            )
         }
         DropdownMenu(
             expanded = expanded,
@@ -316,7 +342,12 @@ private fun DifficultyButton(
         ) {
             difficulties.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(option.localizedLabel()) },
+                    text = {
+                        Text(
+                            text = option.localizedLabel(),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
                     onClick = { onSelected(option) },
                 )
             }
