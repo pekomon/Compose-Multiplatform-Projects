@@ -78,11 +78,12 @@ fun MinesweeperTheme(
     overrideColorScheme: ColorScheme? = null,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = overrideColorScheme ?: if (darkTheme) {
-        MinesweeperDarkColorScheme
-    } else {
-        MinesweeperLightColorScheme
-    }
+    val colorScheme =
+        overrideColorScheme ?: if (darkTheme) {
+            MinesweeperDarkColorScheme
+        } else {
+            MinesweeperLightColorScheme
+        }
 
     MaterialTheme(
         colorScheme = colorScheme,
