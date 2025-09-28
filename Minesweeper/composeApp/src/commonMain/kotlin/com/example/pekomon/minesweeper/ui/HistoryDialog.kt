@@ -5,14 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -56,45 +55,47 @@ fun HistoryDialog(
         onDismissRequest = onClose,
         confirmButton = {
             TextButton(onClick = onClose) {
-                Text(text = t(Res.string.history_close))
+                Text(
+                    text = t(Res.string.history_close),
+                    style = MaterialTheme.typography.labelLarge,
+                )
             }
         },
-        title = { Text(text = t(Res.string.history_title)) },
+        title = {
+            Text(
+                text = t(Res.string.history_title),
+                style = MaterialTheme.typography.headlineSmall,
+            )
+        },
         text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     difficulties.forEach { difficulty ->
                         val selected = selectedDifficulty == difficulty
-                        val containerColor =
-                            if (selected) {
-                                MaterialTheme.colorScheme.primaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.surface
-                            }
-                        val contentColor =
-                            if (selected) {
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            }
 
-                        OutlinedButton(
-                            onClick = { selectedDifficulty = difficulty },
-                            colors =
-                                ButtonDefaults.outlinedButtonColors(
-                                    containerColor = containerColor,
-                                    contentColor = contentColor,
-                                ),
-                        ) {
-                            Text(text = difficulty.localizedLabel())
+                        if (selected) {
+                            FilledTonalButton(onClick = { selectedDifficulty = difficulty }) {
+                                Text(
+                                    text = difficulty.localizedLabel(),
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+                            }
+                        } else {
+                            OutlinedButton(onClick = { selectedDifficulty = difficulty }) {
+                                Text(
+                                    text = difficulty.localizedLabel(),
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+                            }
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
 
                 if (records.isEmpty()) {
                     Text(
@@ -119,7 +120,7 @@ private fun HistoryList(records: List<RunRecord>) {
                 .fillMaxWidth()
                 .heightIn(max = maxHeight)
                 .padding(top = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         itemsIndexed(records) { index, record ->
             Row(
@@ -131,8 +132,14 @@ private fun HistoryList(records: List<RunRecord>) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(text = "${index + 1}.")
-                    Text(text = formatMillisToMmSs(record.elapsedMillis))
+                    Text(
+                        text = "${index + 1}.",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = formatMillisToMmSs(record.elapsedMillis),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
