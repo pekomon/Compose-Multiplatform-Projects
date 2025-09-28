@@ -11,12 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,24 +68,24 @@ fun HistoryDialog(
                 ) {
                     difficulties.forEach { difficulty ->
                         val selected = selectedDifficulty == difficulty
-                        val backgroundColor =
+                        val containerColor =
                             if (selected) {
-                                MaterialTheme.colors.primary.copy(alpha = 0.12f)
+                                MaterialTheme.colorScheme.primaryContainer
                             } else {
-                                MaterialTheme.colors.surface
+                                MaterialTheme.colorScheme.surface
                             }
                         val contentColor =
                             if (selected) {
-                                MaterialTheme.colors.primary
+                                MaterialTheme.colorScheme.onPrimaryContainer
                             } else {
-                                MaterialTheme.colors.onSurface
+                                MaterialTheme.colorScheme.onSurface
                             }
 
                         OutlinedButton(
                             onClick = { selectedDifficulty = difficulty },
                             colors =
                                 ButtonDefaults.outlinedButtonColors(
-                                    backgroundColor = backgroundColor,
+                                    containerColor = containerColor,
                                     contentColor = contentColor,
                                 ),
                         ) {
@@ -99,7 +99,7 @@ fun HistoryDialog(
                 if (records.isEmpty()) {
                     Text(
                         text = t(Res.string.history_no_wins, selectedDifficulty.localizedLabel()),
-                        style = MaterialTheme.typography.body1,
+                        style = MaterialTheme.typography.bodyLarge,
                     )
                 } else {
                     HistoryList(records = records)
@@ -139,7 +139,7 @@ private fun HistoryList(records: List<RunRecord>) {
 
                 Text(
                     text = formatTimestamp(record.epochMillis),
-                    style = MaterialTheme.typography.caption,
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
         }
