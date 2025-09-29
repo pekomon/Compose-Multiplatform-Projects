@@ -74,10 +74,10 @@ import com.example.pekomon.minesweeper.timer.GameTimerState
 import com.example.pekomon.minesweeper.ui.theme.flaggedCellColor
 import com.example.pekomon.minesweeper.ui.theme.hiddenCellColor
 import com.example.pekomon.minesweeper.ui.theme.revealedCellColor
-import kotlin.time.Duration
 import kotlinx.datetime.Clock
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Duration
 
 @Composable
 fun GameScreen(
