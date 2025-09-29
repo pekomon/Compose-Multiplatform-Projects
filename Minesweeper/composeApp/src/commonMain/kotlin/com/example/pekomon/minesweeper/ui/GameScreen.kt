@@ -35,11 +35,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,10 +68,13 @@ import com.example.pekomon.minesweeper.game.GameStatus
 import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
 import com.example.pekomon.minesweeper.history.RunRecord
 import com.example.pekomon.minesweeper.i18n.t
+import com.example.pekomon.minesweeper.lifecycle.AppLifecycle
+import com.example.pekomon.minesweeper.lifecycle.AppLifecycleObserver
+import com.example.pekomon.minesweeper.timer.GameTimerState
 import com.example.pekomon.minesweeper.ui.theme.flaggedCellColor
 import com.example.pekomon.minesweeper.ui.theme.hiddenCellColor
 import com.example.pekomon.minesweeper.ui.theme.revealedCellColor
-import kotlinx.coroutines.delay
+import kotlin.time.Duration
 import kotlinx.datetime.Clock
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -81,8 +88,10 @@ fun GameScreen(
     val api = remember { GameApi(initialDifficulty) }
     var difficulty by remember { mutableStateOf(initialDifficulty) }
     var board by remember { mutableStateOf(api.board) }
-    var elapsedSeconds by remember { mutableStateOf(0) }
-    var timerRunning by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val timer = remember(coroutineScope) { GameTimerState(coroutineScope = coroutineScope) }
+    val elapsed by timer.elapsed.collectAsState()
+    val elapsedSeconds = elapsed.inWholeSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
     var difficultyMenuExpanded by remember { mutableStateOf(false) }
     var showHistoryDialog by remember { mutableStateOf(false) }
     var historyVersion by remember { mutableStateOf(0) }
@@ -96,8 +105,8 @@ fun GameScreen(
         api.reset(newDifficulty)
         board = api.board
         difficulty = newDifficulty
-        elapsedSeconds = 0
-        timerRunning = false
+        timer.reset()
+        winRecorded = false
     }
 
     val statusEmoji =
@@ -109,25 +118,49 @@ fun GameScreen(
 
     LaunchedEffect(board.status, board.revealedCount) {
         when {
-            board.status != GameStatus.IN_PROGRESS -> timerRunning = false
-            board.revealedCount == 0 -> {
-                elapsedSeconds = 0
-                timerRunning = false
+            board.status != GameStatus.IN_PROGRESS -> timer.pause()
+            board.revealedCount == 0 -> timer.reset()
+            else -> {
+                if (!timer.isRunning.value) {
+                    if (timer.elapsed.value == Duration.ZERO) {
+                        timer.start()
+                    } else {
+                        timer.resume()
+                    }
+                }
             }
-            else -> timerRunning = true
         }
     }
 
-    LaunchedEffect(timerRunning) {
-        while (timerRunning) {
-            delay(1000)
-            elapsedSeconds += 1
+    val currentStatus = rememberUpdatedState(board.status)
+    val currentRevealedCount = rememberUpdatedState(board.revealedCount)
+
+    DisposableEffect(timer) {
+        val observer =
+            object : AppLifecycleObserver {
+                override fun onEnterForeground() {
+                    val status = currentStatus.value
+                    val revealed = currentRevealedCount.value
+                    if (status == GameStatus.IN_PROGRESS && revealed > 0) {
+                        timer.resume()
+                    }
+                }
+
+                override fun onEnterBackground() {
+                    timer.pause()
+                }
+            }
+
+        AppLifecycle.register(observer)
+
+        onDispose {
+            AppLifecycle.unregister(observer)
         }
     }
 
     LaunchedEffect(board.status) {
         if (board.status == GameStatus.WON && !winRecorded) {
-            val elapsedMillis = elapsedSeconds * 1000L
+            val elapsedMillis = elapsed.inWholeMilliseconds
             InMemoryHistoryStore.add(
                 RunRecord(
                     difficulty = difficulty,

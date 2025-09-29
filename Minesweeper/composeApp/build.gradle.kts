@@ -56,12 +56,14 @@ kotlin {
                 implementation(libs.androidx.activity.compose)
                 implementation(libs.androidx.core.splashscreen)
                 implementation(libs.androidx.lifecycle.runtimeKtx)
+                implementation(libs.androidx.lifecycle.process)
                 implementation(libs.androidx.datastore.preferences)
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(libs.kotlin.test)
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
         val jvmMain by getting {
