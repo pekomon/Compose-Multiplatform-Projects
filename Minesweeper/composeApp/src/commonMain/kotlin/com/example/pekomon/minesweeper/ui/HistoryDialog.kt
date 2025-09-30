@@ -17,6 +17,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,9 +32,9 @@ import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty
 import com.example.pekomon.minesweeper.composeapp.generated.resources.history_close
 import com.example.pekomon.minesweeper.composeapp.generated.resources.history_no_wins
 import com.example.pekomon.minesweeper.composeapp.generated.resources.history_title
+import com.example.pekomon.minesweeper.db.RunHistoryRepository
+import com.example.pekomon.minesweeper.db.RunRecord
 import com.example.pekomon.minesweeper.game.Difficulty
-import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
-import com.example.pekomon.minesweeper.history.RunRecord
 import com.example.pekomon.minesweeper.i18n.t
 import com.example.pekomon.minesweeper.util.formatMillisToMmSs
 import kotlinx.datetime.Instant
@@ -46,10 +47,16 @@ import org.jetbrains.compose.resources.stringResource
 fun HistoryDialog(
     currentDifficulty: Difficulty,
     onClose: () -> Unit,
+    repository: RunHistoryRepository,
+    refreshKey: Int,
 ) {
     var selectedDifficulty by remember { mutableStateOf(currentDifficulty) }
+    var records by remember { mutableStateOf<List<RunRecord>>(emptyList()) }
     val difficulties = remember { Difficulty.values().toList() }
-    val records = InMemoryHistoryStore.top(selectedDifficulty)
+
+    LaunchedEffect(selectedDifficulty, refreshKey, repository) {
+        records = runCatching { repository.top10(selectedDifficulty) }.getOrElse { emptyList() }
+    }
 
     AlertDialog(
         onDismissRequest = onClose,
@@ -145,7 +152,7 @@ private fun HistoryList(records: List<RunRecord>) {
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = formatTimestamp(record.epochMillis),
+                    text = formatTimestamp(record.finishedAt),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -153,8 +160,8 @@ private fun HistoryList(records: List<RunRecord>) {
     }
 }
 
-private fun formatTimestamp(epochMillis: Long): String {
-    val utcTime = Instant.fromEpochMilliseconds(epochMillis).toLocalDateTime(TimeZone.UTC)
+private fun formatTimestamp(finishedAtMillis: Long): String {
+    val utcTime = Instant.fromEpochMilliseconds(finishedAtMillis).toLocalDateTime(TimeZone.UTC)
     return buildString {
         append(utcTime.year.toString().padStart(4, '0'))
         append('-')

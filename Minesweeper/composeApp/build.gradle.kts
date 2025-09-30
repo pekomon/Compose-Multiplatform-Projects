@@ -2,6 +2,16 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+buildscript {
+    repositories {
+        mavenCentral()
+        maven("https://maven.pkg.jetbrains.space/public/p/sqldelight/maven")
+    }
+    dependencies {
+        classpath("app.cash.sqldelight:gradle-plugin:${libs.versions.sqldelight.get()}")
+    }
+}
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
@@ -10,6 +20,8 @@ plugins {
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.kover)
 }
+
+apply(plugin = "app.cash.sqldelight")
 
 kotlin {
     androidTarget {
@@ -48,6 +60,9 @@ kotlin {
                 implementation(libs.androidx.lifecycle.runtimeCompose)
                 implementation(libs.compose.resources)
                 implementation(libs.kotlinx.datetime)
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.sqldelight.runtime)
+                implementation(libs.sqldelight.coroutines.extensions)
             }
         }
         val androidMain by getting {
@@ -58,19 +73,35 @@ kotlin {
                 implementation(libs.androidx.lifecycle.runtimeKtx)
                 implementation(libs.androidx.lifecycle.process)
                 implementation(libs.androidx.datastore.preferences)
+                implementation(libs.sqldelight.android.driver)
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.sqldelight.sqlite.driver)
             }
         }
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(libs.kotlinx.coroutinesSwing)
+                implementation(libs.sqldelight.sqlite.driver)
             }
+        }
+        val iosMain by getting {
+            dependencies {
+                implementation(libs.sqldelight.native.driver)
+            }
+        }
+    }
+}
+
+sqldelight {
+    databases {
+        create("RunHistoryDatabase") {
+            packageName.set("com.example.pekomon.minesweeper.db")
         }
     }
 }

@@ -39,7 +39,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,14 +58,14 @@ import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty
 import com.example.pekomon.minesweeper.composeapp.generated.resources.history_button
 import com.example.pekomon.minesweeper.composeapp.generated.resources.reset_button
 import com.example.pekomon.minesweeper.composeapp.generated.resources.timer_label
+import com.example.pekomon.minesweeper.db.NoOpRunHistoryRepository
+import com.example.pekomon.minesweeper.db.provideRunHistoryRepository
 import com.example.pekomon.minesweeper.game.Board
 import com.example.pekomon.minesweeper.game.Cell
 import com.example.pekomon.minesweeper.game.CellState
 import com.example.pekomon.minesweeper.game.Difficulty
 import com.example.pekomon.minesweeper.game.GameApi
 import com.example.pekomon.minesweeper.game.GameStatus
-import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
-import com.example.pekomon.minesweeper.history.RunRecord
 import com.example.pekomon.minesweeper.i18n.t
 import com.example.pekomon.minesweeper.lifecycle.AppLifecycle
 import com.example.pekomon.minesweeper.lifecycle.AppLifecycleObserver
@@ -96,6 +95,10 @@ fun GameScreen(
     var showHistoryDialog by remember { mutableStateOf(false) }
     var historyVersion by remember { mutableStateOf(0) }
     var winRecorded by remember { mutableStateOf(false) }
+    val runHistoryRepository =
+        remember {
+            runCatching { provideRunHistoryRepository() }.getOrElse { NoOpRunHistoryRepository }
+        }
 
     fun refreshBoard() {
         board = api.board
@@ -160,15 +163,20 @@ fun GameScreen(
 
     LaunchedEffect(board.status) {
         if (board.status == GameStatus.WON && !winRecorded) {
+            // Only persist victorious runs. Losses are intentionally ignored.
             val elapsedMillis = elapsed.inWholeMilliseconds
-            InMemoryHistoryStore.add(
-                RunRecord(
-                    difficulty = difficulty,
-                    elapsedMillis = elapsedMillis,
-                    epochMillis = Clock.System.now().toEpochMilliseconds(),
-                ),
-            )
-            historyVersion += 1
+            val finishedAt = Clock.System.now().toEpochMilliseconds()
+            val result =
+                runCatching {
+                    runHistoryRepository.insert(
+                        difficulty = difficulty,
+                        elapsedMillis = elapsedMillis,
+                        finishedAt = finishedAt,
+                    )
+                }
+            if (result.isSuccess) {
+                historyVersion += 1
+            }
             winRecorded = true
         }
         if (board.status == GameStatus.IN_PROGRESS) {
@@ -264,12 +272,12 @@ fun GameScreen(
     }
 
     if (showHistoryDialog) {
-        key(historyVersion) {
-            HistoryDialog(
-                currentDifficulty = difficulty,
-                onClose = { showHistoryDialog = false },
-            )
-        }
+        HistoryDialog(
+            currentDifficulty = difficulty,
+            onClose = { showHistoryDialog = false },
+            repository = runHistoryRepository,
+            refreshKey = historyVersion,
+        )
     }
 }
 
