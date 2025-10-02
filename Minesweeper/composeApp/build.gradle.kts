@@ -1,6 +1,4 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -9,6 +7,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.kover)
+    kotlin("plugin.serialization") version "1.9.10"
     alias(libs.plugins.sqldelight)
 }
 
@@ -21,12 +20,7 @@ sqldelight {
 }
 
 kotlin {
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
-    }
-
+    androidTarget()
     listOf(
         iosArm64(),
         iosSimulatorArm64(),
@@ -36,10 +30,12 @@ kotlin {
             isStatic = true
         }
     }
+    iosArm64()
+    iosSimulatorArm64()
 
     jvm()
 
-    @OptIn(ExperimentalWasmDsl::class)
+    @OptIn(org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl::class)
     wasmJs {
         browser()
         binaries.executable()
@@ -82,11 +78,6 @@ kotlin {
                 implementation(compose.desktop.currentOs)
                 implementation(libs.kotlinx.coroutinesSwing)
                 implementation(libs.sqldelight.sqlite.driver)
-            }
-        }
-        val iosMain by getting {
-            dependencies {
-                implementation(libs.sqldelight.native.driver)
             }
         }
     }
