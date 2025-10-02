@@ -1,0 +1,21 @@
+-- RunHistory.sq
+CREATE TABLE RunHistory (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  difficulty TEXT NOT NULL,
+  millis INTEGER NOT NULL,        -- elapsed time in ms
+  epochMillis INTEGER NOT NULL    -- completion timestamp UTC
+);
+
+selectTop10ByDifficulty:
+SELECT *
+FROM RunHistory
+WHERE difficulty = ?
+ORDER BY millis ASC
+LIMIT 10;
+
+insertRun:
+INSERT INTO RunHistory(difficulty, millis, epochMillis)
+VALUES (?, ?, ?);
+
+deleteAll:
+DELETE FROM RunHistory;

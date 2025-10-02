@@ -9,6 +9,15 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.kover)
+    alias(libs.plugins.sqldelight)
+}
+
+sqldelight {
+    databases {
+        create("RunHistoryDatabase") {
+            packageName.set("com.example.pekomon.minesweeper.db")
+        }
+    }
 }
 
 kotlin {
@@ -48,6 +57,7 @@ kotlin {
                 implementation(libs.androidx.lifecycle.runtimeCompose)
                 implementation(libs.compose.resources)
                 implementation(libs.kotlinx.datetime)
+                implementation(libs.sqldelight.runtime)
             }
         }
         val androidMain by getting {
@@ -58,6 +68,7 @@ kotlin {
                 implementation(libs.androidx.lifecycle.runtimeKtx)
                 implementation(libs.androidx.lifecycle.process)
                 implementation(libs.androidx.datastore.preferences)
+                implementation(libs.sqldelight.android.driver)
             }
         }
         val commonTest by getting {
@@ -70,6 +81,12 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(libs.kotlinx.coroutinesSwing)
+                implementation(libs.sqldelight.sqlite.driver)
+            }
+        }
+        val iosMain by getting {
+            dependencies {
+                implementation(libs.sqldelight.native.driver)
             }
         }
     }
