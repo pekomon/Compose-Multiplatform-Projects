@@ -38,4 +38,13 @@ class JvmSettingsRepositoryTest {
 
         assertEquals(Difficulty.MEDIUM, repository.getSelectedDifficulty())
     }
+
+    @Test
+    fun `round trips reduced motion`() {
+        assertEquals(false, repository.isReducedMotionEnabled())
+
+        repository.setReducedMotionEnabled(true)
+
+        assertEquals(true, repository.isReducedMotionEnabled())
+    }
 }

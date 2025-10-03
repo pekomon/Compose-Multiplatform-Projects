@@ -14,6 +14,13 @@ internal class JvmSettingsRepository(
     override fun setSelectedDifficulty(value: Difficulty) {
         preferences.put(SettingsKeys.SELECTED_DIFFICULTY, value.name)
     }
+
+    override fun isReducedMotionEnabled(): Boolean =
+        preferences.getBoolean(SettingsKeys.REDUCED_MOTION_ENABLED, false)
+
+    override fun setReducedMotionEnabled(enabled: Boolean) {
+        preferences.putBoolean(SettingsKeys.REDUCED_MOTION_ENABLED, enabled)
+    }
 }
 
 private val repository: SettingsRepository by lazy {
