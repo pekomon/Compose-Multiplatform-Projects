@@ -1,34 +1,29 @@
 package com.example.pekomon.minesweeper.history
 
 import com.example.pekomon.minesweeper.game.Difficulty
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
-private const val MAX_RECORDS = 10
-
-object InMemoryHistoryStore {
+class InMemoryHistoryStore : HistoryStore {
+    private val mutex = Mutex()
     private val records: MutableMap<Difficulty, MutableList<RunRecord>> =
         Difficulty.values().associateWith { mutableListOf<RunRecord>() }.toMutableMap()
 
-    fun add(record: RunRecord) {
-        val bucket = records.getOrPut(record.difficulty) { mutableListOf() }
-        bucket.add(record)
-        bucket.sortWith(compareBy<RunRecord> { it.elapsedMillis }.thenBy { it.epochMillis })
-        if (bucket.size > MAX_RECORDS) {
-            bucket.subList(MAX_RECORDS, bucket.size).clear()
+    override suspend fun getTop10(difficulty: Difficulty): List<RunRecord> =
+        mutex.withLock { records[difficulty].orEmpty().normalizeTop10() }
+
+    override suspend fun addRun(record: RunRecord) {
+        mutex.withLock {
+            val bucket = records.getOrPut(record.difficulty) { mutableListOf() }
+            val updated = (bucket + record).normalizeTop10()
+            bucket.clear()
+            bucket.addAll(updated)
         }
     }
 
-    fun top(
-        difficulty: Difficulty,
-        limit: Int = MAX_RECORDS,
-    ): List<RunRecord> {
-        if (limit <= 0) {
-            return emptyList()
+    override suspend fun clearAll() {
+        mutex.withLock {
+            records.values.forEach { it.clear() }
         }
-        val bucket = records[difficulty].orEmpty()
-        return bucket.take(limit)
-    }
-
-    internal fun clear() {
-        records.values.forEach { it.clear() }
     }
 }
