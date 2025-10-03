@@ -39,7 +39,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -65,7 +64,7 @@ import com.example.pekomon.minesweeper.game.CellState
 import com.example.pekomon.minesweeper.game.Difficulty
 import com.example.pekomon.minesweeper.game.GameApi
 import com.example.pekomon.minesweeper.game.GameStatus
-import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
+import com.example.pekomon.minesweeper.history.HistoryStore
 import com.example.pekomon.minesweeper.history.RunRecord
 import com.example.pekomon.minesweeper.i18n.t
 import com.example.pekomon.minesweeper.lifecycle.AppLifecycle
@@ -83,6 +82,7 @@ import kotlin.time.Duration
 fun GameScreen(
     modifier: Modifier = Modifier,
     initialDifficulty: Difficulty = Difficulty.EASY,
+    historyStore: HistoryStore,
     onDifficultyChanged: (Difficulty) -> Unit = {},
 ) {
     val api = remember { GameApi(initialDifficulty) }
@@ -158,17 +158,22 @@ fun GameScreen(
         }
     }
 
-    LaunchedEffect(board.status) {
+    LaunchedEffect(board.status, historyStore) {
         if (board.status == GameStatus.WON && !winRecorded) {
             val elapsedMillis = elapsed.inWholeMilliseconds
-            InMemoryHistoryStore.add(
-                RunRecord(
-                    difficulty = difficulty,
-                    elapsedMillis = elapsedMillis,
-                    epochMillis = Clock.System.now().toEpochMilliseconds(),
-                ),
-            )
-            historyVersion += 1
+            val result =
+                runCatching {
+                    historyStore.addRun(
+                        RunRecord(
+                            difficulty = difficulty,
+                            millis = elapsedMillis,
+                            epochMillis = Clock.System.now().toEpochMilliseconds(),
+                        ),
+                    )
+                }
+            if (result.isSuccess) {
+                historyVersion += 1
+            }
             winRecorded = true
         }
         if (board.status == GameStatus.IN_PROGRESS) {
@@ -264,12 +269,12 @@ fun GameScreen(
     }
 
     if (showHistoryDialog) {
-        key(historyVersion) {
-            HistoryDialog(
-                currentDifficulty = difficulty,
-                onClose = { showHistoryDialog = false },
-            )
-        }
+        HistoryDialog(
+            currentDifficulty = difficulty,
+            historyStore = historyStore,
+            dataVersion = historyVersion,
+            onClose = { showHistoryDialog = false },
+        )
     }
 }
 

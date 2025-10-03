@@ -24,6 +24,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
+import com.example.pekomon.minesweeper.history.initializeHistoryStore
 import com.example.pekomon.minesweeper.settings.initializeSettingsRepository
 import com.example.pekomon.minesweeper.ui.GameScreen
 import com.example.pekomon.minesweeper.ui.theme.AndroidMinesweeperTheme
@@ -39,6 +41,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         initializeSettingsRepository(applicationContext)
+        initializeHistoryStore(applicationContext)
 
         splashScreen?.let { screen ->
             var keepSplashVisible = true
@@ -109,6 +112,7 @@ private fun LegacySplash() {
 @Composable
 fun GameScreenAndroidPreview() {
     AndroidMinesweeperTheme {
-        GameScreen()
+        val historyStore = remember { InMemoryHistoryStore() }
+        GameScreen(historyStore = historyStore)
     }
 }

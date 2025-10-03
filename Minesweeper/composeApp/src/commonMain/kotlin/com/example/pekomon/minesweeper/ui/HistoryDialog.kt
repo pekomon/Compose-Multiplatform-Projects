@@ -17,6 +17,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,7 +33,7 @@ import com.example.pekomon.minesweeper.composeapp.generated.resources.history_cl
 import com.example.pekomon.minesweeper.composeapp.generated.resources.history_no_wins
 import com.example.pekomon.minesweeper.composeapp.generated.resources.history_title
 import com.example.pekomon.minesweeper.game.Difficulty
-import com.example.pekomon.minesweeper.history.InMemoryHistoryStore
+import com.example.pekomon.minesweeper.history.HistoryStore
 import com.example.pekomon.minesweeper.history.RunRecord
 import com.example.pekomon.minesweeper.i18n.t
 import com.example.pekomon.minesweeper.util.formatMillisToMmSs
@@ -45,11 +46,17 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun HistoryDialog(
     currentDifficulty: Difficulty,
+    historyStore: HistoryStore,
+    dataVersion: Int,
     onClose: () -> Unit,
 ) {
-    var selectedDifficulty by remember { mutableStateOf(currentDifficulty) }
+    var selectedDifficulty by remember(currentDifficulty) { mutableStateOf(currentDifficulty) }
     val difficulties = remember { Difficulty.values().toList() }
-    val records = InMemoryHistoryStore.top(selectedDifficulty)
+    var records by remember { mutableStateOf<List<RunRecord>>(emptyList()) }
+
+    LaunchedEffect(historyStore, selectedDifficulty, dataVersion) {
+        records = runCatching { historyStore.getTop10(selectedDifficulty) }.getOrElse { emptyList() }
+    }
 
     AlertDialog(
         onDismissRequest = onClose,
@@ -137,7 +144,7 @@ private fun HistoryList(records: List<RunRecord>) {
                         style = MaterialTheme.typography.bodyLarge,
                     )
                     Text(
-                        text = formatMillisToMmSs(record.elapsedMillis),
+                        text = formatMillisToMmSs(record.millis),
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
