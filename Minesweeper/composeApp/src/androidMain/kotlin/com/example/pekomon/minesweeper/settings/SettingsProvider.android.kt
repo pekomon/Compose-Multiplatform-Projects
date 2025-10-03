@@ -54,7 +54,11 @@ private object AndroidSettingsHolder {
     }
 
     fun repository(): SettingsRepository =
-        repository ?: error("SettingsRepository not initialized. Call initializeSettingsRepository(context) first.")
+        repository
+            ?: error(
+                "SettingsRepository not initialized. " +
+                    "Call initializeSettingsRepository(context) first.",
+            )
 }
 
 fun initializeSettingsRepository(context: Context) {
