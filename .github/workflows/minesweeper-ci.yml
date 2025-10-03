@@ -45,7 +45,7 @@ jobs:
   quality:
     name: Quality (Spotless Check & Detekt)
     needs: [changes]
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -113,7 +113,7 @@ jobs:
   tests:
     name: JVM Tests & Coverage
     needs: [changes]
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -152,7 +152,7 @@ jobs:
   android:
     name: Android (assembleDebug)
     needs: [tests]
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -191,7 +191,7 @@ jobs:
   desktop:
     name: Desktop (uber-jar)
     needs: [tests]
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -227,7 +227,7 @@ jobs:
   wasm:
     name: Wasm (production distribution)
     needs: [tests]
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
