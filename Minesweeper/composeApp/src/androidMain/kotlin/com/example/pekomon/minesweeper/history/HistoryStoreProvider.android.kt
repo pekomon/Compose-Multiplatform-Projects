@@ -13,9 +13,10 @@ private val Context.historyDataStore by preferencesDataStore(name = "minesweeper
 private class AndroidHistoryStore(
     private val context: Context,
 ) : HistoryStore {
-    private val keys = Difficulty.values().associateWith { difficulty ->
-        stringPreferencesKey(difficulty.historyKey())
-    }
+    private val keys =
+        Difficulty.values().associateWith { difficulty ->
+            stringPreferencesKey(difficulty.historyKey())
+        }
 
     override suspend fun getTop10(difficulty: Difficulty): List<RunRecord> {
         val key = keys.getValue(difficulty)
@@ -52,7 +53,9 @@ private object AndroidHistoryStoreHolder {
     }
 
     fun get(): HistoryStore =
-        store ?: error("HistoryStore not initialized. Call initializeHistoryStore(context) first.")
+        store ?: error(
+            "HistoryStore not initialized. Call initializeHistoryStore(context) first.",
+        )
 }
 
 fun initializeHistoryStore(context: Context) {

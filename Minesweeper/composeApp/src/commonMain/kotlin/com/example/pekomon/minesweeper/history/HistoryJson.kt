@@ -5,9 +5,10 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 internal object HistoryJson {
-    private val json = Json {
-        ignoreUnknownKeys = true
-    }
+    private val json =
+        Json {
+            ignoreUnknownKeys = true
+        }
 
     fun encode(records: List<RunRecord>): String = json.encodeToString(records)
 
