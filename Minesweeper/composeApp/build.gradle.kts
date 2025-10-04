@@ -54,7 +54,12 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                implementation(project.dependencies.platform(libs.androidx.compose.bom.get()))
+                implementation(
+                    project.dependencies.platform(
+                        libs.androidx.compose.bom
+                            .get(),
+                    ),
+                )
                 implementation(libs.androidx.compose.foundation)
                 implementation(libs.androidx.compose.material3)
                 implementation(libs.androidx.compose.ui)
@@ -128,7 +133,12 @@ android {
 }
 
 dependencies {
-    debugImplementation(project.dependencies.platform(libs.androidx.compose.bom.get()))
+    debugImplementation(
+        project.dependencies.platform(
+            libs.androidx.compose.bom
+                .get(),
+        ),
+    )
     debugImplementation(compose.uiTooling)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
