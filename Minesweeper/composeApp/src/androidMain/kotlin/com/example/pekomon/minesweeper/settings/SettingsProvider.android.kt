@@ -32,7 +32,9 @@ private class AndroidSettingsRepository(
     }
 
     override fun isReducedMotionEnabled(): Boolean =
-        runBlocking { context.dataStore.data.first()[reducedMotionKey] ?: false }
+        runBlocking {
+            context.dataStore.data.first()[reducedMotionKey] ?: false
+        }
 
     override fun setReducedMotionEnabled(enabled: Boolean) {
         runBlocking {

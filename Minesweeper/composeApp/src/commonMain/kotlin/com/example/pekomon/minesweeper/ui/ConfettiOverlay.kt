@@ -24,8 +24,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.PI
-import kotlin.math.sin
 import kotlin.math.roundToInt
+import kotlin.math.sin
 import kotlin.random.Random
 
 @Composable
@@ -40,26 +40,29 @@ fun ConfettiOverlay(
     }
 
     val palette = if (colors.isEmpty()) defaultConfettiColors() else colors
-    val particles = remember(palette, particleCount, animationDurationMillis) {
-        createParticles(palette, particleCount, animationDurationMillis)
-    }
+    val particles =
+        remember(palette, particleCount, animationDurationMillis) {
+            createParticles(palette, particleCount, animationDurationMillis)
+        }
     val transition = rememberInfiniteTransition(label = "confetti-transition")
-    val animationDurations = remember(particles, animationDurationMillis) {
-        particles.map { it.durationMillis(animationDurationMillis) }
-    }
-    val animations = particles.mapIndexed { index, particle ->
-        val duration = animationDurations[index]
-        transition.animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec =
-                infiniteRepeatable(
-                    animation = tween(durationMillis = duration, easing = LinearEasing),
-                    initialStartOffset = StartOffset(particle.startDelayMillis),
-                ),
-            label = "confetti-progress-$index",
-        )
-    }
+    val animationDurations =
+        remember(particles, animationDurationMillis) {
+            particles.map { it.durationMillis(animationDurationMillis) }
+        }
+    val animations =
+        particles.mapIndexed { index, particle ->
+            val duration = animationDurations[index]
+            transition.animateFloat(
+                initialValue = 0f,
+                targetValue = 1f,
+                animationSpec =
+                    infiniteRepeatable(
+                        animation = tween(durationMillis = duration, easing = LinearEasing),
+                        initialStartOffset = StartOffset(particle.startDelayMillis),
+                    ),
+                label = "confetti-progress-$index",
+            )
+        }
 
     val density = LocalDensity.current
     Canvas(modifier = modifier) {
@@ -150,8 +153,7 @@ private fun ConfettiParticle.xFraction(progress: Float): Float {
     return wrap01(startFractionX + swayAmplitude * oscillation)
 }
 
-private fun ConfettiParticle.rotationDegrees(progress: Float): Float =
-    (progress * 360f * rotationSpeed) % 360f
+private fun ConfettiParticle.rotationDegrees(progress: Float): Float = (progress * 360f * rotationSpeed) % 360f
 
 private fun wrap01(value: Float): Float {
     var result = value % 1f
@@ -161,7 +163,10 @@ private fun wrap01(value: Float): Float {
     return result
 }
 
-private fun Random.nextFloatInRange(min: Float, max: Float): Float {
+private fun Random.nextFloatInRange(
+    min: Float,
+    max: Float,
+): Float {
     require(min <= max) { "min must be <= max" }
     return min + nextFloat() * (max - min)
 }

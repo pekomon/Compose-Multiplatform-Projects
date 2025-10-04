@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Dp.Companion.Infinity
 import androidx.compose.ui.unit.Dp.Companion.Unspecified
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.example.pekomon.minesweeper.composeapp.generated.resources.Res
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_easy
@@ -78,11 +79,10 @@ import com.example.pekomon.minesweeper.i18n.t
 import com.example.pekomon.minesweeper.lifecycle.AppLifecycle
 import com.example.pekomon.minesweeper.lifecycle.AppLifecycleObserver
 import com.example.pekomon.minesweeper.timer.GameTimerState
-import com.example.pekomon.minesweeper.util.formatMillisToMmSs
 import com.example.pekomon.minesweeper.ui.theme.flaggedCellColor
 import com.example.pekomon.minesweeper.ui.theme.hiddenCellColor
 import com.example.pekomon.minesweeper.ui.theme.revealedCellColor
-import androidx.compose.ui.zIndex
+import com.example.pekomon.minesweeper.util.formatMillisToMmSs
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import org.jetbrains.compose.resources.StringResource

@@ -15,8 +15,7 @@ internal class JvmSettingsRepository(
         preferences.put(SettingsKeys.SELECTED_DIFFICULTY, value.name)
     }
 
-    override fun isReducedMotionEnabled(): Boolean =
-        preferences.getBoolean(SettingsKeys.REDUCED_MOTION_ENABLED, false)
+    override fun isReducedMotionEnabled(): Boolean = preferences.getBoolean(SettingsKeys.REDUCED_MOTION_ENABLED, false)
 
     override fun setReducedMotionEnabled(enabled: Boolean) {
         preferences.putBoolean(SettingsKeys.REDUCED_MOTION_ENABLED, enabled)
