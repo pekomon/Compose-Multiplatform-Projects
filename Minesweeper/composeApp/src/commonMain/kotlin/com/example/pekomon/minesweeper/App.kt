@@ -34,11 +34,13 @@ fun MinesweeperContent() {
             runCatching { provideHistoryStore() }.getOrElse { InMemoryHistoryStore() }
         }
     var storedDifficulty by remember { mutableStateOf(settingsRepository.getSelectedDifficulty()) }
+    val reducedMotionEnabled = remember { settingsRepository.isReducedMotionEnabled() }
     val initialDifficulty = storedDifficulty ?: Difficulty.EASY
 
     GameScreen(
         initialDifficulty = initialDifficulty,
         historyStore = historyStore,
+        reducedMotionEnabled = reducedMotionEnabled,
         onDifficultyChanged = {
             storedDifficulty = it
             settingsRepository.setSelectedDifficulty(it)
@@ -48,10 +50,17 @@ fun MinesweeperContent() {
 
 private class InMemorySettingsRepository : SettingsRepository {
     private var difficulty: Difficulty? = null
+    private var reducedMotionEnabled: Boolean = false
 
     override fun getSelectedDifficulty(): Difficulty? = difficulty
 
     override fun setSelectedDifficulty(value: Difficulty) {
         difficulty = value
+    }
+
+    override fun isReducedMotionEnabled(): Boolean = reducedMotionEnabled
+
+    override fun setReducedMotionEnabled(enabled: Boolean) {
+        reducedMotionEnabled = enabled
     }
 }

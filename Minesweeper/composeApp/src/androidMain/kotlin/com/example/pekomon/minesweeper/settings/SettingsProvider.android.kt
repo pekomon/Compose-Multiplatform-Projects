@@ -1,6 +1,7 @@
 package com.example.pekomon.minesweeper.settings
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -14,6 +15,7 @@ private class AndroidSettingsRepository(
     private val context: Context,
 ) : SettingsRepository {
     private val difficultyKey = stringPreferencesKey(SettingsKeys.SELECTED_DIFFICULTY)
+    private val reducedMotionKey = booleanPreferencesKey(SettingsKeys.REDUCED_MOTION_ENABLED)
 
     override fun getSelectedDifficulty(): Difficulty? =
         runBlocking {
@@ -25,6 +27,19 @@ private class AndroidSettingsRepository(
         runBlocking {
             context.dataStore.edit { preferences ->
                 preferences[difficultyKey] = value.name
+            }
+        }
+    }
+
+    override fun isReducedMotionEnabled(): Boolean =
+        runBlocking {
+            context.dataStore.data.first()[reducedMotionKey] ?: false
+        }
+
+    override fun setReducedMotionEnabled(enabled: Boolean) {
+        runBlocking {
+            context.dataStore.edit { preferences ->
+                preferences[reducedMotionKey] = enabled
             }
         }
     }
@@ -41,7 +56,11 @@ private object AndroidSettingsHolder {
     }
 
     fun repository(): SettingsRepository =
-        repository ?: error("SettingsRepository not initialized. Call initializeSettingsRepository(context) first.")
+        repository
+            ?: error(
+                "SettingsRepository not initialized. " +
+                    "Call initializeSettingsRepository(context) first.",
+            )
 }
 
 fun initializeSettingsRepository(context: Context) {

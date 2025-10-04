@@ -14,6 +14,12 @@ private class IosSettingsRepository : SettingsRepository {
     override fun setSelectedDifficulty(value: Difficulty) {
         defaults.setObject(value.name, forKey = SettingsKeys.SELECTED_DIFFICULTY)
     }
+
+    override fun isReducedMotionEnabled(): Boolean = defaults.boolForKey(SettingsKeys.REDUCED_MOTION_ENABLED)
+
+    override fun setReducedMotionEnabled(enabled: Boolean) {
+        defaults.setBool(enabled, forKey = SettingsKeys.REDUCED_MOTION_ENABLED)
+    }
 }
 
 private val repository: SettingsRepository by lazy { IosSettingsRepository() }

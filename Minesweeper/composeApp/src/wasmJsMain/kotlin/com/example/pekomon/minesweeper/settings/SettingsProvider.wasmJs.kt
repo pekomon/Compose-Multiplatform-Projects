@@ -14,6 +14,16 @@ private class WasmSettingsRepository : SettingsRepository {
     override fun setSelectedDifficulty(value: Difficulty) {
         storage.setItem(SettingsKeys.SELECTED_DIFFICULTY, value.name)
     }
+
+    override fun isReducedMotionEnabled(): Boolean =
+        storage
+            .getItem(SettingsKeys.REDUCED_MOTION_ENABLED)
+            ?.toBoolean()
+            ?: false
+
+    override fun setReducedMotionEnabled(enabled: Boolean) {
+        storage.setItem(SettingsKeys.REDUCED_MOTION_ENABLED, enabled.toString())
+    }
 }
 
 private val repository: SettingsRepository by lazy { WasmSettingsRepository() }

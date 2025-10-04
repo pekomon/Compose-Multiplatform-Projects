@@ -11,4 +11,7 @@
     <string name="history_no_wins">Ei voittoja tasolla %1$s vielä.</string>
     <string name="history_button">Historia</string>
     <string name="reset_button">Aloita alusta</string>
+    <string name="new_record_title">Uusi ennätys!</string>
+    <string name="new_record_time">Aika: %1$s</string>
+    <string name="new_record_difficulty">Vaikeustaso: %1$s</string>
 </resources>

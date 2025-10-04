@@ -1,9 +1,13 @@
 package com.example.pekomon.minesweeper.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -50,12 +54,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Dp.Companion.Infinity
 import androidx.compose.ui.unit.Dp.Companion.Unspecified
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.example.pekomon.minesweeper.composeapp.generated.resources.Res
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_easy
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_hard
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_medium
 import com.example.pekomon.minesweeper.composeapp.generated.resources.history_button
+import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record_difficulty
+import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record_time
+import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record_title
 import com.example.pekomon.minesweeper.composeapp.generated.resources.reset_button
 import com.example.pekomon.minesweeper.composeapp.generated.resources.timer_label
 import com.example.pekomon.minesweeper.game.Board
@@ -66,6 +74,7 @@ import com.example.pekomon.minesweeper.game.GameApi
 import com.example.pekomon.minesweeper.game.GameStatus
 import com.example.pekomon.minesweeper.history.HistoryStore
 import com.example.pekomon.minesweeper.history.RunRecord
+import com.example.pekomon.minesweeper.history.isNewRecord
 import com.example.pekomon.minesweeper.i18n.t
 import com.example.pekomon.minesweeper.lifecycle.AppLifecycle
 import com.example.pekomon.minesweeper.lifecycle.AppLifecycleObserver
@@ -73,6 +82,8 @@ import com.example.pekomon.minesweeper.timer.GameTimerState
 import com.example.pekomon.minesweeper.ui.theme.flaggedCellColor
 import com.example.pekomon.minesweeper.ui.theme.hiddenCellColor
 import com.example.pekomon.minesweeper.ui.theme.revealedCellColor
+import com.example.pekomon.minesweeper.util.formatMillisToMmSs
+import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -83,6 +94,7 @@ fun GameScreen(
     modifier: Modifier = Modifier,
     initialDifficulty: Difficulty = Difficulty.EASY,
     historyStore: HistoryStore,
+    reducedMotionEnabled: Boolean = false,
     onDifficultyChanged: (Difficulty) -> Unit = {},
 ) {
     val api = remember { GameApi(initialDifficulty) }
@@ -96,6 +108,7 @@ fun GameScreen(
     var showHistoryDialog by remember { mutableStateOf(false) }
     var historyVersion by remember { mutableStateOf(0) }
     var winRecorded by remember { mutableStateOf(false) }
+    var celebration by remember { mutableStateOf<NewRecordCelebration?>(null) }
 
     fun refreshBoard() {
         board = api.board
@@ -107,78 +120,26 @@ fun GameScreen(
         difficulty = newDifficulty
         timer.reset()
         winRecorded = false
+        celebration = null
     }
 
-    val statusEmoji =
-        when (board.status) {
-            GameStatus.IN_PROGRESS -> "⏳"
-            GameStatus.WON -> "🏆"
-            GameStatus.LOST -> "💥"
-        }
+    val statusEmoji = board.status.asStatusEmoji()
 
-    LaunchedEffect(board.status, board.revealedCount) {
-        when {
-            board.status != GameStatus.IN_PROGRESS -> timer.pause()
-            board.revealedCount == 0 -> timer.reset()
-            else -> {
-                if (!timer.isRunning.value) {
-                    if (timer.elapsed.value == Duration.ZERO) {
-                        timer.start()
-                    } else {
-                        timer.resume()
-                    }
-                }
-            }
-        }
-    }
+    GameTimerEffects(board = board, timer = timer)
 
-    val currentStatus = rememberUpdatedState(board.status)
-    val currentRevealedCount = rememberUpdatedState(board.revealedCount)
+    GameCelebrationEffects(
+        board = board,
+        difficulty = difficulty,
+        elapsed = elapsed,
+        historyStore = historyStore,
+        winRecorded = winRecorded,
+        onWinRecordedChange = { winRecorded = it },
+        onHistoryVersionIncrement = { historyVersion += 1 },
+        onCelebrationChange = { celebration = it },
+    )
 
-    DisposableEffect(timer) {
-        val observer =
-            object : AppLifecycleObserver {
-                override fun onEnterForeground() {
-                    val status = currentStatus.value
-                    val revealed = currentRevealedCount.value
-                    if (status == GameStatus.IN_PROGRESS && revealed > 0) {
-                        timer.resume()
-                    }
-                }
-
-                override fun onEnterBackground() {
-                    timer.pause()
-                }
-            }
-
-        AppLifecycle.register(observer)
-
-        onDispose {
-            AppLifecycle.unregister(observer)
-        }
-    }
-
-    LaunchedEffect(board.status, historyStore) {
-        if (board.status == GameStatus.WON && !winRecorded) {
-            val elapsedMillis = elapsed.inWholeMilliseconds
-            val result =
-                runCatching {
-                    historyStore.addRun(
-                        RunRecord(
-                            difficulty = difficulty,
-                            millis = elapsedMillis,
-                            epochMillis = Clock.System.now().toEpochMilliseconds(),
-                        ),
-                    )
-                }
-            if (result.isSuccess) {
-                historyVersion += 1
-            }
-            winRecorded = true
-        }
-        if (board.status == GameStatus.IN_PROGRESS) {
-            winRecorded = false
-        }
+    AutoDismissCelebration(celebration = celebration) {
+        celebration = null
     }
 
     val scrollState = rememberScrollState()
@@ -215,7 +176,6 @@ fun GameScreen(
                         .fillMaxSize()
                         .padding(innerPadding)
                         .padding(horizontal = outerPadding, vertical = outerPadding),
-                contentAlignment = Alignment.TopCenter,
             ) {
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                     val cellSpacing = 8.dp
@@ -261,6 +221,38 @@ fun GameScreen(
                             modifier = Modifier.width(boardWidth).height(boardHeight),
                             cellSpacing = cellSpacing,
                             cellSize = cellSize,
+                        )
+                    }
+                }
+
+                val celebrationState = celebration
+                if (celebrationState != null && !reducedMotionEnabled) {
+                    ConfettiOverlay(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .align(Alignment.Center)
+                                .zIndex(0.5f),
+                    )
+                }
+
+                AnimatedVisibility(
+                    visible = celebrationState != null,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 8.dp)
+                            .zIndex(1f),
+                ) {
+                    celebrationState?.let {
+                        NewRecordBanner(
+                            celebration = it,
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
                         )
                     }
                 }
@@ -392,6 +384,175 @@ private fun DifficultyButton(
         }
     }
 }
+
+@Composable
+private fun NewRecordBanner(
+    celebration: NewRecordCelebration,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        tonalElevation = 6.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = t(Res.string.new_record_title),
+                style = MaterialTheme.typography.headlineMedium,
+            )
+            Text(
+                text = t(Res.string.new_record_time, formatMillisToMmSs(celebration.millis)),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            Text(
+                text = t(Res.string.new_record_difficulty, celebration.difficulty.localizedLabel()),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
+}
+
+@Composable
+private fun GameTimerEffects(
+    board: Board,
+    timer: GameTimerState,
+) {
+    LaunchedEffect(board.status, board.revealedCount) {
+        when {
+            board.status != GameStatus.IN_PROGRESS -> timer.pause()
+            board.revealedCount == 0 -> timer.reset()
+            else -> {
+                if (!timer.isRunning.value) {
+                    if (timer.elapsed.value == Duration.ZERO) {
+                        timer.start()
+                    } else {
+                        timer.resume()
+                    }
+                }
+            }
+        }
+    }
+
+    val currentStatus = rememberUpdatedState(board.status)
+    val currentRevealedCount = rememberUpdatedState(board.revealedCount)
+
+    DisposableEffect(timer) {
+        val observer =
+            object : AppLifecycleObserver {
+                override fun onEnterForeground() {
+                    val status = currentStatus.value
+                    val revealed = currentRevealedCount.value
+                    if (status == GameStatus.IN_PROGRESS && revealed > 0) {
+                        timer.resume()
+                    }
+                }
+
+                override fun onEnterBackground() {
+                    timer.pause()
+                }
+            }
+
+        AppLifecycle.register(observer)
+
+        onDispose {
+            AppLifecycle.unregister(observer)
+        }
+    }
+}
+
+@Composable
+private fun GameCelebrationEffects(
+    board: Board,
+    difficulty: Difficulty,
+    elapsed: Duration,
+    historyStore: HistoryStore,
+    winRecorded: Boolean,
+    onWinRecordedChange: (Boolean) -> Unit,
+    onHistoryVersionIncrement: () -> Unit,
+    onCelebrationChange: (NewRecordCelebration?) -> Unit,
+) {
+    LaunchedEffect(board.status, historyStore, difficulty) {
+        if (board.status == GameStatus.WON && !winRecorded) {
+            val elapsedMillis = elapsed.inWholeMilliseconds
+            val previousRuns =
+                runCatching { historyStore.getTop10(difficulty) }.getOrElse { emptyList() }
+            val newRecordAchieved =
+                isNewRecord(
+                    currentMillis = elapsedMillis,
+                    difficulty = difficulty,
+                    history = previousRuns,
+                )
+            val timestamp = Clock.System.now().toEpochMilliseconds()
+            val result =
+                runCatching {
+                    historyStore.addRun(
+                        RunRecord(
+                            difficulty = difficulty,
+                            millis = elapsedMillis,
+                            epochMillis = timestamp,
+                        ),
+                    )
+                }
+            if (result.isSuccess) {
+                onHistoryVersionIncrement()
+                if (newRecordAchieved) {
+                    onCelebrationChange(
+                        NewRecordCelebration(
+                            millis = elapsedMillis,
+                            difficulty = difficulty,
+                            token = timestamp,
+                        ),
+                    )
+                }
+            }
+            onWinRecordedChange(true)
+        }
+        if (board.status == GameStatus.IN_PROGRESS) {
+            onWinRecordedChange(false)
+            onCelebrationChange(null)
+        }
+        if (board.status == GameStatus.LOST) {
+            onCelebrationChange(null)
+        }
+    }
+}
+
+@Composable
+private fun AutoDismissCelebration(
+    celebration: NewRecordCelebration?,
+    onTimeout: () -> Unit,
+) {
+    val latestCelebration = rememberUpdatedState(celebration)
+    val latestTimeout = rememberUpdatedState(onTimeout)
+
+    LaunchedEffect(celebration?.token) {
+        val activeToken = celebration?.token ?: return@LaunchedEffect
+        delay(NEW_RECORD_DISPLAY_DURATION_MS)
+        if (latestCelebration.value?.token == activeToken) {
+            latestTimeout.value()
+        }
+    }
+}
+
+private fun GameStatus.asStatusEmoji(): String =
+    when (this) {
+        GameStatus.IN_PROGRESS -> "⏳"
+        GameStatus.WON -> "🏆"
+        GameStatus.LOST -> "💥"
+    }
+
+private data class NewRecordCelebration(
+    val millis: Long,
+    val difficulty: Difficulty,
+    val token: Long,
+)
+
+private const val NEW_RECORD_DISPLAY_DURATION_MS = 5_000L
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
