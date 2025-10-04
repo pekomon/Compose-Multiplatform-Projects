@@ -44,20 +44,21 @@ fun ConfettiOverlay(
         createParticles(palette, particleCount, animationDurationMillis)
     }
     val transition = rememberInfiniteTransition(label = "confetti-transition")
-    val animations = remember(particles, animationDurationMillis) {
-        particles.mapIndexed { index, particle ->
-            val duration = particle.durationMillis(animationDurationMillis)
-            transition.animateFloat(
-                initialValue = 0f,
-                targetValue = 1f,
-                animationSpec =
-                    infiniteRepeatable(
-                        animation = tween(durationMillis = duration, easing = LinearEasing),
-                        initialStartOffset = StartOffset(particle.startDelayMillis),
-                    ),
-                label = "confetti-progress-$index",
-            )
-        }
+    val animationDurations = remember(particles, animationDurationMillis) {
+        particles.map { it.durationMillis(animationDurationMillis) }
+    }
+    val animations = particles.mapIndexed { index, particle ->
+        val duration = animationDurations[index]
+        transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec =
+                infiniteRepeatable(
+                    animation = tween(durationMillis = duration, easing = LinearEasing),
+                    initialStartOffset = StartOffset(particle.startDelayMillis),
+                ),
+            label = "confetti-progress-$index",
+        )
     }
 
     val density = LocalDensity.current
@@ -145,7 +146,7 @@ private fun DrawScope.drawConfettiParticles(
 }
 
 private fun ConfettiParticle.xFraction(progress: Float): Float {
-    val oscillation = sin((progress * swayFrequency + swayPhase) * PI * 2f)
+    val oscillation = sin((progress * swayFrequency + swayPhase) * PI * 2f).toFloat()
     return wrap01(startFractionX + swayAmplitude * oscillation)
 }
 
