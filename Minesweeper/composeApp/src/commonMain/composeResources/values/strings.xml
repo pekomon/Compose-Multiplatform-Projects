@@ -6,6 +6,8 @@
     <string name="difficulty_hard">Hard</string>
     <string name="history_title">History</string>
     <string name="settings_title">Settings</string>
+    <string name="settings_sounds">Sounds</string>
+    <string name="settings_animations">Animations</string>
     <string name="timer_label">%1$s %2$ds</string>
     <string name="history_close">Close</string>
     <string name="history_no_wins">No wins recorded for %1$s yet.</string>

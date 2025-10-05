@@ -40,11 +40,20 @@ class JvmSettingsRepositoryTest {
     }
 
     @Test
-    fun `round trips reduced motion`() {
-        assertEquals(false, repository.isReducedMotionEnabled())
+    fun `round trips sound preference`() {
+        assertEquals(true, repository.isSoundEnabled())
 
-        repository.setReducedMotionEnabled(true)
+        repository.setSoundEnabled(false)
 
-        assertEquals(true, repository.isReducedMotionEnabled())
+        assertEquals(false, repository.isSoundEnabled())
+    }
+
+    @Test
+    fun `round trips animation preference`() {
+        assertEquals(true, repository.isAnimationEnabled())
+
+        repository.setAnimationEnabled(false)
+
+        assertEquals(false, repository.isAnimationEnabled())
     }
 }

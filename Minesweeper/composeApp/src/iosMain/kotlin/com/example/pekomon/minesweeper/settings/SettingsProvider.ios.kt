@@ -15,10 +15,22 @@ private class IosSettingsRepository : SettingsRepository {
         defaults.setObject(value.name, forKey = SettingsKeys.SELECTED_DIFFICULTY)
     }
 
-    override fun isReducedMotionEnabled(): Boolean = defaults.boolForKey(SettingsKeys.REDUCED_MOTION_ENABLED)
+    override fun isSoundEnabled(): Boolean {
+        val value = defaults.objectForKey(SettingsKeys.ENABLE_SOUNDS) as? Boolean
+        return value ?: true
+    }
 
-    override fun setReducedMotionEnabled(enabled: Boolean) {
-        defaults.setBool(enabled, forKey = SettingsKeys.REDUCED_MOTION_ENABLED)
+    override fun setSoundEnabled(enabled: Boolean) {
+        defaults.setBool(enabled, forKey = SettingsKeys.ENABLE_SOUNDS)
+    }
+
+    override fun isAnimationEnabled(): Boolean {
+        val value = defaults.objectForKey(SettingsKeys.ENABLE_ANIMATIONS) as? Boolean
+        return value ?: true
+    }
+
+    override fun setAnimationEnabled(enabled: Boolean) {
+        defaults.setBool(enabled, forKey = SettingsKeys.ENABLE_ANIMATIONS)
     }
 }
 

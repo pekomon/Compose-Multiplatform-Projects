@@ -34,23 +34,34 @@ fun MinesweeperContent() {
             runCatching { provideHistoryStore() }.getOrElse { InMemoryHistoryStore() }
         }
     var storedDifficulty by remember { mutableStateOf(settingsRepository.getSelectedDifficulty()) }
-    val reducedMotionEnabled = remember { settingsRepository.isReducedMotionEnabled() }
+    var soundsEnabled by remember { mutableStateOf(settingsRepository.isSoundEnabled()) }
+    var animationsEnabled by remember { mutableStateOf(settingsRepository.isAnimationEnabled()) }
     val initialDifficulty = storedDifficulty ?: Difficulty.EASY
 
     GameScreen(
         initialDifficulty = initialDifficulty,
         historyStore = historyStore,
-        reducedMotionEnabled = reducedMotionEnabled,
+        soundsEnabled = soundsEnabled,
+        animationsEnabled = animationsEnabled,
         onDifficultyChanged = {
             storedDifficulty = it
             settingsRepository.setSelectedDifficulty(it)
+        },
+        onSoundsEnabledChange = { enabled ->
+            soundsEnabled = enabled
+            settingsRepository.setSoundEnabled(enabled)
+        },
+        onAnimationsEnabledChange = { enabled ->
+            animationsEnabled = enabled
+            settingsRepository.setAnimationEnabled(enabled)
         },
     )
 }
 
 private class InMemorySettingsRepository : SettingsRepository {
     private var difficulty: Difficulty? = null
-    private var reducedMotionEnabled: Boolean = false
+    private var soundEnabled: Boolean = true
+    private var animationEnabled: Boolean = true
 
     override fun getSelectedDifficulty(): Difficulty? = difficulty
 
@@ -58,9 +69,15 @@ private class InMemorySettingsRepository : SettingsRepository {
         difficulty = value
     }
 
-    override fun isReducedMotionEnabled(): Boolean = reducedMotionEnabled
+    override fun isSoundEnabled(): Boolean = soundEnabled
 
-    override fun setReducedMotionEnabled(enabled: Boolean) {
-        reducedMotionEnabled = enabled
+    override fun setSoundEnabled(enabled: Boolean) {
+        soundEnabled = enabled
+    }
+
+    override fun isAnimationEnabled(): Boolean = animationEnabled
+
+    override fun setAnimationEnabled(enabled: Boolean) {
+        animationEnabled = enabled
     }
 }

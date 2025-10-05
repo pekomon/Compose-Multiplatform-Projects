@@ -1,9 +1,15 @@
 package com.example.pekomon.minesweeper.ui
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import com.example.pekomon.minesweeper.game.CellState
 import com.example.pekomon.minesweeper.ui.theme.numberColor
@@ -20,6 +26,34 @@ internal fun CellContent(
         return
     }
 
+    val reducedMotion = LocalReducedMotion.current
+    val shouldAnimate = !reducedMotion
+    val flagScaleRaw by animateFloatAsState(
+        targetValue =
+            when {
+                !shouldAnimate -> 1f
+                state == CellState.FLAGGED -> 1f
+                else -> 0.9f
+            },
+        animationSpec =
+            if (shouldAnimate) {
+                tween(durationMillis = 120, easing = FastOutSlowInEasing)
+            } else {
+                snap()
+            },
+        label = "flagPop",
+    )
+    val scaleModifier =
+        if (state == CellState.FLAGGED && shouldAnimate) {
+            modifier.graphicsLayer {
+                val scale = flagScaleRaw
+                scaleX = scale
+                scaleY = scale
+            }
+        } else {
+            modifier
+        }
+
     Text(
         text = content,
         color = cellContentColor(state, isMine, adjacentMines),
@@ -30,7 +64,7 @@ internal fun CellContent(
                 FontWeight.Normal
             },
         style = MaterialTheme.typography.bodyLarge,
-        modifier = modifier,
+        modifier = scaleModifier,
     )
 }
 

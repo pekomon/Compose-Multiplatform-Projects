@@ -1,9 +1,16 @@
 package com.example.pekomon.minesweeper.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -27,10 +34,12 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -39,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -50,11 +60,14 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Dp.Companion.Infinity
 import androidx.compose.ui.unit.Dp.Companion.Unspecified
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.example.pekomon.minesweeper.audio.SoundPlayer
+import com.example.pekomon.minesweeper.audio.rememberSoundPlayer
 import com.example.pekomon.minesweeper.composeapp.generated.resources.Res
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_easy
@@ -65,6 +78,7 @@ import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record
 import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record_time
 import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record_title
 import com.example.pekomon.minesweeper.composeapp.generated.resources.reset_button
+import com.example.pekomon.minesweeper.composeapp.generated.resources.settings_title
 import com.example.pekomon.minesweeper.composeapp.generated.resources.timer_label
 import com.example.pekomon.minesweeper.game.Board
 import com.example.pekomon.minesweeper.game.Cell
@@ -94,8 +108,36 @@ fun GameScreen(
     modifier: Modifier = Modifier,
     initialDifficulty: Difficulty = Difficulty.EASY,
     historyStore: HistoryStore,
-    reducedMotionEnabled: Boolean = false,
+    soundsEnabled: Boolean,
+    animationsEnabled: Boolean,
     onDifficultyChanged: (Difficulty) -> Unit = {},
+    onSoundsEnabledChange: (Boolean) -> Unit = {},
+    onAnimationsEnabledChange: (Boolean) -> Unit = {},
+) {
+    CompositionLocalProvider(LocalReducedMotion provides !animationsEnabled) {
+        GameScreenContent(
+            modifier = modifier,
+            initialDifficulty = initialDifficulty,
+            historyStore = historyStore,
+            soundsEnabled = soundsEnabled,
+            animationsEnabled = animationsEnabled,
+            onDifficultyChanged = onDifficultyChanged,
+            onSoundsEnabledChange = onSoundsEnabledChange,
+            onAnimationsEnabledChange = onAnimationsEnabledChange,
+        )
+    }
+}
+
+@Composable
+private fun GameScreenContent(
+    modifier: Modifier = Modifier,
+    initialDifficulty: Difficulty = Difficulty.EASY,
+    historyStore: HistoryStore,
+    soundsEnabled: Boolean,
+    animationsEnabled: Boolean,
+    onDifficultyChanged: (Difficulty) -> Unit,
+    onSoundsEnabledChange: (Boolean) -> Unit,
+    onAnimationsEnabledChange: (Boolean) -> Unit,
 ) {
     val api = remember { GameApi(initialDifficulty) }
     var difficulty by remember { mutableStateOf(initialDifficulty) }
@@ -106,6 +148,7 @@ fun GameScreen(
     val elapsedSeconds = elapsed.inWholeSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
     var difficultyMenuExpanded by remember { mutableStateOf(false) }
     var showHistoryDialog by remember { mutableStateOf(false) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
     var historyVersion by remember { mutableStateOf(0) }
     var winRecorded by remember { mutableStateOf(false) }
     var celebration by remember { mutableStateOf<NewRecordCelebration?>(null) }
@@ -124,6 +167,7 @@ fun GameScreen(
     }
 
     val statusEmoji = board.status.asStatusEmoji()
+    val soundPlayer = rememberSoundPlayer(soundsEnabled)
 
     GameTimerEffects(board = board, timer = timer)
 
@@ -136,6 +180,7 @@ fun GameScreen(
         onWinRecordedChange = { winRecorded = it },
         onHistoryVersionIncrement = { historyVersion += 1 },
         onCelebrationChange = { celebration = it },
+        soundPlayer = soundPlayer,
     )
 
     AutoDismissCelebration(celebration = celebration) {
@@ -166,6 +211,8 @@ fun GameScreen(
                     elapsedSeconds = elapsedSeconds,
                     statusEmoji = statusEmoji,
                     onHistoryClick = { showHistoryDialog = true },
+                    onSettingsClick = { showSettingsDialog = true },
+                    animationsEnabled = animationsEnabled,
                 )
             },
         ) { innerPadding ->
@@ -209,12 +256,14 @@ fun GameScreen(
                             onReveal = { x, y ->
                                 if (board.status == GameStatus.IN_PROGRESS) {
                                     api.onReveal(x, y)
+                                    soundPlayer.reveal()
                                     refreshBoard()
                                 }
                             },
                             onToggleFlag = { x, y ->
                                 if (board.status == GameStatus.IN_PROGRESS) {
                                     api.onToggleFlag(x, y)
+                                    soundPlayer.click()
                                     refreshBoard()
                                 }
                             },
@@ -226,6 +275,7 @@ fun GameScreen(
                 }
 
                 val celebrationState = celebration
+                val reducedMotionEnabled = LocalReducedMotion.current
                 if (celebrationState != null && !reducedMotionEnabled) {
                     ConfettiOverlay(
                         modifier =
@@ -268,6 +318,16 @@ fun GameScreen(
             onClose = { showHistoryDialog = false },
         )
     }
+
+    if (showSettingsDialog) {
+        SettingsDialog(
+            soundsEnabled = soundsEnabled,
+            animationsEnabled = animationsEnabled,
+            onSoundsEnabledChange = onSoundsEnabledChange,
+            onAnimationsEnabledChange = onAnimationsEnabledChange,
+            onDismissRequest = { showSettingsDialog = false },
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -282,6 +342,8 @@ private fun GameTopBar(
     elapsedSeconds: Int,
     statusEmoji: String,
     onHistoryClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+    animationsEnabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val difficulties = remember { Difficulty.values().toList() }
@@ -308,6 +370,7 @@ private fun GameTopBar(
                 difficulties = difficulties,
                 onSelected = onDifficultySelected,
                 difficulty = difficulty,
+                animationsEnabled = animationsEnabled,
             )
         },
         actions = {
@@ -325,14 +388,50 @@ private fun GameTopBar(
                     )
                 }
 
+                val resetInteraction = remember { MutableInteractionSource() }
                 Button(
                     onClick = onReset,
-                    modifier = Modifier.heightIn(min = 48.dp),
+                    modifier =
+                        Modifier
+                            .heightIn(min = 48.dp)
+                            .pressScale(
+                                interactionSource = resetInteraction,
+                                animationsEnabled = animationsEnabled,
+                                label = "resetPress",
+                            ),
+                    interactionSource = resetInteraction,
                 ) {
                     Text(
                         text = t(Res.string.reset_button),
                         style = MaterialTheme.typography.labelLarge,
                     )
+                }
+
+                var settingsExpanded by remember { mutableStateOf(false) }
+                Box {
+                    IconButton(onClick = { settingsExpanded = true }) {
+                        Text(
+                            text = "⋮",
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = settingsExpanded,
+                        onDismissRequest = { settingsExpanded = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = t(Res.string.settings_title),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                            },
+                            onClick = {
+                                settingsExpanded = false
+                                onSettingsClick()
+                            },
+                        )
+                    }
                 }
             }
         },
@@ -354,12 +453,23 @@ private fun DifficultyButton(
     difficulties: List<Difficulty>,
     onSelected: (Difficulty) -> Unit,
     difficulty: Difficulty,
+    animationsEnabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
+        val interactionSource = remember { MutableInteractionSource() }
         FilledTonalButton(
             onClick = onClick,
-            modifier = Modifier.heightIn(min = 48.dp),
+            modifier =
+                Modifier
+                    .heightIn(min = 48.dp)
+                    .pressScale(
+                        interactionSource = interactionSource,
+                        animationsEnabled = animationsEnabled,
+                        label = "difficultyPress"
+                    ),
+            interactionSource = interactionSource,
+            contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
         ) {
             Text(
                 text = t(Res.string.difficulty, difficulty.localizedLabel()),
@@ -475,9 +585,11 @@ private fun GameCelebrationEffects(
     onWinRecordedChange: (Boolean) -> Unit,
     onHistoryVersionIncrement: () -> Unit,
     onCelebrationChange: (NewRecordCelebration?) -> Unit,
+    soundPlayer: SoundPlayer,
 ) {
     LaunchedEffect(board.status, historyStore, difficulty) {
         if (board.status == GameStatus.WON && !winRecorded) {
+            soundPlayer.win()
             val elapsedMillis = elapsed.inWholeMilliseconds
             val previousRuns =
                 runCatching { historyStore.getTop10(difficulty) }.getOrElse { emptyList() }
@@ -518,6 +630,7 @@ private fun GameCelebrationEffects(
         }
         if (board.status == GameStatus.LOST) {
             onCelebrationChange(null)
+            soundPlayer.lose()
         }
     }
 }
@@ -592,12 +705,35 @@ private fun CellView(
     boardStatus: GameStatus,
     modifier: Modifier = Modifier,
 ) {
-    val backgroundColor =
+    val reducedMotion = LocalReducedMotion.current
+    val animationEnabled = !reducedMotion
+    val targetBackground =
         when (cell.state) {
             CellState.HIDDEN -> hiddenCellColor()
             CellState.REVEALED -> revealedCellColor()
             CellState.FLAGGED -> flaggedCellColor()
         }
+    val backgroundColor by animateColorAsState(
+        targetValue = targetBackground,
+        animationSpec = if (animationEnabled) tween(durationMillis = 220) else snap(),
+        label = "cellBackground",
+    )
+    val revealScaleRaw by animateFloatAsState(
+        targetValue =
+            when {
+                !animationEnabled -> 1f
+                cell.state == CellState.REVEALED -> 1f
+                else -> 0.95f
+            },
+        animationSpec =
+            if (animationEnabled) {
+                tween(durationMillis = 220, easing = FastOutSlowInEasing)
+            } else {
+                snap()
+            },
+        label = "cellRevealScale",
+    )
+    val revealScale = if (animationEnabled && cell.state == CellState.REVEALED) revealScaleRaw else 1f
     val interactionModifier =
         Modifier.cellInteractions(
             revealEnabled = boardStatus == GameStatus.IN_PROGRESS && cell.state == CellState.HIDDEN,
@@ -609,7 +745,11 @@ private fun CellView(
     CellContainer(
         backgroundColor = backgroundColor,
         cornerRadius = 6.dp,
-        modifier = modifier,
+        modifier =
+            modifier.graphicsLayer {
+                scaleX = revealScale
+                scaleY = revealScale
+            },
         interactionModifier = interactionModifier,
     ) {
         CellContent(
@@ -629,3 +769,26 @@ private fun Difficulty.toStringResource(): StringResource =
 
 @Composable
 private fun Difficulty.localizedLabel(): String = stringResource(toStringResource())
+
+@Composable
+private fun Modifier.pressScale(
+    interactionSource: MutableInteractionSource,
+    animationsEnabled: Boolean,
+    label: String,
+    pressedScale: Float = 0.98f,
+): Modifier {
+    val reducedMotion = LocalReducedMotion.current
+    val shouldAnimate = animationsEnabled && !reducedMotion
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val targetScale = if (isPressed) pressedScale else 1f
+    val animationSpec = if (shouldAnimate) tween<Float>(durationMillis = 120, easing = FastOutSlowInEasing) else snap()
+    val scale by animateFloatAsState(
+        targetValue = if (shouldAnimate) targetScale else 1f,
+        animationSpec = animationSpec,
+        label = label,
+    )
+    return graphicsLayer {
+        scaleX = scale
+        scaleY = scale
+    }
+}
