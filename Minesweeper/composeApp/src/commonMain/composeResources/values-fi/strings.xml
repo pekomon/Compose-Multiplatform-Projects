@@ -14,4 +14,16 @@
     <string name="new_record_title">Uusi ennätys!</string>
     <string name="new_record_time">Aika: %1$s</string>
     <string name="new_record_difficulty">Vaikeustaso: %1$s</string>
+    <string name="cell_hidden_a11y">Piilotettu ruutu</string>
+    <string name="cell_flagged_a11y">Liputettu ruutu</string>
+    <string name="cell_mine_a11y">Miina</string>
+    <string name="cell_revealed_number_a11y">Paljastettu numero %1$d</string>
+    <string name="cell_revealed_empty_a11y">Paljastettu tyhjä</string>
+    <string name="reveal_cell_a11y">Paljasta ruutu</string>
+    <string name="toggle_flag_a11y">Vaihda lippu</string>
+    <string name="change_difficulty_a11y">Vaihda vaikeustasoa</string>
+    <string name="reset_game_a11y">Aloita peli alusta</string>
+    <string name="history_button_a11y">Avaa historia</string>
+    <string name="open_settings_a11y">Avaa asetukset</string>
+    <string name="history_entry_a11y">Sija %1$d, %2$s, %3$s</string>
 </resources>

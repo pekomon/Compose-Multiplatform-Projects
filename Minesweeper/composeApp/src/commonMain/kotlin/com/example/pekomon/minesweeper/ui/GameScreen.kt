@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -41,6 +43,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -61,6 +64,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.onLongClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Dp.Companion.Infinity
 import androidx.compose.ui.unit.Dp.Companion.Unspecified
@@ -187,7 +200,7 @@ private fun GameScreenContent(
         celebration = null
     }
 
-    val scrollState = rememberScrollState()
+    val verticalScrollState = rememberScrollState()
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -225,14 +238,15 @@ private fun GameScreenContent(
                         .padding(horizontal = outerPadding, vertical = outerPadding),
             ) {
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                    val horizontalScrollState = rememberScrollState()
                     val cellSpacing = 8.dp
                     val columns = board.width.coerceAtLeast(1)
                     val rows = board.height.coerceAtLeast(1)
 
                     val maxContentWidth = maxWidth
                     val availableCellSpace = maxContentWidth - cellSpacing * (columns - 1)
-                    val minCellSize = 28.dp
-                    val maxCellSize = 48.dp
+                    val minCellSize = 48.dp
+                    val maxCellSize = 64.dp
                     val desiredCellSize = availableCellSpace / columns
                     val cellSize = desiredCellSize.coerceIn(minCellSize, maxCellSize)
                     val boardWidth = cellSize * columns + cellSpacing * (columns - 1)
@@ -240,37 +254,52 @@ private fun GameScreenContent(
 
                     val hasBoundedHeight = maxHeight != Infinity && maxHeight != Unspecified
                     val availableHeight = if (hasBoundedHeight) maxHeight else Infinity
-                    val needsScroll = hasBoundedHeight && boardHeight > availableHeight
+                    val needsVerticalScroll = hasBoundedHeight && boardHeight > availableHeight
+                    val needsHorizontalScroll = boardWidth > maxContentWidth
 
-                    val scrollModifier = if (needsScroll) Modifier.verticalScroll(scrollState) else Modifier
+                    val verticalScrollModifier =
+                        if (needsVerticalScroll) {
+                            Modifier.verticalScroll(verticalScrollState)
+                        } else {
+                            Modifier
+                        }
+
+                    val horizontalScrollModifier =
+                        if (needsHorizontalScroll) {
+                            Modifier.horizontalScroll(horizontalScrollState)
+                        } else {
+                            Modifier
+                        }
 
                     Box(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .then(scrollModifier),
+                                .then(verticalScrollModifier),
                         contentAlignment = Alignment.TopCenter,
                     ) {
-                        BoardView(
-                            board = board,
-                            onReveal = { x, y ->
-                                if (board.status == GameStatus.IN_PROGRESS) {
-                                    api.onReveal(x, y)
-                                    soundPlayer.reveal()
-                                    refreshBoard()
-                                }
-                            },
-                            onToggleFlag = { x, y ->
-                                if (board.status == GameStatus.IN_PROGRESS) {
-                                    api.onToggleFlag(x, y)
-                                    soundPlayer.click()
-                                    refreshBoard()
-                                }
-                            },
-                            modifier = Modifier.width(boardWidth).height(boardHeight),
-                            cellSpacing = cellSpacing,
-                            cellSize = cellSize,
-                        )
+                        Box(modifier = horizontalScrollModifier) {
+                            BoardView(
+                                board = board,
+                                onReveal = { x, y ->
+                                    if (board.status == GameStatus.IN_PROGRESS) {
+                                        api.onReveal(x, y)
+                                        soundPlayer.reveal()
+                                        refreshBoard()
+                                    }
+                                },
+                                onToggleFlag = { x, y ->
+                                    if (board.status == GameStatus.IN_PROGRESS) {
+                                        api.onToggleFlag(x, y)
+                                        soundPlayer.click()
+                                        refreshBoard()
+                                    }
+                                },
+                                modifier = Modifier.width(boardWidth).height(boardHeight),
+                                cellSpacing = cellSpacing,
+                                cellSize = cellSize,
+                            )
+                        }
                     }
                 }
 
@@ -380,7 +409,13 @@ private fun GameTopBar(
             ) {
                 OutlinedButton(
                     onClick = onHistoryClick,
-                    modifier = Modifier.heightIn(min = 48.dp),
+                    modifier =
+                        Modifier
+                            .minimumInteractiveComponentSize()
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = t(Res.string.history_button_a11y)
+                            },
                 ) {
                     Text(
                         text = t(Res.string.history_button),
@@ -393,12 +428,16 @@ private fun GameTopBar(
                     onClick = onReset,
                     modifier =
                         Modifier
-                            .heightIn(min = 48.dp)
+                            .minimumInteractiveComponentSize()
                             .pressScale(
                                 interactionSource = resetInteraction,
                                 animationsEnabled = animationsEnabled,
                                 label = "resetPress",
-                            ),
+                            )
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = t(Res.string.reset_game_a11y)
+                            },
                     interactionSource = resetInteraction,
                 ) {
                     Text(
@@ -409,10 +448,20 @@ private fun GameTopBar(
 
                 var settingsExpanded by remember { mutableStateOf(false) }
                 Box {
-                    IconButton(onClick = { settingsExpanded = true }) {
+                    IconButton(
+                        onClick = { settingsExpanded = true },
+                        modifier =
+                            Modifier
+                                .minimumInteractiveComponentSize()
+                                .semantics {
+                                    role = Role.Button
+                                    contentDescription = t(Res.string.open_settings_a11y)
+                                },
+                    ) {
                         Text(
                             text = "⋮",
                             style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.clearAndSetSemantics { },
                         )
                     }
                     DropdownMenu(
@@ -420,6 +469,13 @@ private fun GameTopBar(
                         onDismissRequest = { settingsExpanded = false },
                     ) {
                         DropdownMenuItem(
+                            modifier =
+                                Modifier
+                                    .minimumInteractiveComponentSize()
+                                    .semantics {
+                                        role = Role.Button
+                                        contentDescription = t(Res.string.settings_title)
+                                    },
                             text = {
                                 Text(
                                     text = t(Res.string.settings_title),
@@ -462,12 +518,16 @@ private fun DifficultyButton(
             onClick = onClick,
             modifier =
                 Modifier
-                    .heightIn(min = 48.dp)
+                    .minimumInteractiveComponentSize()
                     .pressScale(
                         interactionSource = interactionSource,
                         animationsEnabled = animationsEnabled,
                         label = "difficultyPress"
-                    ),
+                    )
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = t(Res.string.change_difficulty_a11y)
+                    },
             interactionSource = interactionSource,
             contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
         ) {
@@ -481,7 +541,19 @@ private fun DifficultyButton(
             onDismissRequest = onDismissRequest,
         ) {
             difficulties.forEach { option ->
+                val optionDescription = t(Res.string.difficulty, option.localizedLabel())
                 DropdownMenuItem(
+                    modifier =
+                        Modifier
+                            .minimumInteractiveComponentSize()
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = optionDescription
+                                selected = option == difficulty
+                                if (option == difficulty) {
+                                    stateDescription = optionDescription
+                                }
+                            },
                     text = {
                         Text(
                             text = option.localizedLabel(),
@@ -690,7 +762,10 @@ private fun BoardView(
                 onReveal = { onReveal(cell.x, cell.y) },
                 onToggleFlag = { onToggleFlag(cell.x, cell.y) },
                 boardStatus = board.status,
-                modifier = Modifier.size(cellSize),
+                modifier =
+                    Modifier
+                        .size(cellSize)
+                        .sizeIn(minWidth = 48.dp, minHeight = 48.dp),
             )
         }
     }
@@ -698,7 +773,7 @@ private fun BoardView(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun CellView(
+internal fun CellView(
     cell: Cell,
     onReveal: () -> Unit,
     onToggleFlag: () -> Unit,
@@ -734,12 +809,43 @@ private fun CellView(
         label = "cellRevealScale",
     )
     val revealScale = if (animationEnabled && cell.state == CellState.REVEALED) revealScaleRaw else 1f
+    val revealEnabled = boardStatus == GameStatus.IN_PROGRESS && cell.state == CellState.HIDDEN
+    val toggleEnabled = cell.state != CellState.REVEALED
+    val cellDescription = cell.accessibilityDescription()
+    val revealLabel = t(Res.string.reveal_cell_a11y)
+    val toggleLabel = t(Res.string.toggle_flag_a11y)
+    val semanticsModifier =
+        Modifier
+            .minimumInteractiveComponentSize()
+            .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+            .clearAndSetSemantics {
+                role = Role.Button
+                contentDescription = cellDescription
+                stateDescription = cellDescription
+                if (!revealEnabled && !toggleEnabled) {
+                    disabled()
+                }
+                if (revealEnabled) {
+                    onClick(label = revealLabel) {
+                        onReveal()
+                        true
+                    }
+                }
+                if (toggleEnabled) {
+                    onLongClick(label = toggleLabel) {
+                        onToggleFlag()
+                        true
+                    }
+                }
+            }
     val interactionModifier =
-        Modifier.cellInteractions(
-            revealEnabled = boardStatus == GameStatus.IN_PROGRESS && cell.state == CellState.HIDDEN,
-            toggleEnabled = cell.state != CellState.REVEALED,
-            onReveal = onReveal,
-            onToggleFlag = onToggleFlag,
+        semanticsModifier.then(
+            Modifier.cellInteractions(
+                revealEnabled = revealEnabled,
+                toggleEnabled = toggleEnabled,
+                onReveal = onReveal,
+                onToggleFlag = onToggleFlag,
+            ),
         )
 
     CellContainer(
@@ -759,6 +865,17 @@ private fun CellView(
         )
     }
 }
+
+@Composable
+private fun Cell.accessibilityDescription(): String =
+    when {
+        state == CellState.FLAGGED -> t(Res.string.cell_flagged_a11y)
+        state == CellState.HIDDEN -> t(Res.string.cell_hidden_a11y)
+        state == CellState.REVEALED && isMine -> t(Res.string.cell_mine_a11y)
+        state == CellState.REVEALED && adjacentMines > 0 ->
+            t(Res.string.cell_revealed_number_a11y, adjacentMines)
+        else -> t(Res.string.cell_revealed_empty_a11y)
+    }
 
 private fun Difficulty.toStringResource(): StringResource =
     when (this) {

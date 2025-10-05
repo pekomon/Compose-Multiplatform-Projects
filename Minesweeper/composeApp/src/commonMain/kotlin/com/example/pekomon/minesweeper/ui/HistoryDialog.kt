@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,6 +26,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.semantics
 import com.example.pekomon.minesweeper.composeapp.generated.resources.Res
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_easy
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_hard
@@ -61,7 +69,16 @@ fun HistoryDialog(
     AlertDialog(
         onDismissRequest = onClose,
         confirmButton = {
-            TextButton(onClick = onClose) {
+            TextButton(
+                onClick = onClose,
+                modifier =
+                    Modifier
+                        .minimumInteractiveComponentSize()
+                        .semantics {
+                            role = Role.Button
+                            contentDescription = t(Res.string.history_close)
+                        },
+            ) {
                 Text(
                     text = t(Res.string.history_close),
                     style = MaterialTheme.typography.labelLarge,
@@ -85,16 +102,38 @@ fun HistoryDialog(
                 ) {
                     difficulties.forEach { difficulty ->
                         val selected = selectedDifficulty == difficulty
+                        val description = t(Res.string.difficulty, difficulty.localizedLabel())
 
                         if (selected) {
-                            FilledTonalButton(onClick = { selectedDifficulty = difficulty }) {
+                            FilledTonalButton(
+                                onClick = { selectedDifficulty = difficulty },
+                                modifier =
+                                    Modifier
+                                        .minimumInteractiveComponentSize()
+                                        .semantics {
+                                            role = Role.Button
+                                            contentDescription = description
+                                            stateDescription = description
+                                            selected = true
+                                        },
+                            ) {
                                 Text(
                                     text = difficulty.localizedLabel(),
                                     style = MaterialTheme.typography.labelLarge,
                                 )
                             }
                         } else {
-                            OutlinedButton(onClick = { selectedDifficulty = difficulty }) {
+                            OutlinedButton(
+                                onClick = { selectedDifficulty = difficulty },
+                                modifier =
+                                    Modifier
+                                        .minimumInteractiveComponentSize()
+                                        .semantics {
+                                            role = Role.Button
+                                            contentDescription = description
+                                            selected = false
+                                        },
+                            ) {
                                 Text(
                                     text = difficulty.localizedLabel(),
                                     style = MaterialTheme.typography.labelLarge,
@@ -130,8 +169,20 @@ private fun HistoryList(records: List<RunRecord>) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         itemsIndexed(records) { index, record ->
+            val entryDescription =
+                t(
+                    Res.string.history_entry_a11y,
+                    index + 1,
+                    formatMillisToMmSs(record.millis),
+                    formatTimestamp(record.epochMillis),
+                )
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clearAndSetSemantics {
+                            contentDescription = entryDescription
+                        },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {

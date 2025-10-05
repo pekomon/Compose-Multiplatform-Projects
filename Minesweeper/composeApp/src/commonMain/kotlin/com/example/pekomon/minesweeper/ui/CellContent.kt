@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
 import com.example.pekomon.minesweeper.game.CellState
 import com.example.pekomon.minesweeper.ui.theme.numberColor
@@ -64,7 +65,7 @@ internal fun CellContent(
                 FontWeight.Normal
             },
         style = MaterialTheme.typography.bodyLarge,
-        modifier = scaleModifier,
+        modifier = scaleModifier.clearAndSetSemantics { },
     )
 }
 

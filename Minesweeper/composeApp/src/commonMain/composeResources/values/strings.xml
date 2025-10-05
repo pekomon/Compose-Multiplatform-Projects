@@ -16,4 +16,16 @@
     <string name="new_record_title">New record!</string>
     <string name="new_record_time">Time: %1$s</string>
     <string name="new_record_difficulty">Difficulty: %1$s</string>
+    <string name="cell_hidden_a11y">Hidden cell</string>
+    <string name="cell_flagged_a11y">Flagged cell</string>
+    <string name="cell_mine_a11y">Mine</string>
+    <string name="cell_revealed_number_a11y">Revealed number %1$d</string>
+    <string name="cell_revealed_empty_a11y">Revealed empty</string>
+    <string name="reveal_cell_a11y">Reveal cell</string>
+    <string name="toggle_flag_a11y">Toggle flag</string>
+    <string name="change_difficulty_a11y">Change difficulty</string>
+    <string name="reset_game_a11y">Reset game</string>
+    <string name="history_button_a11y">Open history</string>
+    <string name="open_settings_a11y">Open settings</string>
+    <string name="history_entry_a11y">Rank %1$d, %2$s, %3$s</string>
 </resources>

@@ -1,3 +1,4 @@
+import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -73,10 +74,12 @@ kotlin {
                 implementation(libs.androidx.datastore.preferences)
             }
         }
+        @OptIn(ExperimentalComposeLibrary::class)
         val commonTest by getting {
             dependencies {
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
+                implementation(compose.uiTest)
             }
         }
         val jvmMain by getting {
