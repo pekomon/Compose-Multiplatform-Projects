@@ -12,6 +12,7 @@
     <string name="history_close">Close</string>
     <string name="history_no_wins">No wins recorded for %1$s yet.</string>
     <string name="history_button">History</string>
+    <string name="action_settings">Settings</string>
     <string name="reset_button">Reset</string>
     <string name="new_record_title">New record!</string>
     <string name="new_record_time">Time: %1$s</string>

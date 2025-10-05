@@ -113,6 +113,10 @@ private fun LegacySplash() {
 fun GameScreenAndroidPreview() {
     AndroidMinesweeperTheme {
         val historyStore = remember { InMemoryHistoryStore() }
-        GameScreen(historyStore = historyStore)
+        GameScreen(
+            historyStore = historyStore,
+            soundsEnabled = true,
+            animationsEnabled = true,
+        )
     }
 }
