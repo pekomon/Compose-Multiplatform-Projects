@@ -421,7 +421,7 @@ private fun GameTopBar(
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    text = t(Res.string.action_settings),
+                                    text = t(Res.string.settings_title),
                                     style = MaterialTheme.typography.bodyLarge,
                                 )
                             },
