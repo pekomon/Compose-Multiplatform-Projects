@@ -78,6 +78,7 @@ import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record
 import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record_time
 import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record_title
 import com.example.pekomon.minesweeper.composeapp.generated.resources.reset_button
+import com.example.pekomon.minesweeper.composeapp.generated.resources.settings_title
 import com.example.pekomon.minesweeper.composeapp.generated.resources.timer_label
 import com.example.pekomon.minesweeper.game.Board
 import com.example.pekomon.minesweeper.game.Cell
