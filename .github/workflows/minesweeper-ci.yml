@@ -85,7 +85,6 @@ jobs:
       - name: Generate Spotless patch
         if: always() && steps.spotless_check.outcome == 'failure'
         run: |
-          cd ..
           if git diff --quiet; then
             echo "No changes from spotlessApply."
           else
@@ -107,7 +106,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: spotless-patch
-          path: ../spotless.patch
+          path: spotless.patch
           if-no-files-found: ignore
 
   tests:
