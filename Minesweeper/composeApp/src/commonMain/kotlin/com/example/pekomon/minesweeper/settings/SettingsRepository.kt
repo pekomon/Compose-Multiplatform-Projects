@@ -11,14 +11,19 @@ interface SettingsRepository {
 
     fun setSelectedDifficulty(value: Difficulty)
 
-    fun isReducedMotionEnabled(): Boolean
+    fun isSoundEnabled(): Boolean
 
-    fun setReducedMotionEnabled(enabled: Boolean)
+    fun setSoundEnabled(enabled: Boolean)
+
+    fun isAnimationEnabled(): Boolean
+
+    fun setAnimationEnabled(enabled: Boolean)
 }
 
 object SettingsKeys {
     const val SELECTED_DIFFICULTY = "selected_difficulty"
-    const val REDUCED_MOTION_ENABLED = "reduced_motion_enabled"
+    const val ENABLE_SOUNDS = "enable_sounds"
+    const val ENABLE_ANIMATIONS = "enable_animations"
 }
 
 /** Expect a platform-specific provider so common UI can obtain the repo. */

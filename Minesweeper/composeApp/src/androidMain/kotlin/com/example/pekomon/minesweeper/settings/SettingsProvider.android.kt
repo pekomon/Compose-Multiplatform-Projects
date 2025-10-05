@@ -15,7 +15,8 @@ private class AndroidSettingsRepository(
     private val context: Context,
 ) : SettingsRepository {
     private val difficultyKey = stringPreferencesKey(SettingsKeys.SELECTED_DIFFICULTY)
-    private val reducedMotionKey = booleanPreferencesKey(SettingsKeys.REDUCED_MOTION_ENABLED)
+    private val soundKey = booleanPreferencesKey(SettingsKeys.ENABLE_SOUNDS)
+    private val animationKey = booleanPreferencesKey(SettingsKeys.ENABLE_ANIMATIONS)
 
     override fun getSelectedDifficulty(): Difficulty? =
         runBlocking {
@@ -31,15 +32,28 @@ private class AndroidSettingsRepository(
         }
     }
 
-    override fun isReducedMotionEnabled(): Boolean =
+    override fun isSoundEnabled(): Boolean =
         runBlocking {
-            context.dataStore.data.first()[reducedMotionKey] ?: false
+            context.dataStore.data.first()[soundKey] ?: true
         }
 
-    override fun setReducedMotionEnabled(enabled: Boolean) {
+    override fun setSoundEnabled(enabled: Boolean) {
         runBlocking {
             context.dataStore.edit { preferences ->
-                preferences[reducedMotionKey] = enabled
+                preferences[soundKey] = enabled
+            }
+        }
+    }
+
+    override fun isAnimationEnabled(): Boolean =
+        runBlocking {
+            context.dataStore.data.first()[animationKey] ?: true
+        }
+
+    override fun setAnimationEnabled(enabled: Boolean) {
+        runBlocking {
+            context.dataStore.edit { preferences ->
+                preferences[animationKey] = enabled
             }
         }
     }

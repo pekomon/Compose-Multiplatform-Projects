@@ -15,14 +15,24 @@ private class WasmSettingsRepository : SettingsRepository {
         storage.setItem(SettingsKeys.SELECTED_DIFFICULTY, value.name)
     }
 
-    override fun isReducedMotionEnabled(): Boolean =
+    override fun isSoundEnabled(): Boolean =
         storage
-            .getItem(SettingsKeys.REDUCED_MOTION_ENABLED)
+            .getItem(SettingsKeys.ENABLE_SOUNDS)
             ?.toBoolean()
-            ?: false
+            ?: true
 
-    override fun setReducedMotionEnabled(enabled: Boolean) {
-        storage.setItem(SettingsKeys.REDUCED_MOTION_ENABLED, enabled.toString())
+    override fun setSoundEnabled(enabled: Boolean) {
+        storage.setItem(SettingsKeys.ENABLE_SOUNDS, enabled.toString())
+    }
+
+    override fun isAnimationEnabled(): Boolean =
+        storage
+            .getItem(SettingsKeys.ENABLE_ANIMATIONS)
+            ?.toBoolean()
+            ?: true
+
+    override fun setAnimationEnabled(enabled: Boolean) {
+        storage.setItem(SettingsKeys.ENABLE_ANIMATIONS, enabled.toString())
     }
 }
 
