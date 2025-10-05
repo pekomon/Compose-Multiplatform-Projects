@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -43,13 +42,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -72,8 +71,8 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Dp.Companion.Infinity
 import androidx.compose.ui.unit.Dp.Companion.Unspecified
@@ -82,17 +81,28 @@ import androidx.compose.ui.zIndex
 import com.example.pekomon.minesweeper.audio.SoundPlayer
 import com.example.pekomon.minesweeper.audio.rememberSoundPlayer
 import com.example.pekomon.minesweeper.composeapp.generated.resources.Res
+import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_flagged_a11y
+import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_hidden_a11y
+import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_mine_a11y
+import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_revealed_empty_a11y
+import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_revealed_number_a11y
+import com.example.pekomon.minesweeper.composeapp.generated.resources.change_difficulty_a11y
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_easy
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_hard
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_medium
 import com.example.pekomon.minesweeper.composeapp.generated.resources.history_button
+import com.example.pekomon.minesweeper.composeapp.generated.resources.history_button_a11y
 import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record_difficulty
 import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record_time
 import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record_title
+import com.example.pekomon.minesweeper.composeapp.generated.resources.open_settings_a11y
 import com.example.pekomon.minesweeper.composeapp.generated.resources.reset_button
+import com.example.pekomon.minesweeper.composeapp.generated.resources.reset_game_a11y
+import com.example.pekomon.minesweeper.composeapp.generated.resources.reveal_cell_a11y
 import com.example.pekomon.minesweeper.composeapp.generated.resources.settings_title
 import com.example.pekomon.minesweeper.composeapp.generated.resources.timer_label
+import com.example.pekomon.minesweeper.composeapp.generated.resources.toggle_flag_a11y
 import com.example.pekomon.minesweeper.game.Board
 import com.example.pekomon.minesweeper.game.Cell
 import com.example.pekomon.minesweeper.game.CellState
@@ -437,8 +447,7 @@ private fun GameTopBar(
                                 interactionSource = resetInteraction,
                                 animationsEnabled = animationsEnabled,
                                 label = "resetPress",
-                            )
-                            .semantics {
+                            ).semantics {
                                 role = Role.Button
                                 contentDescription = resetDescription
                             },
@@ -529,9 +538,8 @@ private fun DifficultyButton(
                     .pressScale(
                         interactionSource = interactionSource,
                         animationsEnabled = animationsEnabled,
-                        label = "difficultyPress"
-                    )
-                    .semantics {
+                        label = "difficultyPress",
+                    ).semantics {
                         role = Role.Button
                         contentDescription = changeDifficultyDescription
                     },
