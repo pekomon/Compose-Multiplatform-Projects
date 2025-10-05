@@ -13,13 +13,13 @@ interface SoundPlayer {
 }
 
 object NullSoundPlayer : SoundPlayer {
-    override fun click() {}
+    override fun click() { /* NOOP */ }
 
-    override fun reveal() {}
+    override fun reveal() { /* NOOP */ }
 
-    override fun win() {}
+    override fun win() { /* NOOP */ }
 
-    override fun lose() {}
+    override fun lose() { /* NOOP */ }
 }
 
 @Composable

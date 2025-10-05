@@ -2,13 +2,13 @@ package com.example.pekomon.minesweeper.audio
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.AudioSystem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.sound.sampled.AudioFormat
+import javax.sound.sampled.AudioSystem
 import kotlin.math.PI
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -39,7 +39,11 @@ private class JvmSoundPlayer : SoundPlayer {
         playTone(frequencyHz = 320, durationMs = 360)
     }
 
-    private fun playTone(frequencyHz: Int, durationMs: Int, delayBeforeMs: Long = 0L) {
+    private fun playTone(
+        frequencyHz: Int,
+        durationMs: Int,
+        delayBeforeMs: Long = 0L,
+    ) {
         scope.launch {
             if (delayBeforeMs > 0) {
                 delay(delayBeforeMs)
@@ -59,7 +63,10 @@ private class JvmSoundPlayer : SoundPlayer {
         }
     }
 
-    private suspend fun playToneInternal(frequencyHz: Int, durationMs: Int) {
+    private suspend fun playToneInternal(
+        frequencyHz: Int,
+        durationMs: Int,
+    ) {
         val clip = runCatching { AudioSystem.getClip() }.getOrNull() ?: return
         try {
             val data = generateTone(frequencyHz, durationMs)
@@ -81,7 +88,10 @@ private data class ToneSpec(
     val delayBeforeMs: Long,
 )
 
-fun generateTone(frequencyHz: Int, millis: Int): ByteArray {
+fun generateTone(
+    frequencyHz: Int,
+    millis: Int,
+): ByteArray {
     val totalSamples = (SAMPLE_RATE * (millis / 1000.0)).roundToInt().coerceAtLeast(1)
     val buffer = ByteArray(totalSamples * 2)
     for (i in 0 until totalSamples) {

@@ -2,12 +2,12 @@ package com.example.pekomon.minesweeper.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -463,7 +463,11 @@ private fun DifficultyButton(
             modifier =
                 Modifier
                     .heightIn(min = 48.dp)
-                    .pressScale(interactionSource = interactionSource, animationsEnabled = animationsEnabled, label = "difficultyPress"),
+                    .pressScale(
+                        interactionSource = interactionSource,
+                        animationsEnabled = animationsEnabled,
+                        label = "difficultyPress"
+                    ),
             interactionSource = interactionSource,
             contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
         ) {

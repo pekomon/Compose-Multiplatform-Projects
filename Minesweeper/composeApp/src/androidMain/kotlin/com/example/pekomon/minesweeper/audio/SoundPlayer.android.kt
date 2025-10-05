@@ -34,7 +34,11 @@ private object AndroidSoundPlayer : SoundPlayer {
         playTone(tone = ToneGenerator.TONE_DTMF_2, durationMs = 320)
     }
 
-    private fun playTone(tone: Int, durationMs: Int, delayBeforeMs: Long = 0L) {
+    private fun playTone(
+        tone: Int,
+        durationMs: Int,
+        delayBeforeMs: Long = 0L,
+    ) {
         scope.launch {
             if (delayBeforeMs > 0) {
                 delay(delayBeforeMs)
