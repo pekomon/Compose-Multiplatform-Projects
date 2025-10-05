@@ -407,6 +407,8 @@ private fun GameTopBar(
                 horizontalArrangement = Arrangement.spacedBy(actionSpacing),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                val historyActionLabel = stringResource(Res.string.history_button)
+                val historyActionDescription = stringResource(Res.string.history_button_a11y)
                 OutlinedButton(
                     onClick = onHistoryClick,
                     modifier =
@@ -414,16 +416,18 @@ private fun GameTopBar(
                             .minimumInteractiveComponentSize()
                             .semantics {
                                 role = Role.Button
-                                contentDescription = t(Res.string.history_button_a11y)
+                                contentDescription = historyActionDescription
                             },
                 ) {
                     Text(
-                        text = t(Res.string.history_button),
+                        text = historyActionLabel,
                         style = MaterialTheme.typography.labelLarge,
                     )
                 }
 
                 val resetInteraction = remember { MutableInteractionSource() }
+                val resetLabel = stringResource(Res.string.reset_button)
+                val resetDescription = stringResource(Res.string.reset_game_a11y)
                 Button(
                     onClick = onReset,
                     modifier =
@@ -436,17 +440,19 @@ private fun GameTopBar(
                             )
                             .semantics {
                                 role = Role.Button
-                                contentDescription = t(Res.string.reset_game_a11y)
+                                contentDescription = resetDescription
                             },
                     interactionSource = resetInteraction,
                 ) {
                     Text(
-                        text = t(Res.string.reset_button),
+                        text = resetLabel,
                         style = MaterialTheme.typography.labelLarge,
                     )
                 }
 
                 var settingsExpanded by remember { mutableStateOf(false) }
+                val settingsDescription = stringResource(Res.string.open_settings_a11y)
+                val settingsTitle = stringResource(Res.string.settings_title)
                 Box {
                     IconButton(
                         onClick = { settingsExpanded = true },
@@ -455,7 +461,7 @@ private fun GameTopBar(
                                 .minimumInteractiveComponentSize()
                                 .semantics {
                                     role = Role.Button
-                                    contentDescription = t(Res.string.open_settings_a11y)
+                                    contentDescription = settingsDescription
                                 },
                     ) {
                         Text(
@@ -474,11 +480,11 @@ private fun GameTopBar(
                                     .minimumInteractiveComponentSize()
                                     .semantics {
                                         role = Role.Button
-                                        contentDescription = t(Res.string.settings_title)
+                                        contentDescription = settingsTitle
                                     },
                             text = {
                                 Text(
-                                    text = t(Res.string.settings_title),
+                                    text = settingsTitle,
                                     style = MaterialTheme.typography.bodyLarge,
                                 )
                             },
@@ -514,6 +520,7 @@ private fun DifficultyButton(
 ) {
     Box(modifier = modifier) {
         val interactionSource = remember { MutableInteractionSource() }
+        val changeDifficultyDescription = stringResource(Res.string.change_difficulty_a11y)
         FilledTonalButton(
             onClick = onClick,
             modifier =
@@ -526,7 +533,7 @@ private fun DifficultyButton(
                     )
                     .semantics {
                         role = Role.Button
-                        contentDescription = t(Res.string.change_difficulty_a11y)
+                        contentDescription = changeDifficultyDescription
                     },
             interactionSource = interactionSource,
             contentPadding = ButtonDefaults.ButtonWithIconContentPadding,

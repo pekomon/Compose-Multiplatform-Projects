@@ -66,6 +66,8 @@ fun HistoryDialog(
         records = runCatching { historyStore.getTop10(selectedDifficulty) }.getOrElse { emptyList() }
     }
 
+    val closeLabel = stringResource(Res.string.history_close)
+    val titleLabel = stringResource(Res.string.history_title)
     AlertDialog(
         onDismissRequest = onClose,
         confirmButton = {
@@ -76,18 +78,18 @@ fun HistoryDialog(
                         .minimumInteractiveComponentSize()
                         .semantics {
                             role = Role.Button
-                            contentDescription = t(Res.string.history_close)
+                            contentDescription = closeLabel
                         },
             ) {
                 Text(
-                    text = t(Res.string.history_close),
+                    text = closeLabel,
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
         },
         title = {
             Text(
-                text = t(Res.string.history_title),
+                text = titleLabel,
                 style = MaterialTheme.typography.headlineSmall,
             )
         },
@@ -100,13 +102,13 @@ fun HistoryDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    difficulties.forEach { difficulty ->
-                        val selected = selectedDifficulty == difficulty
-                        val description = t(Res.string.difficulty, difficulty.localizedLabel())
+                    difficulties.forEach { difficultyOption ->
+                        val isSelected = selectedDifficulty == difficultyOption
+                        val description = t(Res.string.difficulty, difficultyOption.localizedLabel())
 
-                        if (selected) {
+                        if (isSelected) {
                             FilledTonalButton(
-                                onClick = { selectedDifficulty = difficulty },
+                                onClick = { selectedDifficulty = difficultyOption },
                                 modifier =
                                     Modifier
                                         .minimumInteractiveComponentSize()
@@ -118,13 +120,13 @@ fun HistoryDialog(
                                         },
                             ) {
                                 Text(
-                                    text = difficulty.localizedLabel(),
+                                    text = difficultyOption.localizedLabel(),
                                     style = MaterialTheme.typography.labelLarge,
                                 )
                             }
                         } else {
                             OutlinedButton(
-                                onClick = { selectedDifficulty = difficulty },
+                                onClick = { selectedDifficulty = difficultyOption },
                                 modifier =
                                     Modifier
                                         .minimumInteractiveComponentSize()
@@ -135,7 +137,7 @@ fun HistoryDialog(
                                         },
                             ) {
                                 Text(
-                                    text = difficulty.localizedLabel(),
+                                    text = difficultyOption.localizedLabel(),
                                     style = MaterialTheme.typography.labelLarge,
                                 )
                             }
