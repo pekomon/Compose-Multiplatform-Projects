@@ -185,10 +185,9 @@ jobs:
           target: default
           disable-animations: true
           script: |
-            cd Minesweeper
-            ./gradlew :composeApp:connectedDebugAndroidTest
-            mkdir -p composeApp/build/outputs/androidTest-screenshots
-            adb pull /sdcard/Android/data/com.example.pekomon.minesweeper/files/androidTest-screenshots composeApp/build/outputs/androidTest-screenshots || true
+            ./Minesweeper/gradlew :composeApp:connectedDebugAndroidTest
+            mkdir -p Minesweeper/composeApp/build/outputs/androidTest-screenshots
+            adb pull /sdcard/Android/data/com.example.pekomon.minesweeper/files/androidTest-screenshots Minesweeper/composeApp/build/outputs/androidTest-screenshots || true
 
       - name: Upload UI test screenshots
         if: always()
