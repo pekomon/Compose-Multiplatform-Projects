@@ -61,6 +61,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Dp.Companion.Infinity
 import androidx.compose.ui.unit.Dp.Companion.Unspecified
@@ -194,7 +195,10 @@ private fun GameScreenContent(
         color = MaterialTheme.colorScheme.surface,
     ) {
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .testTag(TestTags.ROOT),
             contentWindowInsets = WindowInsets.safeDrawing,
             topBar = {
                 GameTopBar(
@@ -360,6 +364,7 @@ private fun GameTopBar(
             Text(
                 text = t(Res.string.timer_label, statusEmoji, elapsedSeconds),
                 style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.testTag(TestTags.TXT_TIMER),
             )
         },
         navigationIcon = {
@@ -380,7 +385,10 @@ private fun GameTopBar(
             ) {
                 OutlinedButton(
                     onClick = onHistoryClick,
-                    modifier = Modifier.heightIn(min = 48.dp),
+                    modifier =
+                        Modifier
+                            .testTag(TestTags.BTN_HISTORY)
+                            .heightIn(min = 48.dp),
                 ) {
                     Text(
                         text = t(Res.string.history_button),
@@ -393,6 +401,7 @@ private fun GameTopBar(
                     onClick = onReset,
                     modifier =
                         Modifier
+                            .testTag(TestTags.BTN_RESET)
                             .heightIn(min = 48.dp)
                             .pressScale(
                                 interactionSource = resetInteraction,
@@ -462,6 +471,7 @@ private fun DifficultyButton(
             onClick = onClick,
             modifier =
                 Modifier
+                    .testTag(TestTags.BTN_DIFFICULTY)
                     .heightIn(min = 48.dp)
                     .pressScale(
                         interactionSource = interactionSource,
@@ -746,10 +756,12 @@ private fun CellView(
         backgroundColor = backgroundColor,
         cornerRadius = 6.dp,
         modifier =
-            modifier.graphicsLayer {
-                scaleX = revealScale
-                scaleY = revealScale
-            },
+            modifier
+                .testTag(TestTags.cell(cell.y, cell.x))
+                .graphicsLayer {
+                    scaleX = revealScale
+                    scaleY = revealScale
+                },
         interactionModifier = interactionModifier,
     ) {
         CellContent(
