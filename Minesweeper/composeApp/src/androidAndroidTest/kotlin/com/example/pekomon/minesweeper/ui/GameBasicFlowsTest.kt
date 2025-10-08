@@ -51,7 +51,7 @@ class GameBasicFlowsTest {
     fun resetClearsBoard() {
         val result = composeRule.revealSafeCell()
 
-        composeRule.resetGame(Difficulty.EASY.width * Difficulty.EASY.height)
+        composeRule.resetGame(Difficulty.EASY)
 
         val afterReset =
             composeRule.onNodeWithTag(result.tag, useUnmergedTree = true).captureToImage()
@@ -61,12 +61,12 @@ class GameBasicFlowsTest {
 
     @Test
     fun changeDifficultyUpdatesGridSize() {
-        val easyCount = composeRule.cellCount()
+        val easyCount = composeRule.cellCount(Difficulty.EASY)
         assertEquals(Difficulty.EASY.width * Difficulty.EASY.height, easyCount)
 
         composeRule.setDifficulty(Difficulty.MEDIUM)
 
-        val mediumCount = composeRule.cellCount()
+        val mediumCount = composeRule.cellCount(Difficulty.MEDIUM)
         assertEquals(Difficulty.MEDIUM.width * Difficulty.MEDIUM.height, mediumCount)
     }
 }

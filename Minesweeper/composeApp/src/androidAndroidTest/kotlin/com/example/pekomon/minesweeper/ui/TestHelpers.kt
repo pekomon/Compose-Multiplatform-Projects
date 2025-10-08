@@ -1,19 +1,17 @@
 package com.example.pekomon.minesweeper.ui
 
 import android.graphics.Bitmap
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.toPixelMap
-import androidx.compose.ui.semantics.SemanticsMatcher
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
-import androidx.compose.ui.test.onAllNodes
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.useUnmergedTree
 import androidx.compose.ui.test.waitForIdle
 import androidx.compose.ui.test.waitUntil
 import androidx.test.platform.app.InstrumentationRegistry
@@ -26,24 +24,23 @@ internal data class RevealResult(
     val after: ImageBitmap,
 )
 
-private const val CELL_TAG_PREFIX = "cell-"
-
-private val easyCellCount = Difficulty.EASY.width * Difficulty.EASY.height
 private val easyRows = Difficulty.EASY.height
 private val easyCols = Difficulty.EASY.width
 
-internal fun AndroidComposeTestRule<*, *>.waitForBoard(expectedCells: Int = easyCellCount) {
-    waitUntil(timeoutMillis = 5_000) { cellCount() == expectedCells }
+internal fun AndroidComposeTestRule<*, *>.waitForBoard(difficulty: Difficulty = Difficulty.EASY) {
+    waitUntil(timeoutMillis = 5_000) { boardReady(difficulty) }
     waitForIdle()
 }
 
-internal fun AndroidComposeTestRule<*, *>.cellCount(): Int =
-    onAllNodes(hasTestTagPrefix(CELL_TAG_PREFIX), useUnmergedTree = true).fetchSemanticsNodes().size
+internal fun AndroidComposeTestRule<*, *>.cellCount(difficulty: Difficulty = Difficulty.EASY): Int =
+    (0 until difficulty.height).sumOf { row ->
+        (0 until difficulty.width).count { col -> cellExists(TestTags.cell(row, col)) }
+    }
 
 internal fun AndroidComposeTestRule<*, *>.setDifficulty(difficulty: Difficulty) {
     onNodeWithTag(TestTags.BTN_DIFFICULTY, useUnmergedTree = true).performClick()
     onNodeWithText(difficultyLabel(difficulty), useUnmergedTree = true).performClick()
-    waitForBoard(difficulty.width * difficulty.height)
+    waitForBoard(difficulty)
 }
 
 internal fun AndroidComposeTestRule<*, *>.revealSafeCell(): RevealResult {
@@ -65,10 +62,10 @@ internal fun AndroidComposeTestRule<*, *>.revealSafeCell(): RevealResult {
     error("Failed to reveal a safe cell")
 }
 
-internal fun AndroidComposeTestRule<*, *>.resetGame(expectedCells: Int = easyCellCount) {
+internal fun AndroidComposeTestRule<*, *>.resetGame(difficulty: Difficulty = Difficulty.EASY) {
     onNodeWithTag(TestTags.BTN_RESET, useUnmergedTree = true).performClick()
     waitForIdle()
-    waitForBoard(expectedCells)
+    waitForBoard(difficulty)
     waitUntil(timeoutMillis = 5_000) { !isGameLost() && getTimerText().contains("0s") }
 }
 
@@ -92,16 +89,18 @@ internal fun AndroidComposeTestRule<*, *>.saveScreenshot(image: ImageBitmap, fil
     return outputFile
 }
 
-internal fun hasTestTagPrefix(prefix: String): SemanticsMatcher =
-    SemanticsMatcher("TestTag starts with $prefix") { semanticsNode ->
-        val tag = semanticsNode.config.getOrNull(SemanticsProperties.TestTag)
-        tag?.startsWith(prefix) == true
-    }
-
-internal fun ImageBitmap.centerPixel(): Int {
+internal fun ImageBitmap.centerPixel(): Color {
     val pixels = toPixelMap()
     return pixels[pixels.width / 2, pixels.height / 2]
 }
+
+private fun AndroidComposeTestRule<*, *>.boardReady(difficulty: Difficulty): Boolean =
+    (0 until difficulty.height).all { row ->
+        (0 until difficulty.width).all { col -> cellExists(TestTags.cell(row, col)) }
+    }
+
+private fun AndroidComposeTestRule<*, *>.cellExists(tag: String): Boolean =
+    runCatching { onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode() }.isSuccess
 
 private fun difficultyLabel(difficulty: Difficulty): String =
     when (difficulty) {
