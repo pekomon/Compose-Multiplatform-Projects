@@ -7,13 +7,14 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.junit4.waitForIdle
+import androidx.compose.ui.test.junit4.waitUntil
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.waitForIdle
-import androidx.compose.ui.test.waitUntil
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.pekomon.minesweeper.game.Difficulty
 import java.io.File
@@ -27,6 +28,7 @@ internal data class RevealResult(
 private val easyRows = Difficulty.EASY.height
 private val easyCols = Difficulty.EASY.width
 
+@OptIn(ExperimentalTestApi::class)
 internal fun AndroidComposeTestRule<*, *>.waitForBoard(difficulty: Difficulty = Difficulty.EASY) {
     waitUntil(timeoutMillis = 5_000) { boardReady(difficulty) }
     waitForIdle()
@@ -62,6 +64,7 @@ internal fun AndroidComposeTestRule<*, *>.revealSafeCell(): RevealResult {
     error("Failed to reveal a safe cell")
 }
 
+@OptIn(ExperimentalTestApi::class)
 internal fun AndroidComposeTestRule<*, *>.resetGame(difficulty: Difficulty = Difficulty.EASY) {
     onNodeWithTag(TestTags.BTN_RESET, useUnmergedTree = true).performClick()
     waitForIdle()
