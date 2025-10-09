@@ -10,8 +10,8 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
-import androidx.compose.ui.test.junit4.waitForIdle
-import androidx.compose.ui.test.junit4.waitUntil
+import androidx.compose.ui.test.waitForIdle
+import androidx.compose.ui.test.waitUntil
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
