@@ -1,13 +1,13 @@
 package com.example.pekomon.minesweeper.ui
 
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.longClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.pekomon.minesweeper.MainActivity
 import com.example.pekomon.minesweeper.game.Difficulty
@@ -20,7 +20,6 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class GameBasicFlowsTest {
-
     @get:Rule
     val composeRule = createAndroidComposeRule<MainActivity>()
 
@@ -40,10 +39,12 @@ class GameBasicFlowsTest {
     fun flagCellShowsFlagEmoji() {
         val cellTag = TestTags.cell(0, 0)
 
-        composeRule.onNodeWithTag(cellTag, useUnmergedTree = true)
+        composeRule
+            .onNodeWithTag(cellTag, useUnmergedTree = true)
             .performTouchInput { longClick() }
 
-        composeRule.onNodeWithTag(cellTag, useUnmergedTree = true)
+        composeRule
+            .onNodeWithTag(cellTag, useUnmergedTree = true)
             .assert(hasAnyDescendant(hasText("🚩")))
     }
 

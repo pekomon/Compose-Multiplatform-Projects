@@ -79,7 +79,10 @@ internal fun AndroidComposeTestRule<*, *>.getTimerText(): String {
 
 internal fun AndroidComposeTestRule<*, *>.isGameLost(): Boolean = getTimerText().contains("💥")
 
-internal fun AndroidComposeTestRule<*, *>.saveScreenshot(image: ImageBitmap, fileName: String): File {
+internal fun AndroidComposeTestRule<*, *>.saveScreenshot(
+    image: ImageBitmap,
+    fileName: String,
+): File {
     val instrumentation = InstrumentationRegistry.getInstrumentation()
     val context = instrumentation.targetContext
     val outputDir = File(context.getExternalFilesDir(null), "androidTest-screenshots").apply { mkdirs() }

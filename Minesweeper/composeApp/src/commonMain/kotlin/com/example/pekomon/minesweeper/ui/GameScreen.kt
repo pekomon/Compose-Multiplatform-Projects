@@ -476,7 +476,7 @@ private fun DifficultyButton(
                     .pressScale(
                         interactionSource = interactionSource,
                         animationsEnabled = animationsEnabled,
-                        label = "difficultyPress"
+                        label = "difficultyPress",
                     ),
             interactionSource = interactionSource,
             contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
