@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.example.pekomon.minesweeper.composeapp.generated.resources.Res
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_easy
@@ -60,6 +61,7 @@ fun HistoryDialog(
 
     AlertDialog(
         onDismissRequest = onClose,
+        modifier = Modifier.testTag(TestTags.DIALOG_HISTORY),
         confirmButton = {
             TextButton(onClick = onClose) {
                 Text(

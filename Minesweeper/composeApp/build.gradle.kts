@@ -79,6 +79,22 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
+        val androidInstrumentedTest by getting {
+            kotlin.srcDir("src/androidAndroidTest/kotlin")
+            dependencies {
+                implementation(
+                    project.dependencies.platform(
+                        libs.androidx.compose.bom
+                            .get(),
+                    ),
+                )
+                implementation(libs.androidx.compose.ui.test.junit4)
+                implementation(libs.androidx.test.core)
+                implementation(libs.androidx.testExt.junit)
+                implementation(libs.androidx.test.rules)
+                implementation(libs.androidx.test.runner)
+            }
+        }
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
@@ -111,6 +127,7 @@ android {
                 .toInt()
         versionCode = 1
         versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     packaging {
         resources {

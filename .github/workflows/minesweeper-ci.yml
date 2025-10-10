@@ -148,6 +148,55 @@ jobs:
             Minesweeper/composeApp/build/reports/kover/xml
           if-no-files-found: warn
 
+  android-ui-tests:
+    name: Android (instrumented UI tests)
+    needs: [tests]
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.minesweeper == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Minesweeper
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref }}
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android SDK (accept licenses)
+        uses: android-actions/setup-android@v3
+
+      - name: Gradle build cache
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Run UI tests on emulator (API 34)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: default
+          disable-animations: true
+          script: >-
+            bash -lc 'set -euo pipefail; cd Minesweeper; ./gradlew :composeApp:connectedDebugAndroidTest;
+            mkdir -p composeApp/build/outputs/androidTest-screenshots;
+            adb pull /sdcard/Android/data/com.example.pekomon.minesweeper/files/androidTest-screenshots composeApp/build/outputs/androidTest-screenshots || true'
+
+      - name: Upload UI test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-test-screenshots
+          path: Minesweeper/composeApp/build/outputs/androidTest-screenshots/**
+          if-no-files-found: warn
+
   android:
     name: Android (assembleDebug)
     needs: [tests]
