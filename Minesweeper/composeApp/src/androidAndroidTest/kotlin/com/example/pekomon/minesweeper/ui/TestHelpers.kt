@@ -1,3 +1,7 @@
+@file:Suppress(
+    "MatchingDeclarationName",
+)
+
 package com.example.pekomon.minesweeper.ui
 
 import android.graphics.Bitmap

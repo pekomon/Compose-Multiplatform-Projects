@@ -1,6 +1,5 @@
 package com.example.pekomon.minesweeper.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -15,15 +14,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -37,16 +35,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -62,6 +56,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Dp.Companion.Infinity
 import androidx.compose.ui.unit.Dp.Companion.Unspecified
@@ -79,7 +76,8 @@ import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record
 import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record_time
 import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record_title
 import com.example.pekomon.minesweeper.composeapp.generated.resources.reset_button
-import com.example.pekomon.minesweeper.composeapp.generated.resources.settings_title
+import com.example.pekomon.minesweeper.composeapp.generated.resources.settings_animations
+import com.example.pekomon.minesweeper.composeapp.generated.resources.settings_sounds
 import com.example.pekomon.minesweeper.composeapp.generated.resources.timer_label
 import com.example.pekomon.minesweeper.game.Board
 import com.example.pekomon.minesweeper.game.Cell
@@ -149,7 +147,6 @@ private fun GameScreenContent(
     val elapsedSeconds = elapsed.inWholeSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
     var difficultyMenuExpanded by remember { mutableStateOf(false) }
     var showHistoryDialog by remember { mutableStateOf(false) }
-    var showSettingsDialog by remember { mutableStateOf(false) }
     var historyVersion by remember { mutableStateOf(0) }
     var winRecorded by remember { mutableStateOf(false) }
     var celebration by remember { mutableStateOf<NewRecordCelebration?>(null) }
@@ -191,42 +188,45 @@ private fun GameScreenContent(
     val scrollState = rememberScrollState()
 
     Surface(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().testTag(TestTags.ROOT),
         color = MaterialTheme.colorScheme.surface,
     ) {
-        Scaffold(
+        val safePadding = WindowInsets.safeDrawing.asPaddingValues()
+        val contentPadding = 16.dp
+        Column(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .testTag(TestTags.ROOT),
-            contentWindowInsets = WindowInsets.safeDrawing,
-            topBar = {
-                GameTopBar(
-                    difficulty = difficulty,
-                    onDifficultyClick = { difficultyMenuExpanded = true },
-                    difficultyMenuExpanded = difficultyMenuExpanded,
-                    onDifficultyDismiss = { difficultyMenuExpanded = false },
-                    onDifficultySelected = {
-                        difficultyMenuExpanded = false
-                        resetGame(it)
-                        onDifficultyChanged(it)
-                    },
-                    onReset = { resetGame(difficulty) },
-                    elapsedSeconds = elapsedSeconds,
-                    statusEmoji = statusEmoji,
-                    onHistoryClick = { showHistoryDialog = true },
-                    onSettingsClick = { showSettingsDialog = true },
-                    animationsEnabled = animationsEnabled,
-                )
-            },
-        ) { innerPadding ->
-            val outerPadding = 16.dp
+                    .padding(safePadding)
+                    .padding(horizontal = contentPadding, vertical = contentPadding),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            GameHud(
+                modifier = Modifier.fillMaxWidth(),
+                difficulty = difficulty,
+                onDifficultyClick = { difficultyMenuExpanded = true },
+                difficultyMenuExpanded = difficultyMenuExpanded,
+                onDifficultyDismiss = { difficultyMenuExpanded = false },
+                onDifficultySelected = {
+                    difficultyMenuExpanded = false
+                    resetGame(it)
+                    onDifficultyChanged(it)
+                },
+                onReset = { resetGame(difficulty) },
+                elapsedSeconds = elapsedSeconds,
+                statusEmoji = statusEmoji,
+                onHistoryClick = { showHistoryDialog = true },
+                animationsEnabled = animationsEnabled,
+                soundsEnabled = soundsEnabled,
+                onSoundsEnabledChange = onSoundsEnabledChange,
+                onAnimationsEnabledChange = onAnimationsEnabledChange,
+            )
+
             Box(
                 modifier =
                     Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(horizontal = outerPadding, vertical = outerPadding),
+                        .fillMaxWidth()
+                        .weight(1f, fill = true),
             ) {
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                     val cellSpacing = 8.dp
@@ -290,24 +290,29 @@ private fun GameScreenContent(
                     )
                 }
 
-                AnimatedVisibility(
-                    visible = celebrationState != null,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
+                Box(
                     modifier =
                         Modifier
-                            .align(Alignment.TopCenter)
+                            .fillMaxWidth()
                             .padding(top = 8.dp)
+                            .align(Alignment.TopCenter)
                             .zIndex(1f),
+                    contentAlignment = Alignment.TopCenter,
                 ) {
-                    celebrationState?.let {
-                        NewRecordBanner(
-                            celebration = it,
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp),
-                        )
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = celebrationState != null,
+                        enter = fadeIn(),
+                        exit = fadeOut(),
+                    ) {
+                        celebrationState?.let {
+                            NewRecordBanner(
+                                celebration = it,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp),
+                            )
+                        }
                     }
                 }
             }
@@ -322,21 +327,11 @@ private fun GameScreenContent(
             onClose = { showHistoryDialog = false },
         )
     }
-
-    if (showSettingsDialog) {
-        SettingsDialog(
-            soundsEnabled = soundsEnabled,
-            animationsEnabled = animationsEnabled,
-            onSoundsEnabledChange = onSoundsEnabledChange,
-            onAnimationsEnabledChange = onAnimationsEnabledChange,
-            onDismissRequest = { showSettingsDialog = false },
-        )
-    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun GameTopBar(
+private fun GameHud(
     difficulty: Difficulty,
     onDifficultyClick: () -> Unit,
     difficultyMenuExpanded: Boolean,
@@ -346,28 +341,88 @@ private fun GameTopBar(
     elapsedSeconds: Int,
     statusEmoji: String,
     onHistoryClick: () -> Unit,
-    onSettingsClick: () -> Unit,
     animationsEnabled: Boolean,
+    soundsEnabled: Boolean,
+    onSoundsEnabledChange: (Boolean) -> Unit,
+    onAnimationsEnabledChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val difficulties = remember { Difficulty.values().toList() }
 
-    val actionSpacing = 8.dp
-    TopAppBar(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues())
-                .padding(horizontal = 16.dp),
-        windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top),
-        title = {
-            Text(
-                text = t(Res.string.timer_label, statusEmoji, elapsedSeconds),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.testTag(TestTags.TXT_TIMER),
-            )
-        },
-        navigationIcon = {
+    val timerDescription = t(Res.string.timer_label, statusEmoji, elapsedSeconds)
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = timerDescription,
+            style = MaterialTheme.typography.titleLarge,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .testTag(TestTags.TXT_TIMER)
+                    .semantics {
+                        contentDescription = timerDescription
+                    },
+            textAlign = TextAlign.Center,
+        )
+
+        val soundsLabel = t(Res.string.settings_sounds)
+        val animationsLabel = t(Res.string.settings_animations)
+
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            IconToggleButton(
+                checked = soundsEnabled,
+                onCheckedChange = onSoundsEnabledChange,
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .semantics {
+                            contentDescription = soundsLabel
+                        },
+            ) {
+                val soundTint =
+                    if (soundsEnabled) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+
+                Text(
+                    text = if (soundsEnabled) "🔊" else "🔇",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = soundTint,
+                )
+            }
+
+            IconToggleButton(
+                checked = animationsEnabled,
+                onCheckedChange = onAnimationsEnabledChange,
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .semantics {
+                            contentDescription = animationsLabel
+                        },
+            ) {
+                val animationTint =
+                    if (animationsEnabled) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                Text(
+                    text = if (animationsEnabled) "✨" else "🚫✨",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = animationTint,
+                )
+            }
+
             DifficultyButton(
                 onClick = onDifficultyClick,
                 expanded = difficultyMenuExpanded,
@@ -377,81 +432,41 @@ private fun GameTopBar(
                 difficulty = difficulty,
                 animationsEnabled = animationsEnabled,
             )
-        },
-        actions = {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(actionSpacing),
-                verticalAlignment = Alignment.CenterVertically,
+
+            OutlinedButton(
+                onClick = onHistoryClick,
+                modifier =
+                    Modifier
+                        .testTag(TestTags.BTN_HISTORY)
+                        .heightIn(min = 48.dp),
             ) {
-                OutlinedButton(
-                    onClick = onHistoryClick,
-                    modifier =
-                        Modifier
-                            .testTag(TestTags.BTN_HISTORY)
-                            .heightIn(min = 48.dp),
-                ) {
-                    Text(
-                        text = t(Res.string.history_button),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                }
-
-                val resetInteraction = remember { MutableInteractionSource() }
-                Button(
-                    onClick = onReset,
-                    modifier =
-                        Modifier
-                            .testTag(TestTags.BTN_RESET)
-                            .heightIn(min = 48.dp)
-                            .pressScale(
-                                interactionSource = resetInteraction,
-                                animationsEnabled = animationsEnabled,
-                                label = "resetPress",
-                            ),
-                    interactionSource = resetInteraction,
-                ) {
-                    Text(
-                        text = t(Res.string.reset_button),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                }
-
-                var settingsExpanded by remember { mutableStateOf(false) }
-                Box {
-                    IconButton(onClick = { settingsExpanded = true }) {
-                        Text(
-                            text = "⋮",
-                            style = MaterialTheme.typography.titleLarge,
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = settingsExpanded,
-                        onDismissRequest = { settingsExpanded = false },
-                    ) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = t(Res.string.settings_title),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
-                            },
-                            onClick = {
-                                settingsExpanded = false
-                                onSettingsClick()
-                            },
-                        )
-                    }
-                }
+                Text(
+                    text = t(Res.string.history_button),
+                    style = MaterialTheme.typography.labelLarge,
+                )
             }
-        },
-        colors =
-            TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                titleContentColor = MaterialTheme.colorScheme.onSurface,
-                navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                actionIconContentColor = MaterialTheme.colorScheme.onSurface,
-            ),
-    )
+
+            val resetInteraction = remember { MutableInteractionSource() }
+            Button(
+                onClick = onReset,
+                modifier =
+                    Modifier
+                        .testTag(TestTags.BTN_RESET)
+                        .heightIn(min = 48.dp)
+                        .pressScale(
+                            interactionSource = resetInteraction,
+                            animationsEnabled = animationsEnabled,
+                            label = "resetPress",
+                        ),
+                interactionSource = resetInteraction,
+            ) {
+                Text(
+                    text = t(Res.string.reset_button),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+        }
+    }
 }
 
 @Composable
