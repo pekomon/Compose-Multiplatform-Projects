@@ -80,7 +80,7 @@ kotlin {
             }
         }
         val androidInstrumentedTest by getting {
-            kotlin.srcDir("src/androidAndroidTest/kotlin")
+            kotlin.srcDir("src/androidInstrumentedTest/kotlin")
             dependencies {
                 implementation(
                     project.dependencies.platform(
