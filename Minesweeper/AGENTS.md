@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 - `composeApp/` holds the Kotlin Multiplatform app: shared UI + domain code in `src/commonMain`, platform forks under `androidMain`, `iosMain`, `jvmMain`, and `wasmJsMain`.
-- Tests live beside their targets: `src/commonTest` for shared logic, `src/jvmTest` for JVM-only helpers, Android UI checks in `androidAndroidTest`.
+- Tests live beside their targets: `src/commonTest` for shared logic, `src/jvmTest` for JVM-only helpers, Android UI checks in `androidInstrumentedTest`.
 - `iosApp/` wraps the shared code for Xcode; `kotlin-js-store/` contains the web asset bundle.
 - Tooling lives at the root (`build.gradle.kts`, `settings.gradle.kts`, `gradle.properties`), with analysis configs under `config/`.
 

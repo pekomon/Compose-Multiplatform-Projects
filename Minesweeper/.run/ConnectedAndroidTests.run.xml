@@ -1,0 +1,26 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="Connected Android Tests" type="GradleRunConfiguration" factoryName="Gradle">
+        <ExternalSystemSettings>
+            <option name="executionName" />
+            <option name="externalProjectPath" value="$PROJECT_DIR$" />
+            <option name="externalSystemIdString" value="GRADLE" />
+            <option name="scriptParameters" />
+            <option name="taskDescriptions">
+                <list />
+            </option>
+            <option name="taskNames">
+                <list>
+                    <option value=":composeApp:connectedAndroidTest" />
+                </list>
+            </option>
+            <option name="vmOptions" />
+        </ExternalSystemSettings>
+        <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+        <ExternalSystemReattachDebugProcess>false</ExternalSystemReattachDebugProcess>
+        <DebugAllEnabled>false</DebugAllEnabled>
+        <RunAsTest>true</RunAsTest>
+        <method v="2">
+            <option name="Gradle.BeforeRunTask" enabled="true" tasks=":composeApp:assembleDebug" externalProjectPath="$PROJECT_DIR$" />
+        </method>
+    </configuration>
+</component>
