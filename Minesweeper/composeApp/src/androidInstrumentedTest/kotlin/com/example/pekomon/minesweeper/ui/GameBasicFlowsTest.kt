@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.pekomon.minesweeper.MainActivity
 import com.example.pekomon.minesweeper.game.Difficulty
@@ -27,6 +28,7 @@ class GameBasicFlowsTest {
     @Before
     fun setUp() {
         composeRule.setDifficulty(Difficulty.EASY)
+        composeRule.setFlagMode(false)
     }
 
     @Test
@@ -37,7 +39,24 @@ class GameBasicFlowsTest {
     }
 
     @Test
-    fun flagCellShowsFlagEmoji() {
+    fun flagModeToggleFlagsCell() {
+        val cellTag = TestTags.cell(0, 0)
+
+        composeRule.setFlagMode(true)
+
+        composeRule
+            .onNodeWithTag(cellTag, useUnmergedTree = true)
+            .performClick()
+
+        composeRule
+            .onNodeWithTag(cellTag, useUnmergedTree = true)
+            .assert(hasAnyDescendant(hasText("🚩")))
+
+        composeRule.setFlagMode(false)
+    }
+
+    @Test
+    fun longPressStillFlagsCell() {
         val cellTag = TestTags.cell(0, 0)
 
         composeRule

@@ -4,6 +4,7 @@ object TestTags {
     const val ROOT = "root-scaffold"
     const val BTN_DIFFICULTY = "btn-difficulty"
     const val BTN_RESET = "btn-reset"
+    const val BTN_FLAG_MODE = "btn-flag-mode"
     const val TXT_TIMER = "txt-timer"
     const val TXT_MINES = "txt-mines"
 

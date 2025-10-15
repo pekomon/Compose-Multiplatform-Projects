@@ -35,6 +35,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
@@ -56,8 +58,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Dp.Companion.Infinity
@@ -71,6 +78,16 @@ import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_easy
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_hard
 import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_medium
+import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_action_flag
+import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_action_reveal
+import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_flagged_label
+import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_hidden_label
+import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_revealed_count
+import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_revealed_empty
+import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_revealed_mine
+import com.example.pekomon.minesweeper.composeapp.generated.resources.flag_mode_label
+import com.example.pekomon.minesweeper.composeapp.generated.resources.flag_mode_off
+import com.example.pekomon.minesweeper.composeapp.generated.resources.flag_mode_on
 import com.example.pekomon.minesweeper.composeapp.generated.resources.history_button
 import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record_difficulty
 import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record_time
@@ -78,6 +95,8 @@ import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record
 import com.example.pekomon.minesweeper.composeapp.generated.resources.reset_button
 import com.example.pekomon.minesweeper.composeapp.generated.resources.settings_animations
 import com.example.pekomon.minesweeper.composeapp.generated.resources.settings_sounds
+import com.example.pekomon.minesweeper.composeapp.generated.resources.toggle_off
+import com.example.pekomon.minesweeper.composeapp.generated.resources.toggle_on
 import com.example.pekomon.minesweeper.composeapp.generated.resources.timer_label
 import com.example.pekomon.minesweeper.game.Board
 import com.example.pekomon.minesweeper.game.Cell
@@ -149,6 +168,7 @@ private fun GameScreenContent(
     var showHistoryDialog by remember { mutableStateOf(false) }
     var historyVersion by remember { mutableStateOf(0) }
     var winRecorded by remember { mutableStateOf(false) }
+    var flagMode by remember { mutableStateOf(false) }
     var celebration by remember { mutableStateOf<NewRecordCelebration?>(null) }
 
     fun refreshBoard() {
@@ -161,6 +181,7 @@ private fun GameScreenContent(
         difficulty = newDifficulty
         timer.reset()
         winRecorded = false
+        flagMode = false
         celebration = null
     }
 
@@ -168,6 +189,12 @@ private fun GameScreenContent(
     val soundPlayer = rememberSoundPlayer(soundsEnabled)
 
     GameTimerEffects(board = board, timer = timer)
+
+    LaunchedEffect(board.status) {
+        if (board.status != GameStatus.IN_PROGRESS) {
+            flagMode = false
+        }
+    }
 
     GameCelebrationEffects(
         board = board,
@@ -218,6 +245,8 @@ private fun GameScreenContent(
                 onHistoryClick = { showHistoryDialog = true },
                 animationsEnabled = animationsEnabled,
                 soundsEnabled = soundsEnabled,
+                flagModeEnabled = flagMode,
+                onFlagModeChange = { flagMode = it },
                 onSoundsEnabledChange = onSoundsEnabledChange,
                 onAnimationsEnabledChange = onAnimationsEnabledChange,
             )
@@ -253,11 +282,11 @@ private fun GameScreenContent(
                             Modifier
                                 .fillMaxWidth()
                                 .then(scrollModifier),
-                        contentAlignment = Alignment.TopCenter,
-                    ) {
-                        BoardView(
-                            board = board,
-                            onReveal = { x, y ->
+                    contentAlignment = Alignment.TopCenter,
+                ) {
+                    BoardView(
+                        board = board,
+                        onReveal = { x, y ->
                                 if (board.status == GameStatus.IN_PROGRESS) {
                                     api.onReveal(x, y)
                                     soundPlayer.reveal()
@@ -271,6 +300,7 @@ private fun GameScreenContent(
                                     refreshBoard()
                                 }
                             },
+                            flagMode = flagMode,
                             modifier = Modifier.width(boardWidth).height(boardHeight),
                             cellSpacing = cellSpacing,
                             cellSize = cellSize,
@@ -343,6 +373,8 @@ private fun GameHud(
     onHistoryClick: () -> Unit,
     animationsEnabled: Boolean,
     soundsEnabled: Boolean,
+    flagModeEnabled: Boolean,
+    onFlagModeChange: (Boolean) -> Unit,
     onSoundsEnabledChange: (Boolean) -> Unit,
     onAnimationsEnabledChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -370,6 +402,11 @@ private fun GameHud(
 
         val soundsLabel = t(Res.string.settings_sounds)
         val animationsLabel = t(Res.string.settings_animations)
+        val flagModeLabel = t(Res.string.flag_mode_label)
+        val flagModeOn = t(Res.string.flag_mode_on)
+        val flagModeOff = t(Res.string.flag_mode_off)
+        val toggleOnLabel = t(Res.string.toggle_on)
+        val toggleOffLabel = t(Res.string.toggle_off)
 
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
@@ -384,6 +421,7 @@ private fun GameHud(
                         .size(48.dp)
                         .semantics {
                             contentDescription = soundsLabel
+                            stateDescription = if (soundsEnabled) toggleOnLabel else toggleOffLabel
                         },
             ) {
                 val soundTint =
@@ -408,6 +446,7 @@ private fun GameHud(
                         .size(48.dp)
                         .semantics {
                             contentDescription = animationsLabel
+                            stateDescription = if (animationsEnabled) toggleOnLabel else toggleOffLabel
                         },
             ) {
                 val animationTint =
@@ -423,6 +462,39 @@ private fun GameHud(
                 )
             }
 
+            FilterChip(
+                selected = flagModeEnabled,
+                onClick = { onFlagModeChange(!flagModeEnabled) },
+                modifier =
+                    Modifier
+                        .heightIn(min = 40.dp)
+                        .testTag(TestTags.BTN_FLAG_MODE)
+                        .semantics {
+                            contentDescription = flagModeLabel
+                            stateDescription = if (flagModeEnabled) flagModeOn else flagModeOff
+                        },
+                label = {
+                    val labelText = if (flagModeEnabled) flagModeOn else flagModeOff
+                    Text(text = labelText, style = MaterialTheme.typography.labelLarge)
+                },
+                leadingIcon = {
+                    val flagTint =
+                        if (flagModeEnabled) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    Text(
+                        text = "🚩",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = flagTint,
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+            )
             DifficultyButton(
                 onClick = onDifficultyClick,
                 expanded = difficultyMenuExpanded,
@@ -698,6 +770,7 @@ private fun BoardView(
     board: Board,
     onReveal: (Int, Int) -> Unit,
     onToggleFlag: (Int, Int) -> Unit,
+    flagMode: Boolean,
     modifier: Modifier = Modifier,
     cellSpacing: Dp = 2.dp,
     cellSize: Dp,
@@ -715,6 +788,7 @@ private fun BoardView(
                 onReveal = { onReveal(cell.x, cell.y) },
                 onToggleFlag = { onToggleFlag(cell.x, cell.y) },
                 boardStatus = board.status,
+                flagMode = flagMode,
                 modifier = Modifier.size(cellSize),
             )
         }
@@ -728,6 +802,7 @@ private fun CellView(
     onReveal: () -> Unit,
     onToggleFlag: () -> Unit,
     boardStatus: GameStatus,
+    flagMode: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val reducedMotion = LocalReducedMotion.current
@@ -759,12 +834,68 @@ private fun CellView(
         label = "cellRevealScale",
     )
     val revealScale = if (animationEnabled && cell.state == CellState.REVEALED) revealScaleRaw else 1f
+    val revealEnabled = boardStatus == GameStatus.IN_PROGRESS && cell.state == CellState.HIDDEN
+    val toggleEnabled = boardStatus == GameStatus.IN_PROGRESS && cell.state != CellState.REVEALED
+    val cellDescription =
+        when (cell.state) {
+            CellState.HIDDEN -> t(Res.string.cell_hidden_label)
+            CellState.FLAGGED -> t(Res.string.cell_flagged_label)
+            CellState.REVEALED ->
+                when {
+                    cell.isMine -> t(Res.string.cell_revealed_mine)
+                    cell.adjacentMines == 0 -> t(Res.string.cell_revealed_empty)
+                    else -> t(Res.string.cell_revealed_count, cell.adjacentMines)
+                }
+        }
+    val revealActionLabel = t(Res.string.cell_action_reveal)
+    val flagActionLabel = t(Res.string.cell_action_flag)
+    val primaryTogglesFlag = flagMode && toggleEnabled
+    val primaryRevealsCell = !primaryTogglesFlag && revealEnabled
+    val semanticsModifier =
+        Modifier.semantics(mergeDescendants = true) {
+            contentDescription = cellDescription
+            when {
+                primaryTogglesFlag ->
+                    onClick(label = flagActionLabel) {
+                        onToggleFlag()
+                        true
+                    }
+                primaryRevealsCell ->
+                    onClick(label = revealActionLabel) {
+                        onReveal()
+                        true
+                    }
+                !toggleEnabled && !revealEnabled -> disabled()
+            }
+
+            val secondaryActions = mutableListOf<CustomAccessibilityAction>()
+            if (toggleEnabled && !primaryTogglesFlag) {
+                secondaryActions +=
+                    CustomAccessibilityAction(label = flagActionLabel) {
+                        onToggleFlag()
+                        true
+                    }
+            }
+            if (revealEnabled && !primaryRevealsCell) {
+                secondaryActions +=
+                    CustomAccessibilityAction(label = revealActionLabel) {
+                        onReveal()
+                        true
+                    }
+            }
+            if (secondaryActions.isNotEmpty()) {
+                customActions = secondaryActions
+            }
+        }
     val interactionModifier =
-        Modifier.cellInteractions(
-            revealEnabled = boardStatus == GameStatus.IN_PROGRESS && cell.state == CellState.HIDDEN,
-            toggleEnabled = cell.state != CellState.REVEALED,
-            onReveal = onReveal,
-            onToggleFlag = onToggleFlag,
+        semanticsModifier.then(
+            Modifier.cellInteractions(
+                revealEnabled = revealEnabled,
+                toggleEnabled = toggleEnabled,
+                onReveal = onReveal,
+                onToggleFlag = onToggleFlag,
+                flagMode = flagMode,
+            ),
         )
 
     CellContainer(

@@ -47,6 +47,17 @@ internal fun AndroidComposeTestRule<*, *>.setDifficulty(difficulty: Difficulty) 
     waitForBoard(difficulty)
 }
 
+internal fun AndroidComposeTestRule<*, *>.setFlagMode(enabled: Boolean) {
+    val node = onNodeWithTag(TestTags.BTN_FLAG_MODE, useUnmergedTree = true)
+    val semantics = node.fetchSemanticsNode().config
+    val selected = semantics.getOrNull(SemanticsProperties.Selected)
+    val shouldSelect = if (enabled) true else false
+    if (selected != shouldSelect) {
+        node.performClick()
+        waitForIdle()
+    }
+}
+
 internal fun AndroidComposeTestRule<*, *>.revealSafeCell(): RevealResult {
     waitForBoard()
     for (row in 0 until easyRows) {
