@@ -14,16 +14,18 @@ internal fun Modifier.cellInteractions(
     toggleEnabled: Boolean,
     onReveal: () -> Unit,
     onToggleFlag: () -> Unit,
+    flagMode: Boolean,
 ): Modifier =
     composed {
         val currentReveal by rememberUpdatedState(onReveal)
         val currentToggle by rememberUpdatedState(onToggleFlag)
 
-        pointerInput(revealEnabled, toggleEnabled) {
+        pointerInput(revealEnabled, toggleEnabled, flagMode) {
             detectTapGestures(
                 onTap = {
-                    if (revealEnabled) {
-                        currentReveal()
+                    when {
+                        flagMode && toggleEnabled -> currentToggle()
+                        revealEnabled -> currentReveal()
                     }
                 },
                 onLongPress = {
