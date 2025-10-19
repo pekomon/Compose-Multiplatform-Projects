@@ -35,9 +35,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -74,10 +74,6 @@ import androidx.compose.ui.zIndex
 import com.example.pekomon.minesweeper.audio.SoundPlayer
 import com.example.pekomon.minesweeper.audio.rememberSoundPlayer
 import com.example.pekomon.minesweeper.composeapp.generated.resources.Res
-import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty
-import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_easy
-import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_hard
-import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_medium
 import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_action_flag
 import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_action_reveal
 import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_flagged_label
@@ -85,6 +81,10 @@ import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_hidde
 import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_revealed_count
 import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_revealed_empty
 import com.example.pekomon.minesweeper.composeapp.generated.resources.cell_revealed_mine
+import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty
+import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_easy
+import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_hard
+import com.example.pekomon.minesweeper.composeapp.generated.resources.difficulty_medium
 import com.example.pekomon.minesweeper.composeapp.generated.resources.flag_mode_label
 import com.example.pekomon.minesweeper.composeapp.generated.resources.flag_mode_off
 import com.example.pekomon.minesweeper.composeapp.generated.resources.flag_mode_on
@@ -95,9 +95,9 @@ import com.example.pekomon.minesweeper.composeapp.generated.resources.new_record
 import com.example.pekomon.minesweeper.composeapp.generated.resources.reset_button
 import com.example.pekomon.minesweeper.composeapp.generated.resources.settings_animations
 import com.example.pekomon.minesweeper.composeapp.generated.resources.settings_sounds
+import com.example.pekomon.minesweeper.composeapp.generated.resources.timer_label
 import com.example.pekomon.minesweeper.composeapp.generated.resources.toggle_off
 import com.example.pekomon.minesweeper.composeapp.generated.resources.toggle_on
-import com.example.pekomon.minesweeper.composeapp.generated.resources.timer_label
 import com.example.pekomon.minesweeper.game.Board
 import com.example.pekomon.minesweeper.game.Cell
 import com.example.pekomon.minesweeper.game.CellState
@@ -282,11 +282,11 @@ private fun GameScreenContent(
                             Modifier
                                 .fillMaxWidth()
                                 .then(scrollModifier),
-                    contentAlignment = Alignment.TopCenter,
-                ) {
-                    BoardView(
-                        board = board,
-                        onReveal = { x, y ->
+                        contentAlignment = Alignment.TopCenter,
+                    ) {
+                        BoardView(
+                            board = board,
+                            onReveal = { x, y ->
                                 if (board.status == GameStatus.IN_PROGRESS) {
                                     api.onReveal(x, y)
                                     soundPlayer.reveal()
@@ -490,10 +490,11 @@ private fun GameHud(
                         color = flagTint,
                     )
                 },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
+                colors =
+                    FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
             )
             DifficultyButton(
                 onClick = onDifficultyClick,
