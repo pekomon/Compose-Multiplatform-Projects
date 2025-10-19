@@ -13,6 +13,7 @@ import org.example.pekomon.cryptoapp.core.database.portfolio.getPortfolioDatabas
 import org.example.pekomon.cryptoapp.core.network.HttpClientFactory
 import org.example.pekomon.cryptoapp.portfolio.data.PortfolioRepositoryImpl
 import org.example.pekomon.cryptoapp.portfolio.domain.PortfolioRepository
+import org.example.pekomon.cryptoapp.portfolio.presentation.PortfolioViewModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
@@ -38,6 +39,7 @@ val sharedModule = module {
     // portfolio
     single { getPortfolioDatabase(get<RoomDatabase.Builder<PortfolioDatabase>>()) }
     singleOf(::PortfolioRepositoryImpl).bind<PortfolioRepository>()
+    viewModel { PortfolioViewModel(get()) }
 
     // coins list
     viewModel { CoinsListViewModel(get(), get()) }
