@@ -1,0 +1,5 @@
+#include "Configuration/Config.xcconfig"
+
+// Copy this file locally and replace the placeholder with your actual Coinranking key.
+// Keep the real value out of source control.
+COINRANKING_API_KEY = not-set

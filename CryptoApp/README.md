@@ -12,3 +12,8 @@ This is a Kotlin Multiplatform project targeting Android, iOS.
 
 
 Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+
+## API keys
+
+- Android reads `COINRANKING_API_KEY` from the root `local.properties` file (already gitignored).
+- iOS looks for the same key in `iosApp/Keys.xcconfig`. The file now exists in the project with a placeholder value—edit it locally to paste your secret or create a personal copy and keep it untracked. Xcode does not load `~/.zshrc`, so exporting the variable there is not enough unless you also generate/update `Keys.xcconfig` before each build.
