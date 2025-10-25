@@ -39,6 +39,8 @@ val sharedModule = module {
     // portfolio
     single { getPortfolioDatabase(get<RoomDatabase.Builder<PortfolioDatabase>>()) }
     singleOf(::PortfolioRepositoryImpl).bind<PortfolioRepository>()
+    single { get<PortfolioDatabase>().portfolioDao() }
+    single { get<PortfolioDatabase>().userBalanceDao() }
     viewModel { PortfolioViewModel(get()) }
 
     // coins list
