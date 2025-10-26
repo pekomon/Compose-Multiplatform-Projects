@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Skip formatting if the commit doesn't include Minesweeper changes
+if ! git diff --cached --name-only -- 'Minesweeper/**' 'Minesweeper' | grep -q .; then
+  exit 0
+fi
+
 # Format Kotlin sources before each commit for consistent style
 (
   cd Minesweeper
