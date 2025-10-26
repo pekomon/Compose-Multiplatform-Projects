@@ -28,6 +28,7 @@
 .idea/**/dbnavigator.xml
 
 Keys.xcconfig
+!CryptoApp/iosApp/Keys.xcconfig
 
 # Gradle
 .idea/**/gradle.xml
