@@ -14,6 +14,7 @@ import org.example.pekomon.cryptoapp.core.network.HttpClientFactory
 import org.example.pekomon.cryptoapp.portfolio.data.PortfolioRepositoryImpl
 import org.example.pekomon.cryptoapp.portfolio.domain.PortfolioRepository
 import org.example.pekomon.cryptoapp.portfolio.presentation.PortfolioViewModel
+import org.example.pekomon.cryptoapp.trade.domain.BuyCoinUseCase
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
@@ -49,4 +50,7 @@ val sharedModule = module {
     singleOf(::KtorCoinsRemoteDataSource).bind<CoinsRemoteDataSource>()
     singleOf(::GetCoinDetailsUseCase)
     singleOf(::GetCoinPriceHistoryUseCase)
+
+    // trade
+    singleOf(::BuyCoinUseCase)
 }
