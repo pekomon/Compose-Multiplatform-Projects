@@ -17,7 +17,7 @@ class BuyCoinUseCase(
         price: Double
     ): EmptyResult<DataError> {
         val balance = portfolioRepository.cashBalanceFlow().first()
-        if (balance < amountinFiat) {
+        if (balance < amountInFiat) {
             return Result.Error(DataError.Local.INSUFFICIENT_FUNDS)
         }
 
