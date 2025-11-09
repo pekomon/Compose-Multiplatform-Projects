@@ -15,6 +15,7 @@ import org.example.pekomon.cryptoapp.portfolio.data.PortfolioRepositoryImpl
 import org.example.pekomon.cryptoapp.portfolio.domain.PortfolioRepository
 import org.example.pekomon.cryptoapp.portfolio.presentation.PortfolioViewModel
 import org.example.pekomon.cryptoapp.trade.domain.BuyCoinUseCase
+import org.example.pekomon.cryptoapp.trade.domain.SellCoinUseCase
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
@@ -53,4 +54,5 @@ val sharedModule = module {
 
     // trade
     singleOf(::BuyCoinUseCase)
+    singleOf(::SellCoinUseCase)
 }
