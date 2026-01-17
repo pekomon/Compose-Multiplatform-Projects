@@ -319,3 +319,18 @@ obj/
 !**/gradle/wrapper/gradle-wrapper.properties
 !**/gradlew
 !**/gradlew.bat
+
+
+
+# PdfForge local planning
+PdfForge/.codex/
+PdfForge/.codex/**
+
+# PdfForge local secrets / certs
+PdfForge/.secrets/
+PdfForge/.secrets/**
+*.p12
+*.pfx
+*.pem
+*.key
+
