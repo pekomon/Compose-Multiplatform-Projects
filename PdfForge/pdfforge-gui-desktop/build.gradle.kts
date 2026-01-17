@@ -27,8 +27,14 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
+            implementation(projects.pdfforgeUsecases)
+            implementation(projects.pdfforgeDomain)
         }
     }
+}
+
+compose.resources {
+    packageOfResClass = "pdfforge.composeapp.generated.resources"
 }
 
 
