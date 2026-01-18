@@ -23,6 +23,17 @@ data class ShrinkResult(
     val afterBytes: Long,
 )
 
+data class SignOptions(
+    val reason: String? = null,
+    val location: String? = null,
+)
+
+data class SignResult(
+    val outputPath: Path,
+    val beforeBytes: Long,
+    val afterBytes: Long,
+)
+
 sealed class PdfForgeError(
     open val userMessage: String,
     open val technicalMessage: String,
