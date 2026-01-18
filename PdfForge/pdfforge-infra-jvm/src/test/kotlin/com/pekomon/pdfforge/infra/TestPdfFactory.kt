@@ -5,11 +5,33 @@ import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory
+import org.apache.pdfbox.pdmodel.font.PDType1Font
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts
 import java.awt.image.BufferedImage
 import java.nio.file.Path
 import kotlin.random.Random
 
 object TestPdfFactory {
+    fun createTextPdf(
+        output: Path,
+        pages: Int = 1,
+    ) {
+        PDDocument().use { document ->
+            repeat(pages) { pageIndex ->
+                val page = PDPage(PDRectangle.LETTER)
+                document.addPage(page)
+                PDPageContentStream(document, page).use { contentStream ->
+                    contentStream.beginText()
+                    contentStream.setFont(PDType1Font(Standard14Fonts.FontName.HELVETICA), 12f)
+                    contentStream.newLineAtOffset(72f, 720f - (pageIndex * 20f))
+                    contentStream.showText("PdfForge test page ${pageIndex + 1}")
+                    contentStream.endText()
+                }
+            }
+            document.save(output.toFile())
+        }
+    }
+
     fun createScannedLikePdf(
         output: Path,
         pages: Int = 2,
