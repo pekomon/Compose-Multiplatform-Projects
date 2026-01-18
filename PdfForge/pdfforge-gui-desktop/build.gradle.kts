@@ -29,6 +29,7 @@ kotlin {
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(projects.pdfforgeUsecases)
             implementation(projects.pdfforgeDomain)
+            implementation(projects.pdfforgeInfraJvm)
         }
     }
 }
