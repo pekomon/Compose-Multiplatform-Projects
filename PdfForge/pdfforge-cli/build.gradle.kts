@@ -8,6 +8,7 @@ application {
 }
 
 dependencies {
+    implementation(projects.pdfforgeDomain)
     implementation(projects.pdfforgeUsecases)
     implementation(projects.pdfforgeInfraJvm)
 }
