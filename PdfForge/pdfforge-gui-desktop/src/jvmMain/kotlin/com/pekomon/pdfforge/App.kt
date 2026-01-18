@@ -1,49 +1,106 @@
 package com.pekomon.pdfforge
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.pekomon.pdfforge.domain.PdfPaths
+import com.pekomon.pdfforge.infra.JvmFileCopyPdfShrinker
+import com.pekomon.pdfforge.usecases.ShrinkPdfUseCase
+import com.pekomon.pdfforge.usecases.UseCaseResult
+import java.io.File
+import kotlin.io.path.Path
+import kotlin.io.path.nameWithoutExtension
+import kotlin.io.path.pathString
 
-import pdfforge.composeapp.generated.resources.Res
-import pdfforge.composeapp.generated.resources.compose_multiplatform
+private const val BytesInKb = 1024.0
+private const val BytesInMb = 1024.0 * 1024.0
 
 @Composable
-@Preview
 fun App() {
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
+        val shrinkUseCase = remember { ShrinkPdfUseCase(JvmFileCopyPdfShrinker()) }
+        var selectedFile by remember { mutableStateOf<File?>(null) }
+        var statusMessage by remember { mutableStateOf("Select a PDF to begin.") }
+
         Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .safeContentPadding()
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize().padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+            Text("PdfForge", style = MaterialTheme.typography.headlineMedium)
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Input PDF")
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedButton(onClick = {
+                        selectedFile = pickPdfFile()
+                        statusMessage = if (selectedFile != null) "Ready to shrink." else "Select a PDF to begin."
+                    }) {
+                        Text("Choose PDF")
+                    }
+                    val name = selectedFile?.name ?: "No file selected"
+                    Text(name, modifier = Modifier.weight(1f))
+                }
+                selectedFile?.let { file ->
+                    Text("Size: ${formatBytes(file.length())}")
                 }
             }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(
+                    enabled = selectedFile != null,
+                    onClick = {
+                        val input = selectedFile ?: return@Button
+                        val inputPath = Path(input.absolutePath)
+                        val outputPath = inputPath.resolveSibling("${inputPath.nameWithoutExtension}_compressed.pdf")
+                        val result = shrinkUseCase.execute(
+                            PdfPaths(inputPath, outputPath),
+                        )
+                        statusMessage = when (result) {
+                            is UseCaseResult.Success -> "Created: ${outputPath.pathString}"
+                            is UseCaseResult.Failure -> result.error.userMessage
+                        }
+                    },
+                ) {
+                    Text("Shrink (stub)")
+                }
+                Spacer(Modifier.width(8.dp))
+                Text(statusMessage, modifier = Modifier.weight(1f))
+            }
+
+            Spacer(Modifier.height(8.dp))
         }
     }
+}
+
+private fun formatBytes(bytes: Long): String {
+    return when {
+        bytes >= BytesInMb -> String.format("%.2f MB", bytes / BytesInMb)
+        bytes >= BytesInKb -> String.format("%.1f KB", bytes / BytesInKb)
+        else -> "$bytes B"
+    }
+}
+
+private fun pickPdfFile(): File? {
+    val dialog = java.awt.FileDialog(null as java.awt.Frame?, "Select PDF", java.awt.FileDialog.LOAD)
+    dialog.isVisible = true
+    val directory = dialog.directory ?: return null
+    val filename = dialog.file ?: return null
+    return File(directory, filename)
 }
