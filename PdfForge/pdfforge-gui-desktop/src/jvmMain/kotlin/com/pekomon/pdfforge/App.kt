@@ -21,7 +21,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pekomon.pdfforge.domain.PdfPaths
-import com.pekomon.pdfforge.infra.JvmFileCopyPdfShrinker
+import com.pekomon.pdfforge.domain.PdfProgressEvent
+import com.pekomon.pdfforge.domain.ShrinkOptions
+import com.pekomon.pdfforge.domain.ShrinkPreset
+import com.pekomon.pdfforge.infra.PdfBoxPdfShrinker
 import com.pekomon.pdfforge.usecases.ShrinkPdfUseCase
 import com.pekomon.pdfforge.usecases.UseCaseResult
 import java.io.File
@@ -35,9 +38,10 @@ private const val BytesInMb = 1024.0 * 1024.0
 @Composable
 fun App() {
     MaterialTheme {
-        val shrinkUseCase = remember { ShrinkPdfUseCase(JvmFileCopyPdfShrinker()) }
+        val shrinkUseCase = remember { ShrinkPdfUseCase(PdfBoxPdfShrinker()) }
         var selectedFile by remember { mutableStateOf<File?>(null) }
         var statusMessage by remember { mutableStateOf("Select a PDF to begin.") }
+        var selectedPreset by remember { mutableStateOf(ShrinkPreset.Medium) }
 
         Column(
             modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -62,6 +66,23 @@ fun App() {
                 }
             }
 
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Preset")
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ShrinkPreset.values().forEach { preset ->
+                        if (preset == selectedPreset) {
+                            Button(onClick = { selectedPreset = preset }) {
+                                Text(preset.name)
+                            }
+                        } else {
+                            OutlinedButton(onClick = { selectedPreset = preset }) {
+                                Text(preset.name)
+                            }
+                        }
+                    }
+                }
+            }
+
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(
                     enabled = selectedFile != null,
@@ -71,14 +92,24 @@ fun App() {
                         val outputPath = inputPath.resolveSibling("${inputPath.nameWithoutExtension}_compressed.pdf")
                         val result = shrinkUseCase.execute(
                             PdfPaths(inputPath, outputPath),
-                        )
+                            ShrinkOptions(selectedPreset),
+                        ) { event ->
+                            statusMessage = when (event) {
+                                is PdfProgressEvent.Started -> "Shrinking..."
+                                is PdfProgressEvent.PageProcessed ->
+                                    "Processing page ${event.pageIndex}/${event.totalPages}"
+                                is PdfProgressEvent.Completed -> "Finalizing..."
+                                is PdfProgressEvent.Failed -> event.error.userMessage
+                            }
+                        }
                         statusMessage = when (result) {
-                            is UseCaseResult.Success -> "Created: ${outputPath.pathString}"
+                            is UseCaseResult.Success ->
+                                "Created: ${outputPath.pathString} (${formatBytes(result.value.beforeBytes)} → ${formatBytes(result.value.afterBytes)})"
                             is UseCaseResult.Failure -> result.error.userMessage
                         }
                     },
                 ) {
-                    Text("Shrink (stub)")
+                    Text("Shrink")
                 }
                 Spacer(Modifier.width(8.dp))
                 Text(statusMessage, modifier = Modifier.weight(1f))
