@@ -29,6 +29,7 @@ class SignPdfUseCase(
             )
             UseCaseResult.Success(result)
         } catch (error: Exception) {
+            System.err.println("Sign failed: ${error.message}")
             val wrapped = IoError(
                 userMessage = "Could not sign PDF.",
                 technicalMessage = error.message ?: "Unknown error during signing.",

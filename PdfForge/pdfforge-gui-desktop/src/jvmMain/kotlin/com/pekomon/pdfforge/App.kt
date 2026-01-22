@@ -40,6 +40,7 @@ import kotlinx.coroutines.withContext
 import java.awt.Desktop
 import java.io.File
 import java.io.FilenameFilter
+import java.time.Instant
 import kotlin.io.path.Path
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.pathString
@@ -60,9 +61,11 @@ fun App() {
         var selectedPreset by remember { mutableStateOf(ShrinkPreset.Medium) }
         var lastOutputFile by remember { mutableStateOf<File?>(null) }
         var isBusy by remember { mutableStateOf(false) }
+        var logLines by remember { mutableStateOf(listOf<String>()) }
 
         val updateStatus: (String) -> Unit = { message ->
             coroutineScope.launch {
+                logLines = (logLines + "[${Instant.now()}] $message").takeLast(6)
                 statusMessage = message
             }
         }
@@ -218,6 +221,15 @@ fun App() {
                     Text("Output: ${file.name}", modifier = Modifier.weight(1f))
                     OutlinedButton(onClick = { revealInFinder(file) }) {
                         Text("Reveal in Finder")
+                    }
+                }
+            }
+
+            if (logLines.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("Recent activity", style = MaterialTheme.typography.titleSmall)
+                    logLines.forEach { line ->
+                        Text(line, style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }

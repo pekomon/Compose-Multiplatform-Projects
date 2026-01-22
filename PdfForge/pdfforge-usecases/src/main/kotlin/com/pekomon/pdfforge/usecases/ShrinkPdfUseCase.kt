@@ -32,6 +32,7 @@ class ShrinkPdfUseCase(
             )
             UseCaseResult.Success(result)
         } catch (error: Exception) {
+            System.err.println("Shrink failed: ${error.message}")
             val wrapped = IoError(
                 userMessage = "Could not shrink PDF.",
                 technicalMessage = error.message ?: "Unknown error during shrink.",
