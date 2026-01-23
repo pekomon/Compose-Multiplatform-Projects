@@ -26,6 +26,8 @@ data class ShrinkResult(
 data class SignOptions(
     val reason: String? = null,
     val location: String? = null,
+    val visibleSignature: Boolean = false,
+    val visibleSignaturePage: Int = 1,
 )
 
 data class SignResult(

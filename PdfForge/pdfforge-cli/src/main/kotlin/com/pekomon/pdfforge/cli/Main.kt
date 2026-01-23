@@ -92,12 +92,17 @@ private fun runSign(args: List<String>) {
     }
 
     val password = readPassword(options)
+    val visibleSignature = hasFlag(options, "--visible")
+    val visiblePage = optionValue(options, "--page")?.toIntOrNull() ?: 1
     val useCase = SignPdfUseCase(PdfBoxPdfSigner())
     val result = useCase.execute(
         PdfPaths(input, output),
         p12Path,
         password,
-        SignOptions(),
+        SignOptions(
+            visibleSignature = visibleSignature,
+            visibleSignaturePage = visiblePage,
+        ),
     )
     password.fill('\u0000')
 
@@ -151,6 +156,10 @@ private fun optionValue(args: List<String>, key: String): String? {
     return args[index + 1]
 }
 
+private fun hasFlag(args: List<String>, key: String): Boolean {
+    return args.contains(key)
+}
+
 private fun formatBytes(bytes: Long): String {
     return when {
         bytes >= BytesInMb -> String.format("%.2f MB", bytes / BytesInMb)
@@ -166,7 +175,7 @@ private fun printHelp() {
         |
         |Usage:
         |  pdfforge shrink <input.pdf> <output.pdf> --preset {high|medium|aggressive}
-        |  pdfforge sign <input.pdf> <output.pdf> --p12 <cert.p12> --pass env:VAR
+        |  pdfforge sign <input.pdf> <output.pdf> --p12 <cert.p12> --pass env:VAR [--visible] [--page N]
         |
         |Commands:
         |  shrink   Shrink a PDF by recompressing images
@@ -180,5 +189,5 @@ private fun printShrinkHelp() {
 }
 
 private fun printSignHelp() {
-    println("pdfforge sign <input.pdf> <output.pdf> --p12 <cert.p12> --pass env:VAR")
+    println("pdfforge sign <input.pdf> <output.pdf> --p12 <cert.p12> --pass env:VAR [--visible] [--page N]")
 }

@@ -1,6 +1,7 @@
 package com.pekomon.pdfforge
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -61,6 +63,7 @@ fun App() {
         var selectedPreset by remember { mutableStateOf(ShrinkPreset.Medium) }
         var lastOutputFile by remember { mutableStateOf<File?>(null) }
         var isBusy by remember { mutableStateOf(false) }
+        var visibleSignature by remember { mutableStateOf(false) }
         var logLines by remember { mutableStateOf(listOf<String>()) }
 
         val updateStatus: (String) -> Unit = { message ->
@@ -129,6 +132,13 @@ fun App() {
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
                 )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = visibleSignature,
+                        onCheckedChange = { visibleSignature = it },
+                    )
+                    Text("Visible signature")
+                }
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -183,7 +193,7 @@ fun App() {
                                     PdfPaths(inputPath, outputPath),
                                     Path(cert.absolutePath),
                                     passwordChars,
-                                    SignOptions(),
+                                    SignOptions(visibleSignature = visibleSignature),
                                 ) { event ->
                                     val message = when (event) {
                                         is PdfProgressEvent.Started -> "Signing..."

@@ -8,12 +8,20 @@ import com.pekomon.pdfforge.usecases.PdfSigner
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.SignatureInterface
+import org.apache.pdfbox.pdmodel.interactive.digitalsignature.SignatureOptions
+import org.apache.pdfbox.pdmodel.interactive.digitalsignature.visible.PDVisibleSigProperties
+import org.apache.pdfbox.pdmodel.interactive.digitalsignature.visible.PDVisibleSignDesigner
 import org.bouncycastle.cert.jcajce.JcaCertStore
 import org.bouncycastle.cms.CMSProcessableByteArray
 import org.bouncycastle.cms.CMSSignedDataGenerator
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder
+import java.awt.Color
+import java.awt.Font
+import java.awt.Graphics2D
+import java.awt.RenderingHints
+import java.awt.image.BufferedImage
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
@@ -43,9 +51,28 @@ class PdfBoxPdfSigner : PdfSigner {
 
         val signer = CmsSignature(keyMaterial.privateKey, keyMaterial.certificateChain)
         Loader.loadPDF(paths.input.toFile()).use { document ->
-            document.addSignature(signature, signer)
-            Files.newOutputStream(paths.output).use { output ->
-                document.saveIncremental(output)
+            if (options.visibleSignature) {
+                SignatureOptions().use { sigOptions ->
+                    val pageNumber = options.visibleSignaturePage.coerceAtLeast(1)
+                    val visibleProps = buildVisibleSignature(
+                        document,
+                        signature,
+                        keyMaterial.certificate.subjectX500Principal.name,
+                        options,
+                        pageNumber,
+                    )
+                    sigOptions.setVisualSignature(visibleProps)
+                    sigOptions.setPage(pageNumber - 1)
+                    document.addSignature(signature, signer, sigOptions)
+                    Files.newOutputStream(paths.output).use { output ->
+                        document.saveIncremental(output)
+                    }
+                }
+            } else {
+                document.addSignature(signature, signer)
+                Files.newOutputStream(paths.output).use { output ->
+                    document.saveIncremental(output)
+                }
             }
         }
 
@@ -93,6 +120,75 @@ class PdfBoxPdfSigner : PdfSigner {
             val cmsData = generator.generate(CMSProcessableByteArray(contentBytes), false)
             return cmsData.encoded
         }
+    }
+}
+
+private const val VisibleSignatureWidth = 200f
+private const val VisibleSignatureHeight = 60f
+private const val VisibleSignatureX = 36f
+private const val VisibleSignatureY = 36f
+private const val VisibleSignatureScale = 2f
+
+private fun buildVisibleSignature(
+    document: org.apache.pdfbox.pdmodel.PDDocument,
+    @Suppress("UNUSED_PARAMETER") signature: PDSignature,
+    signerName: String,
+    options: SignOptions,
+    pageNumber: Int,
+): PDVisibleSigProperties {
+    val image = createSignatureImage(signerName, options)
+    val designer = PDVisibleSignDesigner(document, image, pageNumber)
+        .xAxis(VisibleSignatureX)
+        .yAxis(VisibleSignatureY)
+        .width(VisibleSignatureWidth)
+        .height(VisibleSignatureHeight)
+        .signatureFieldName("Signature1")
+
+    return PDVisibleSigProperties()
+        .signerName(signerName)
+        .signerLocation(options.location ?: "")
+        .signatureReason(options.reason ?: "")
+        .page(pageNumber)
+        .visualSignEnabled(true)
+        .setPdVisibleSignature(designer)
+        .apply { buildSignature() }
+}
+
+private fun createSignatureImage(
+    signerName: String,
+    options: SignOptions,
+): BufferedImage {
+    val width = (VisibleSignatureWidth * VisibleSignatureScale).toInt().coerceAtLeast(1)
+    val height = (VisibleSignatureHeight * VisibleSignatureScale).toInt().coerceAtLeast(1)
+    val image = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
+    val g = image.createGraphics()
+    drawSignatureImage(g, width, height, signerName, options)
+    g.dispose()
+    return image
+}
+
+private fun drawSignatureImage(
+    g: Graphics2D,
+    width: Int,
+    height: Int,
+    signerName: String,
+    options: SignOptions,
+) {
+    g.color = Color.WHITE
+    g.fillRect(0, 0, width, height)
+    g.color = Color.BLACK
+    g.drawRect(0, 0, width - 1, height - 1)
+    g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+    g.font = Font("SansSerif", Font.PLAIN, 12 * VisibleSignatureScale.toInt())
+    val lines = buildList {
+        add("Signed by: $signerName")
+        options.reason?.let { add("Reason: $it") }
+        options.location?.let { add("Location: $it") }
+    }
+    var y = 16 * VisibleSignatureScale
+    lines.forEach { line ->
+        g.drawString(line, 8f, y)
+        y += 14 * VisibleSignatureScale
     }
 }
 
