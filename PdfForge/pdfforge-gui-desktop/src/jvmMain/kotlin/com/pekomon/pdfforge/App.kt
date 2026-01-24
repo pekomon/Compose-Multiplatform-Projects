@@ -105,6 +105,7 @@ fun App() {
             else -> PrimaryAction.Disabled
         }
         val canRunPrimary = primaryAction != PrimaryAction.Disabled && !isBusy
+        val inputsEnabled = !isBusy
 
         if (passwordDialogVisible && pendingCert != null) {
             AlertDialog(
@@ -282,10 +283,13 @@ fun App() {
             ) {
                 SectionCard("Input PDF") {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        OutlinedButton(onClick = {
-                            selectedPdf = pickPdfFile()
-                            statusMessage = if (selectedPdf != null) "Ready." else "Select a PDF to begin."
-                        }) {
+                        OutlinedButton(
+                            enabled = inputsEnabled,
+                            onClick = {
+                                selectedPdf = pickPdfFile()
+                                statusMessage = if (selectedPdf != null) "Ready." else "Select a PDF to begin."
+                            },
+                        ) {
                             Text("Choose PDF")
                         }
                         val name = selectedPdf?.name ?: "No file selected"
@@ -298,26 +302,37 @@ fun App() {
 
                 SectionCard("Compression") {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        PresetButton("None", selectedPreset == ShrinkPreset.None) { selectedPreset = ShrinkPreset.None }
-                        PresetButton("High", selectedPreset == ShrinkPreset.High) { selectedPreset = ShrinkPreset.High }
-                        PresetButton("Medium", selectedPreset == ShrinkPreset.Medium) { selectedPreset = ShrinkPreset.Medium }
-                        PresetButton("Aggressive", selectedPreset == ShrinkPreset.Aggressive) { selectedPreset = ShrinkPreset.Aggressive }
+                        PresetButton("None", selectedPreset == ShrinkPreset.None, inputsEnabled) {
+                            selectedPreset = ShrinkPreset.None
+                        }
+                        PresetButton("High", selectedPreset == ShrinkPreset.High, inputsEnabled) {
+                            selectedPreset = ShrinkPreset.High
+                        }
+                        PresetButton("Medium", selectedPreset == ShrinkPreset.Medium, inputsEnabled) {
+                            selectedPreset = ShrinkPreset.Medium
+                        }
+                        PresetButton("Aggressive", selectedPreset == ShrinkPreset.Aggressive, inputsEnabled) {
+                            selectedPreset = ShrinkPreset.Aggressive
+                        }
                     }
                 }
 
                 SectionCard("Signing") {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        OutlinedButton(onClick = {
-                            val picked = pickP12File()
-                            if (picked != null) {
-                                pendingCert = picked
-                                passwordInput = ""
-                                passwordError = null
-                                passwordDialogVisible = true
-                                selectedP12 = null
-                                passwordCache = ""
-                            }
-                        }) {
+                        OutlinedButton(
+                            enabled = inputsEnabled,
+                            onClick = {
+                                val picked = pickP12File()
+                                if (picked != null) {
+                                    pendingCert = picked
+                                    passwordInput = ""
+                                    passwordError = null
+                                    passwordDialogVisible = true
+                                    selectedP12 = null
+                                    passwordCache = ""
+                                }
+                            },
+                        ) {
                             Text("Choose .p12/.pfx")
                         }
                         val certName = selectedP12?.name ?: "No certificate selected"
@@ -327,6 +342,7 @@ fun App() {
                         Checkbox(
                             checked = visibleSignature,
                             onCheckedChange = { visibleSignature = it },
+                            enabled = inputsEnabled,
                         )
                         Text("Visible signature")
                     }
@@ -339,11 +355,11 @@ fun App() {
 }
 
 @Composable
-private fun PresetButton(label: String, selected: Boolean, onClick: () -> Unit) {
+private fun PresetButton(label: String, selected: Boolean, enabled: Boolean, onClick: () -> Unit) {
     if (selected) {
-        Button(onClick = onClick) { Text(label) }
+        Button(onClick = onClick, enabled = enabled) { Text(label) }
     } else {
-        OutlinedButton(onClick = onClick) { Text(label) }
+        OutlinedButton(onClick = onClick, enabled = enabled) { Text(label) }
     }
 }
 
