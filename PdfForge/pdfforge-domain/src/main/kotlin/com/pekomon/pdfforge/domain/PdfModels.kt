@@ -8,6 +8,7 @@ data class PdfPaths(
 )
 
 enum class ShrinkPreset {
+    None,
     High,
     Medium,
     Aggressive,

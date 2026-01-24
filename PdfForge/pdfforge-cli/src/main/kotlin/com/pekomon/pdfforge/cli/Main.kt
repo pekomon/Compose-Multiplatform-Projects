@@ -120,6 +120,7 @@ private fun runSign(args: List<String>) {
 private fun readPreset(args: List<String>): ShrinkPreset {
     val value = optionValue(args, "--preset")?.lowercase() ?: return ShrinkPreset.Medium
     return when (value) {
+        "none" -> ShrinkPreset.None
         "high" -> ShrinkPreset.High
         "medium" -> ShrinkPreset.Medium
         "aggressive" -> ShrinkPreset.Aggressive
@@ -174,7 +175,7 @@ private fun printHelp() {
         |PdfForge CLI
         |
         |Usage:
-        |  pdfforge shrink <input.pdf> <output.pdf> --preset {high|medium|aggressive}
+        |  pdfforge shrink <input.pdf> <output.pdf> --preset {none|high|medium|aggressive}
         |  pdfforge sign <input.pdf> <output.pdf> --p12 <cert.p12> --pass env:VAR [--visible] [--page N]
         |
         |Commands:
@@ -185,7 +186,7 @@ private fun printHelp() {
 }
 
 private fun printShrinkHelp() {
-    println("pdfforge shrink <input.pdf> <output.pdf> --preset {high|medium|aggressive}")
+    println("pdfforge shrink <input.pdf> <output.pdf> --preset {none|high|medium|aggressive}")
 }
 
 private fun printSignHelp() {

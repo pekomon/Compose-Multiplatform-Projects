@@ -26,6 +26,15 @@ class PdfBoxPdfShrinker : PdfShrinker {
         onProgress: (PdfProgressEvent) -> Unit,
     ): ShrinkResult {
         val beforeBytes = Files.size(paths.input)
+        if (options.preset == ShrinkPreset.None) {
+            Files.copy(paths.input, paths.output, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+            val afterBytes = Files.size(paths.output)
+            return ShrinkResult(
+                outputPath = paths.output,
+                beforeBytes = beforeBytes,
+                afterBytes = afterBytes,
+            )
+        }
         val preset = presetConfig(options.preset)
         Loader.loadPDF(paths.input.toFile()).use { document ->
             val processed = mutableSetOf<COSBase>()
@@ -113,6 +122,7 @@ class PdfBoxPdfShrinker : PdfShrinker {
 
     private fun presetConfig(preset: ShrinkPreset): PresetConfig {
         return when (preset) {
+            ShrinkPreset.None -> PresetConfig(jpegQuality = 1.0f, maxImagePx = Int.MAX_VALUE)
             ShrinkPreset.High -> PresetConfig(jpegQuality = 0.85f, maxImagePx = 2400)
             ShrinkPreset.Medium -> PresetConfig(jpegQuality = 0.70f, maxImagePx = 2000)
             ShrinkPreset.Aggressive -> PresetConfig(jpegQuality = 0.55f, maxImagePx = 1600)

@@ -1,28 +1,36 @@
 package com.pekomon.pdfforge
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -42,13 +50,22 @@ import kotlinx.coroutines.withContext
 import java.awt.Desktop
 import java.io.File
 import java.io.FilenameFilter
+import java.security.KeyStore
+import java.nio.file.Path
 import java.time.Instant
-import kotlin.io.path.Path
+import kotlin.io.path.Path as pathOf
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.pathString
 
 private const val BytesInKb = 1024.0
 private const val BytesInMb = 1024.0 * 1024.0
+
+private enum class PrimaryAction {
+    Disabled,
+    ShrinkOnly,
+    SignOnly,
+    ShrinkAndSign,
+}
 
 @Composable
 fun App() {
@@ -56,195 +73,292 @@ fun App() {
         val shrinkUseCase = remember { ShrinkPdfUseCase(PdfBoxPdfShrinker()) }
         val signUseCase = remember { SignPdfUseCase(PdfBoxPdfSigner()) }
         val coroutineScope = rememberCoroutineScope()
+        val scrollState = rememberScrollState()
         var selectedPdf by remember { mutableStateOf<File?>(null) }
         var selectedP12 by remember { mutableStateOf<File?>(null) }
-        var password by remember { mutableStateOf("") }
+        var passwordCache by remember { mutableStateOf("") }
         var statusMessage by remember { mutableStateOf("Select a PDF to begin.") }
         var selectedPreset by remember { mutableStateOf(ShrinkPreset.Medium) }
         var lastOutputFile by remember { mutableStateOf<File?>(null) }
         var isBusy by remember { mutableStateOf(false) }
         var visibleSignature by remember { mutableStateOf(false) }
-        var logLines by remember { mutableStateOf(listOf<String>()) }
+
+        var passwordDialogVisible by remember { mutableStateOf(false) }
+        var passwordInput by remember { mutableStateOf("") }
+        var passwordError by remember { mutableStateOf<String?>(null) }
+        var pendingCert by remember { mutableStateOf<File?>(null) }
 
         val updateStatus: (String) -> Unit = { message ->
             coroutineScope.launch {
-                logLines = (logLines + "[${Instant.now()}] $message").takeLast(6)
                 statusMessage = message
             }
         }
 
-        Column(
-            modifier = Modifier.fillMaxSize().padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text("PdfForge", style = MaterialTheme.typography.headlineMedium)
+        val hasPdf = selectedPdf != null
+        val hasSigning = selectedP12 != null && passwordCache.isNotBlank()
+        val wantsShrink = selectedPreset != ShrinkPreset.None
+        val primaryAction = when {
+            !hasPdf -> PrimaryAction.Disabled
+            wantsShrink && hasSigning -> PrimaryAction.ShrinkAndSign
+            wantsShrink -> PrimaryAction.ShrinkOnly
+            hasSigning -> PrimaryAction.SignOnly
+            else -> PrimaryAction.Disabled
+        }
+        val canRunPrimary = primaryAction != PrimaryAction.Disabled && !isBusy
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Input PDF")
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedButton(onClick = {
-                        selectedPdf = pickPdfFile()
-                        statusMessage = if (selectedPdf != null) "Ready." else "Select a PDF to begin."
-                    }) {
-                        Text("Choose PDF")
+        if (passwordDialogVisible && pendingCert != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    passwordDialogVisible = false
+                    pendingCert = null
+                    passwordInput = ""
+                    passwordError = null
+                },
+                title = { Text("Certificate password") },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = passwordInput,
+                            onValueChange = { passwordInput = it },
+                            label = { Text("Password") },
+                            singleLine = true,
+                            visualTransformation = PasswordVisualTransformation(),
+                            isError = passwordError != null,
+                        )
+                        passwordError?.let { Text(it) }
                     }
-                    val name = selectedPdf?.name ?: "No file selected"
-                    Text(name, modifier = Modifier.weight(1f))
-                }
-                selectedPdf?.let { file ->
-                    Text("Size: ${formatBytes(file.length())}")
-                }
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Preset")
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ShrinkPreset.values().forEach { preset ->
-                        if (preset == selectedPreset) {
-                            Button(onClick = { selectedPreset = preset }) {
-                                Text(preset.name)
-                            }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val cert = pendingCert ?: return@TextButton
+                        val isValid = validateP12Password(cert, passwordInput)
+                        if (isValid) {
+                            selectedP12 = cert
+                            passwordCache = passwordInput
+                            statusMessage = "Certificate loaded."
+                            passwordDialogVisible = false
+                            pendingCert = null
+                            passwordInput = ""
+                            passwordError = null
                         } else {
-                            OutlinedButton(onClick = { selectedPreset = preset }) {
-                                Text(preset.name)
-                            }
+                            selectedP12 = null
+                            passwordCache = ""
+                            passwordError = "Invalid password."
+                            statusMessage = "Invalid certificate password."
                         }
-                    }
-                }
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Signing Certificate")
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedButton(onClick = {
-                        selectedP12 = pickP12File()
                     }) {
-                        Text("Choose .p12/.pfx")
+                        Text("Confirm")
                     }
-                    val certName = selectedP12?.name ?: "No certificate selected"
-                    Text(certName, modifier = Modifier.weight(1f))
-                }
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Password") },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = visibleSignature,
-                        onCheckedChange = { visibleSignature = it },
-                    )
-                    Text("Visible signature")
-                }
-            }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        passwordDialogVisible = false
+                        pendingCert = null
+                        passwordInput = ""
+                        passwordError = null
+                    }) {
+                        Text("Cancel")
+                    }
+                },
+            )
+        }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(
-                    enabled = selectedPdf != null && !isBusy,
-                    onClick = {
-                        val input = selectedPdf ?: return@Button
-                        val inputPath = Path(input.absolutePath)
-                        val outputPath = inputPath.resolveSibling("${inputPath.nameWithoutExtension}_compressed.pdf")
-                        isBusy = true
-                        coroutineScope.launch {
-                            val result = withContext(Dispatchers.IO) {
-                                shrinkUseCase.execute(
-                                    PdfPaths(inputPath, outputPath),
-                                    ShrinkOptions(selectedPreset),
-                                ) { event ->
-                                    val message = when (event) {
-                                        is PdfProgressEvent.Started -> "Shrinking..."
-                                        is PdfProgressEvent.PageProcessed ->
-                                            "Processing page ${event.pageIndex}/${event.totalPages}"
-                                        is PdfProgressEvent.Completed -> "Finalizing shrink..."
-                                        is PdfProgressEvent.Failed -> event.error.userMessage
-                                    }
-                                    updateStatus(message)
-                                }
-                            }
-                            statusMessage = when (result) {
-                                is UseCaseResult.Success -> {
-                                    lastOutputFile = outputPath.toFile()
-                                    "Created: ${outputPath.pathString} (${formatBytes(result.value.beforeBytes)} → ${formatBytes(result.value.afterBytes)})"
-                                }
-                                is UseCaseResult.Failure -> result.error.userMessage
-                            }
-                            isBusy = false
+        Scaffold(
+            bottomBar = {
+                Surface(tonalElevation = 4.dp) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        if (isBusy) {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         }
-                    },
-                ) {
-                    Text("Shrink")
-                }
-                Button(
-                    enabled = selectedPdf != null && selectedP12 != null && password.isNotBlank() && !isBusy,
-                    onClick = {
-                        val input = selectedPdf ?: return@Button
-                        val cert = selectedP12 ?: return@Button
-                        val passwordChars = password.toCharArray()
-                        val inputPath = Path(input.absolutePath)
-                        val outputPath = inputPath.resolveSibling("${inputPath.nameWithoutExtension}_signed.pdf")
-                        isBusy = true
-                        coroutineScope.launch {
-                            val result = withContext(Dispatchers.IO) {
-                                signUseCase.execute(
-                                    PdfPaths(inputPath, outputPath),
-                                    Path(cert.absolutePath),
-                                    passwordChars,
-                                    SignOptions(visibleSignature = visibleSignature),
-                                ) { event ->
-                                    val message = when (event) {
-                                        is PdfProgressEvent.Started -> "Signing..."
-                                        is PdfProgressEvent.PageProcessed ->
-                                            "Preparing page ${event.pageIndex}/${event.totalPages}"
-                                        is PdfProgressEvent.Completed -> "Finalizing signature..."
-                                        is PdfProgressEvent.Failed -> event.error.userMessage
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Button(
+                                enabled = canRunPrimary,
+                                onClick = {
+                                    val input = selectedPdf ?: return@Button
+                                    val cert = selectedP12
+                                    val inputPath = pathOf(input.absolutePath)
+                                    val compressedPath =
+                                        inputPath.resolveSibling("${inputPath.nameWithoutExtension}_compressed.pdf")
+                                    val signedPath =
+                                        compressedPath.resolveSibling("${compressedPath.nameWithoutExtension}_signed.pdf")
+                                    val directSignedPath =
+                                        inputPath.resolveSibling("${inputPath.nameWithoutExtension}_signed.pdf")
+                                    isBusy = true
+                                    coroutineScope.launch {
+                                        when (primaryAction) {
+                                            PrimaryAction.ShrinkOnly -> {
+                                                val result = runShrink(
+                                                    shrinkUseCase,
+                                                    inputPath,
+                                                    compressedPath,
+                                                    selectedPreset,
+                                                    updateStatus,
+                                                )
+                                                statusMessage = when (result) {
+                                                    is UseCaseResult.Success -> {
+                                                        lastOutputFile = compressedPath.toFile()
+                                                        "Created: ${compressedPath.pathString} " +
+                                                            "(${formatBytes(result.value.beforeBytes)} -> ${formatBytes(result.value.afterBytes)})"
+                                                    }
+                                                    is UseCaseResult.Failure -> result.error.userMessage
+                                                }
+                                            }
+                                            PrimaryAction.SignOnly -> {
+                                                val result = runSign(
+                                                    signUseCase,
+                                                    inputPath,
+                                                    directSignedPath,
+                                                    cert,
+                                                    passwordCache,
+                                                    visibleSignature,
+                                                    updateStatus,
+                                                )
+                                                statusMessage = when (result) {
+                                                    is UseCaseResult.Success -> {
+                                                        lastOutputFile = directSignedPath.toFile()
+                                                        "Created: ${directSignedPath.pathString}"
+                                                    }
+                                                    is UseCaseResult.Failure -> result.error.userMessage
+                                                }
+                                            }
+                                            PrimaryAction.ShrinkAndSign -> {
+                                                val shrinkResult = runShrink(
+                                                    shrinkUseCase,
+                                                    inputPath,
+                                                    compressedPath,
+                                                    selectedPreset,
+                                                    updateStatus,
+                                                )
+                                                if (shrinkResult is UseCaseResult.Success) {
+                                                    val signResult = runSign(
+                                                        signUseCase,
+                                                        compressedPath,
+                                                        signedPath,
+                                                        cert,
+                                                        passwordCache,
+                                                        visibleSignature,
+                                                        updateStatus,
+                                                    )
+                                                    statusMessage = when (signResult) {
+                                                        is UseCaseResult.Success -> {
+                                                            lastOutputFile = signedPath.toFile()
+                                                            "Created: ${signedPath.pathString}"
+                                                        }
+                                                        is UseCaseResult.Failure -> signResult.error.userMessage
+                                                    }
+                                                } else if (shrinkResult is UseCaseResult.Failure) {
+                                                    statusMessage = shrinkResult.error.userMessage
+                                                }
+                                            }
+                                            PrimaryAction.Disabled -> Unit
+                                        }
+                                        isBusy = false
                                     }
-                                    updateStatus(message)
+                                },
+                            ) {
+                                Text(primaryActionLabel(primaryAction))
+                            }
+                            if (lastOutputFile != null) {
+                                FilledTonalButton(onClick = { revealInFinder(lastOutputFile!!) }) {
+                                    Text("Reveal in Finder")
                                 }
                             }
-                            passwordChars.fill('\u0000')
-                            statusMessage = when (result) {
-                                is UseCaseResult.Success -> {
-                                    lastOutputFile = outputPath.toFile()
-                                    "Created: ${outputPath.pathString}"
-                                }
-                                is UseCaseResult.Failure -> result.error.userMessage
-                            }
-                            isBusy = false
                         }
-                    },
-                ) {
-                    Text("Sign")
-                }
-            }
-
-            if (isBusy) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
-            Text(statusMessage)
-
-            lastOutputFile?.let { file ->
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Output: ${file.name}", modifier = Modifier.weight(1f))
-                    OutlinedButton(onClick = { revealInFinder(file) }) {
-                        Text("Reveal in Finder")
+                        Text(statusMessage, style = MaterialTheme.typography.bodySmall)
                     }
                 }
-            }
-
-            if (logLines.isNotEmpty()) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Recent activity", style = MaterialTheme.typography.titleSmall)
-                    logLines.forEach { line ->
-                        Text(line, style = MaterialTheme.typography.bodySmall)
+            },
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp)
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                SectionCard("Input PDF") {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedButton(onClick = {
+                            selectedPdf = pickPdfFile()
+                            statusMessage = if (selectedPdf != null) "Ready." else "Select a PDF to begin."
+                        }) {
+                            Text("Choose PDF")
+                        }
+                        val name = selectedPdf?.name ?: "No file selected"
+                        Text(name, modifier = Modifier.weight(1f))
+                    }
+                    selectedPdf?.let { file ->
+                        Text("Size: ${formatBytes(file.length())}")
                     }
                 }
-            }
 
-            Spacer(Modifier.height(8.dp))
+                SectionCard("Compression") {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        PresetButton("None", selectedPreset == ShrinkPreset.None) { selectedPreset = ShrinkPreset.None }
+                        PresetButton("High", selectedPreset == ShrinkPreset.High) { selectedPreset = ShrinkPreset.High }
+                        PresetButton("Medium", selectedPreset == ShrinkPreset.Medium) { selectedPreset = ShrinkPreset.Medium }
+                        PresetButton("Aggressive", selectedPreset == ShrinkPreset.Aggressive) { selectedPreset = ShrinkPreset.Aggressive }
+                    }
+                }
+
+                SectionCard("Signing") {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedButton(onClick = {
+                            val picked = pickP12File()
+                            if (picked != null) {
+                                pendingCert = picked
+                                passwordInput = ""
+                                passwordError = null
+                                passwordDialogVisible = true
+                                selectedP12 = null
+                                passwordCache = ""
+                            }
+                        }) {
+                            Text("Choose .p12/.pfx")
+                        }
+                        val certName = selectedP12?.name ?: "No certificate selected"
+                        Text(certName, modifier = Modifier.weight(1f))
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = visibleSignature,
+                            onCheckedChange = { visibleSignature = it },
+                        )
+                        Text("Visible signature")
+                    }
+                }
+
+                Spacer(Modifier.height(24.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun PresetButton(label: String, selected: Boolean, onClick: () -> Unit) {
+    if (selected) {
+        Button(onClick = onClick) { Text(label) }
+    } else {
+        OutlinedButton(onClick = onClick) { Text(label) }
+    }
+}
+
+@Composable
+private fun SectionCard(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Surface(
+        tonalElevation = 1.dp,
+        shape = MaterialTheme.shapes.medium,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            content()
         }
     }
 }
@@ -285,5 +399,87 @@ private fun revealInFinder(file: File) {
     }
     if (Desktop.isDesktopSupported()) {
         Desktop.getDesktop().open(file.parentFile)
+    }
+}
+
+private fun validateP12Password(certFile: File, password: String): Boolean {
+    return try {
+        val keyStore = KeyStore.getInstance("PKCS12")
+        certFile.inputStream().use { input ->
+            keyStore.load(input, password.toCharArray())
+        }
+        true
+    } catch (_: Exception) {
+        false
+    }
+}
+
+private fun primaryActionLabel(action: PrimaryAction): String {
+    return when (action) {
+        PrimaryAction.Disabled -> "Select input"
+        PrimaryAction.ShrinkOnly -> "Shrink"
+        PrimaryAction.SignOnly -> "Sign"
+        PrimaryAction.ShrinkAndSign -> "Shrink & Sign"
+    }
+}
+
+private suspend fun runShrink(
+    useCase: ShrinkPdfUseCase,
+    input: Path,
+    output: Path,
+    preset: ShrinkPreset,
+    updateStatus: (String) -> Unit,
+): UseCaseResult<com.pekomon.pdfforge.domain.ShrinkResult> {
+    return withContext(Dispatchers.IO) {
+        useCase.execute(
+            PdfPaths(input, output),
+            ShrinkOptions(preset),
+        ) { event ->
+            val message = when (event) {
+                is PdfProgressEvent.Started -> "Shrinking..."
+                is PdfProgressEvent.PageProcessed ->
+                    "Processing page ${event.pageIndex}/${event.totalPages}"
+                is PdfProgressEvent.Completed -> "Finalizing shrink..."
+                is PdfProgressEvent.Failed -> event.error.userMessage
+            }
+            updateStatus(message)
+        }
+    }
+}
+
+private suspend fun runSign(
+    useCase: SignPdfUseCase,
+    input: Path,
+    output: Path,
+    certFile: File?,
+    password: String,
+    visibleSignature: Boolean,
+    updateStatus: (String) -> Unit,
+): UseCaseResult<com.pekomon.pdfforge.domain.SignResult> {
+    val cert = certFile ?: return UseCaseResult.Failure(
+        com.pekomon.pdfforge.domain.InvalidInputError(
+            userMessage = "Certificate not selected.",
+            technicalMessage = "Sign called without certificate.",
+        ),
+    )
+    val passwordChars = password.toCharArray()
+    return withContext(Dispatchers.IO) {
+        val result = useCase.execute(
+            PdfPaths(input, output),
+            pathOf(cert.absolutePath),
+            passwordChars,
+            SignOptions(visibleSignature = visibleSignature),
+        ) { event ->
+            val message = when (event) {
+                is PdfProgressEvent.Started -> "Signing..."
+                is PdfProgressEvent.PageProcessed ->
+                    "Preparing page ${event.pageIndex}/${event.totalPages}"
+                is PdfProgressEvent.Completed -> "Finalizing signature..."
+                is PdfProgressEvent.Failed -> event.error.userMessage
+            }
+            updateStatus(message)
+        }
+        passwordChars.fill('\u0000')
+        result
     }
 }
