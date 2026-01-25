@@ -29,7 +29,21 @@ data class SignOptions(
     val location: String? = null,
     val visibleSignature: Boolean = false,
     val visibleSignaturePage: Int = 1,
+    val visibleSignatureStyle: VisibleSignatureStyle = VisibleSignatureStyle.Compact,
+    val visibleSignaturePosition: VisibleSignaturePosition = VisibleSignaturePosition.BottomRight,
 )
+
+enum class VisibleSignatureStyle {
+    Compact,
+    Detailed,
+}
+
+enum class VisibleSignaturePosition {
+    BottomRight,
+    BottomLeft,
+    TopRight,
+    TopLeft,
+}
 
 data class SignResult(
     val outputPath: Path,

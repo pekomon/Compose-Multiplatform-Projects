@@ -4,6 +4,8 @@ import com.pekomon.pdfforge.domain.PdfPaths
 import com.pekomon.pdfforge.domain.ShrinkOptions
 import com.pekomon.pdfforge.domain.ShrinkPreset
 import com.pekomon.pdfforge.domain.SignOptions
+import com.pekomon.pdfforge.domain.VisibleSignaturePosition
+import com.pekomon.pdfforge.domain.VisibleSignatureStyle
 import com.pekomon.pdfforge.infra.PdfBoxPdfShrinker
 import com.pekomon.pdfforge.infra.PdfBoxPdfSigner
 import com.pekomon.pdfforge.usecases.ShrinkPdfUseCase
@@ -94,6 +96,8 @@ private fun runSign(args: List<String>) {
     val password = readPassword(options)
     val visibleSignature = hasFlag(options, "--visible")
     val visiblePage = optionValue(options, "--page")?.toIntOrNull() ?: 1
+    val visibleStyle = parseVisibleStyle(optionValue(options, "--visible-style"))
+    val visiblePosition = parseVisiblePosition(optionValue(options, "--visible-pos"))
     val useCase = SignPdfUseCase(PdfBoxPdfSigner())
     val result = useCase.execute(
         PdfPaths(input, output),
@@ -102,6 +106,8 @@ private fun runSign(args: List<String>) {
         SignOptions(
             visibleSignature = visibleSignature,
             visibleSignaturePage = visiblePage,
+            visibleSignatureStyle = visibleStyle,
+            visibleSignaturePosition = visiblePosition,
         ),
     )
     password.fill('\u0000')
@@ -121,11 +127,12 @@ private fun readPreset(args: List<String>): ShrinkPreset {
     val value = optionValue(args, "--preset")?.lowercase() ?: return ShrinkPreset.Medium
     return when (value) {
         "none" -> ShrinkPreset.None
-        "high" -> ShrinkPreset.High
+        "low" -> ShrinkPreset.High
         "medium" -> ShrinkPreset.Medium
+        "high" -> ShrinkPreset.Aggressive
         "aggressive" -> ShrinkPreset.Aggressive
         else -> {
-            System.err.println("Unknown preset: $value (use high, medium, aggressive)")
+            System.err.println("Unknown preset: $value (use low, medium, high)")
             exitProcess(2)
         }
     }
@@ -161,6 +168,34 @@ private fun hasFlag(args: List<String>, key: String): Boolean {
     return args.contains(key)
 }
 
+private fun parseVisibleStyle(value: String?): VisibleSignatureStyle {
+    val normalized = value?.lowercase() ?: return VisibleSignatureStyle.Compact
+    return when (normalized) {
+        "compact" -> VisibleSignatureStyle.Compact
+        "detailed" -> VisibleSignatureStyle.Detailed
+        else -> {
+            System.err.println("Unknown visible style: $value (use compact or detailed)")
+            exitProcess(2)
+        }
+    }
+}
+
+private fun parseVisiblePosition(value: String?): VisibleSignaturePosition {
+    val normalized = value?.lowercase() ?: return VisibleSignaturePosition.BottomRight
+    return when (normalized) {
+        "bottom-right" -> VisibleSignaturePosition.BottomRight
+        "bottom-left" -> VisibleSignaturePosition.BottomLeft
+        "top-right" -> VisibleSignaturePosition.TopRight
+        "top-left" -> VisibleSignaturePosition.TopLeft
+        else -> {
+            System.err.println(
+                "Unknown visible position: $value (use bottom-right, bottom-left, top-right, top-left)",
+            )
+            exitProcess(2)
+        }
+    }
+}
+
 private fun formatBytes(bytes: Long): String {
     return when {
         bytes >= BytesInMb -> String.format("%.2f MB", bytes / BytesInMb)
@@ -175,8 +210,9 @@ private fun printHelp() {
         |PdfForge CLI
         |
         |Usage:
-        |  pdfforge shrink <input.pdf> <output.pdf> --preset {none|high|medium|aggressive}
-        |  pdfforge sign <input.pdf> <output.pdf> --p12 <cert.p12> --pass env:VAR [--visible] [--page N]
+        |  pdfforge shrink <input.pdf> <output.pdf> --preset {none|low|medium|high}
+        |  pdfforge sign <input.pdf> <output.pdf> --p12 <cert.p12> --pass env:VAR [--visible]
+        |    [--page N] [--visible-style {compact|detailed}] [--visible-pos {bottom-right|bottom-left|top-right|top-left}]
         |
         |Commands:
         |  shrink   Shrink a PDF by recompressing images
@@ -186,9 +222,13 @@ private fun printHelp() {
 }
 
 private fun printShrinkHelp() {
-    println("pdfforge shrink <input.pdf> <output.pdf> --preset {none|high|medium|aggressive}")
+    println("pdfforge shrink <input.pdf> <output.pdf> --preset {none|low|medium|high}")
 }
 
 private fun printSignHelp() {
-    println("pdfforge sign <input.pdf> <output.pdf> --p12 <cert.p12> --pass env:VAR [--visible] [--page N]")
+    println(
+        "pdfforge sign <input.pdf> <output.pdf> --p12 <cert.p12> --pass env:VAR " +
+            "[--visible] [--page N] [--visible-style {compact|detailed}] " +
+            "[--visible-pos {bottom-right|bottom-left|top-right|top-left}]",
+    )
 }
