@@ -4,8 +4,12 @@ import com.pekomon.pdfforge.domain.PdfPaths
 import com.pekomon.pdfforge.domain.PdfProgressEvent
 import com.pekomon.pdfforge.domain.SignOptions
 import com.pekomon.pdfforge.domain.SignResult
+import com.pekomon.pdfforge.domain.VisibleSignaturePosition
+import com.pekomon.pdfforge.domain.VisibleSignatureStyle
 import com.pekomon.pdfforge.usecases.PdfSigner
 import org.apache.pdfbox.Loader
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.SignatureInterface
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.SignatureOptions
@@ -29,6 +33,8 @@ import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.cert.X509Certificate
 import java.util.Calendar
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class PdfBoxPdfSigner : PdfSigner {
     override fun signWithP12(
@@ -40,29 +46,30 @@ class PdfBoxPdfSigner : PdfSigner {
     ): SignResult {
         val beforeBytes = Files.size(paths.input)
         val keyMaterial = loadKeyMaterial(p12Path, password)
+        val signDate = Calendar.getInstance()
         val signature = PDSignature().apply {
             setFilter(PDSignature.FILTER_ADOBE_PPKLITE)
             setSubFilter(PDSignature.SUBFILTER_ADBE_PKCS7_DETACHED)
             name = keyMaterial.certificate.subjectX500Principal.name
             reason = options.reason
             location = options.location
-            signDate = Calendar.getInstance()
+            this.signDate = signDate
         }
 
         val signer = CmsSignature(keyMaterial.privateKey, keyMaterial.certificateChain)
         Loader.loadPDF(paths.input.toFile()).use { document ->
             if (options.visibleSignature) {
                 SignatureOptions().use { sigOptions ->
-                    val pageNumber = options.visibleSignaturePage.coerceAtLeast(1)
+                    val pageIndex = visiblePageIndex(document, options.visibleSignaturePage)
                     val visibleProps = buildVisibleSignature(
                         document,
-                        signature,
                         keyMaterial.certificate.subjectX500Principal.name,
                         options,
-                        pageNumber,
+                        pageIndex,
+                        signDate,
                     )
                     sigOptions.setVisualSignature(visibleProps)
-                    sigOptions.setPage(pageNumber - 1)
+                    sigOptions.setPage(pageIndex)
                     document.addSignature(signature, signer, sigOptions)
                     Files.newOutputStream(paths.output).use { output ->
                         document.saveIncremental(output)
@@ -123,26 +130,32 @@ class PdfBoxPdfSigner : PdfSigner {
     }
 }
 
-private const val VisibleSignatureWidth = 200f
-private const val VisibleSignatureHeight = 60f
-private const val VisibleSignatureX = 36f
-private const val VisibleSignatureY = 36f
 private const val VisibleSignatureScale = 2f
+private const val VisibleSignatureMargin = 36f
+private const val CompactSignatureWidth = 200f
+private const val CompactSignatureHeight = 60f
+private const val DetailedSignatureWidth = 260f
+private const val DetailedSignatureHeight = 90f
+private val SignatureTimestampFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm XXX")
 
 private fun buildVisibleSignature(
-    document: org.apache.pdfbox.pdmodel.PDDocument,
-    @Suppress("UNUSED_PARAMETER") signature: PDSignature,
+    document: PDDocument,
     signerName: String,
     options: SignOptions,
-    pageNumber: Int,
+    pageIndex: Int,
+    signDate: Calendar,
 ): PDVisibleSigProperties {
-    val image = createSignatureImage(signerName, options)
+    val pageNumber = pageIndex + 1
+    val image = createSignatureImage(signerName, options, signDate)
+    val page = document.getPage(pageIndex)
+    val layout = signatureLayout(options.visibleSignatureStyle)
+    val placement = signaturePlacement(page, layout, options.visibleSignaturePosition)
     val designer = PDVisibleSignDesigner(document, image, pageNumber)
-        .xAxis(VisibleSignatureX)
-        .yAxis(VisibleSignatureY)
-        .width(VisibleSignatureWidth)
-        .height(VisibleSignatureHeight)
-        .signatureFieldName("Signature1")
+        .xAxis(placement.x)
+        .yAxis(placement.y)
+        .width(layout.width)
+        .height(layout.height)
+        .signatureFieldName("Signature$pageNumber")
 
     return PDVisibleSigProperties()
         .signerName(signerName)
@@ -157,12 +170,14 @@ private fun buildVisibleSignature(
 private fun createSignatureImage(
     signerName: String,
     options: SignOptions,
+    signDate: Calendar,
 ): BufferedImage {
-    val width = (VisibleSignatureWidth * VisibleSignatureScale).toInt().coerceAtLeast(1)
-    val height = (VisibleSignatureHeight * VisibleSignatureScale).toInt().coerceAtLeast(1)
+    val layout = signatureLayout(options.visibleSignatureStyle)
+    val width = (layout.width * VisibleSignatureScale).toInt().coerceAtLeast(1)
+    val height = (layout.height * VisibleSignatureScale).toInt().coerceAtLeast(1)
     val image = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
     val g = image.createGraphics()
-    drawSignatureImage(g, width, height, signerName, options)
+    drawSignatureImage(g, width, height, signerName, options, signDate)
     g.dispose()
     return image
 }
@@ -173,23 +188,111 @@ private fun drawSignatureImage(
     height: Int,
     signerName: String,
     options: SignOptions,
+    signDate: Calendar,
 ) {
+    val layout = signatureLayout(options.visibleSignatureStyle)
     g.color = Color.WHITE
     g.fillRect(0, 0, width, height)
     g.color = Color.BLACK
     g.drawRect(0, 0, width - 1, height - 1)
     g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
-    g.font = Font("SansSerif", Font.PLAIN, 12 * VisibleSignatureScale.toInt())
-    val lines = buildList {
-        add("Signed by: $signerName")
-        options.reason?.let { add("Reason: $it") }
-        options.location?.let { add("Location: $it") }
-    }
-    var y = 16 * VisibleSignatureScale
+    g.font = Font("SansSerif", Font.PLAIN, (layout.fontSize * VisibleSignatureScale).toInt())
+    val lines = buildSignatureLines(signerName, options, signDate)
+    val lineHeight = layout.lineHeight * VisibleSignatureScale
+    var y = layout.paddingY * VisibleSignatureScale
     lines.forEach { line ->
-        g.drawString(line, 8f, y)
-        y += 14 * VisibleSignatureScale
+        g.drawString(line, layout.paddingX * VisibleSignatureScale, y)
+        y += lineHeight
     }
+}
+
+private fun buildSignatureLines(
+    signerName: String,
+    options: SignOptions,
+    signDate: Calendar,
+): List<String> {
+    val timestamp = SignatureTimestampFormat.format(signDate.toInstant().atZone(ZoneId.systemDefault()))
+    return when (options.visibleSignatureStyle) {
+        VisibleSignatureStyle.Compact -> buildList {
+            add("Digitally signed by $signerName")
+            add("Date: $timestamp")
+        }
+        VisibleSignatureStyle.Detailed -> buildList {
+            add("Signed by: $signerName")
+            add("Date: $timestamp")
+            options.reason?.takeIf { it.isNotBlank() }?.let { add("Reason: $it") }
+            options.location?.takeIf { it.isNotBlank() }?.let { add("Location: $it") }
+        }
+    }
+}
+
+private data class SignatureLayout(
+    val width: Float,
+    val height: Float,
+    val fontSize: Int,
+    val lineHeight: Float,
+    val paddingX: Float,
+    val paddingY: Float,
+)
+
+private data class SignaturePlacement(
+    val x: Float,
+    val y: Float,
+)
+
+private fun signatureLayout(style: VisibleSignatureStyle): SignatureLayout {
+    return when (style) {
+        VisibleSignatureStyle.Compact -> SignatureLayout(
+            width = CompactSignatureWidth,
+            height = CompactSignatureHeight,
+            fontSize = 12,
+            lineHeight = 14f,
+            paddingX = 8f,
+            paddingY = 18f,
+        )
+        VisibleSignatureStyle.Detailed -> SignatureLayout(
+            width = DetailedSignatureWidth,
+            height = DetailedSignatureHeight,
+            fontSize = 10,
+            lineHeight = 12f,
+            paddingX = 8f,
+            paddingY = 18f,
+        )
+    }
+}
+
+private fun signaturePlacement(
+    page: PDPage,
+    layout: SignatureLayout,
+    position: VisibleSignaturePosition,
+): SignaturePlacement {
+    val pageBox = page.mediaBox
+    val pageWidth = pageBox.width
+    val pageHeight = pageBox.height
+    val maxX = (pageWidth - layout.width).coerceAtLeast(0f)
+    val maxY = (pageHeight - layout.height).coerceAtLeast(0f)
+    val rawX = when (position) {
+        VisibleSignaturePosition.BottomLeft, VisibleSignaturePosition.TopLeft -> VisibleSignatureMargin
+        VisibleSignaturePosition.BottomRight, VisibleSignaturePosition.TopRight ->
+            pageWidth - layout.width - VisibleSignatureMargin
+    }
+    val rawY = when (position) {
+        VisibleSignaturePosition.BottomLeft, VisibleSignaturePosition.BottomRight ->
+            pageHeight - layout.height - VisibleSignatureMargin
+        VisibleSignaturePosition.TopLeft, VisibleSignaturePosition.TopRight -> VisibleSignatureMargin
+    }
+    return SignaturePlacement(
+        x = rawX.coerceIn(0f, maxX),
+        y = rawY.coerceIn(0f, maxY),
+    )
+}
+
+private fun visiblePageIndex(document: PDDocument, pageNumber: Int): Int {
+    val totalPages = document.numberOfPages
+    if (totalPages <= 1) {
+        return 0
+    }
+    return (pageNumber - 1).coerceIn(0, totalPages - 1)
 }
 
 private fun <T> java.util.Enumeration<T>.toList(): List<T> {
