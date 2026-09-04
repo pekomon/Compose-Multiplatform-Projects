@@ -15,5 +15,13 @@ Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-mu
 
 ## API keys
 
-- Android reads `COINRANKING_API_KEY` from the root `local.properties` file (already gitignored).
-- iOS looks for the same key in `iosApp/Keys.xcconfig`. The file now exists in the project with a placeholder value—edit it locally to paste your secret or create a personal copy and keep it untracked. Xcode does not load `~/.zshrc`, so exporting the variable there is not enough unless you also generate/update `Keys.xcconfig` before each build.
+- The project `.envrc` exports `COINRANKING_API_KEY` from macOS Keychain with `keychain COINRANKING_API_KEY`.
+- Run `direnv allow` in this directory after reviewing `.envrc`.
+- Android reads `COINRANKING_API_KEY` from the root `local.properties` file first, then falls back to the environment loaded by direnv.
+- iOS reads the key from `iosApp/Keys.xcconfig`. Keep the tracked placeholder as-is and put your real local value in `iosApp/Keys.local.xcconfig`, which is gitignored:
+
+```xcconfig
+COINRANKING_API_KEY = your-local-key
+```
+
+- Use `.envrc.local` for machine-specific direnv overrides. Keep real secret values out of source control.

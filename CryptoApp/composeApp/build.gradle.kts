@@ -110,10 +110,17 @@ android {
         // Make the API key available in BuildConfig for the Android target
         // It's good practice to provide a default empty string
 
+        val coinrankingApiKey = localProperties.getProperty("COINRANKING_API_KEY")
+            ?: System.getenv("COINRANKING_API_KEY")
+            ?: ""
+        val escapedCoinrankingApiKey = coinrankingApiKey
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+
         buildConfigField(
             "String",
             "COINRANKING_API_KEY",
-            "\"${localProperties.getProperty("COINRANKING_API_KEY", "")}\""
+            "\"$escapedCoinrankingApiKey\""
         )
     }
 
